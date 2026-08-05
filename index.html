@@ -305,6 +305,7 @@ a{color:var(--wine);}
         <h2 class="section-title">전체 내역</h2>
         <p class="section-desc">상담·계약 전 건을 검색하고 관리합니다</p>
       </div>
+      <button class="btn btn-sm" id="importExcelBtn">📁 엑셀로 가져오기</button>
     </div>
     <div class="toolbar">
       <input type="text" id="searchInput" placeholder="이름 · 연락처 · 계약코드 검색">
@@ -327,7 +328,7 @@ a{color:var(--wine);}
       <table id="listTable">
         <thead><tr>
           <th>D-DAY</th><th>단계</th><th>계약자명</th><th>연락처</th><th>계약코드</th>
-          <th>예식일자</th><th>예식장</th><th>지역</th><th>상품</th><th>잔금</th><th>정산</th><th>길찾기</th>
+          <th>예식일자</th><th>예식시간</th><th>예식장</th><th>지역</th><th>상품</th><th>잔금</th><th>정산</th><th>길찾기</th>
         </tr></thead>
         <tbody id="listBody"></tbody>
       </table>
@@ -390,6 +391,27 @@ a{color:var(--wine);}
 
 <div class="toast" id="toast"></div>
 
+<div class="overlay" id="importOverlay">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-head">
+      <h3>엑셀로 가져오기</h3>
+      <button class="modal-close" id="importModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="section-desc" style="margin-bottom:12px;line-height:1.6;">기존 현황판과 같은 양식(계약자명·계약코드·예식일자 등 헤더가 있는 표)의 .xlsx 파일을 올려주세요. 계약코드가 이미 등록된 건은 자동으로 제외돼요.</p>
+      <input type="file" id="importFileInput" accept=".xlsx,.xls" style="margin-bottom:12px;width:100%;">
+      <div id="importSummary" style="font-size:12.5px;color:var(--ink-soft);line-height:1.7;background:#F5F3EA;border:1px solid var(--line);border-radius:8px;padding:11px 13px;">엑셀 파일(.xlsx)을 선택하면 자동으로 분석합니다.</div>
+    </div>
+    <div class="modal-foot">
+      <div></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" id="importCancelBtn">취소</button>
+        <button class="btn btn-primary" id="importConfirmBtn" disabled>가져오기 실행</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="uploadOverlay">
   <div class="modal" style="max-width:520px;">
     <div class="modal-head">
@@ -440,6 +462,7 @@ a{color:var(--wine);}
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 /* =========================================================
    모먼트웍스 통합 관리 시스템
@@ -642,7 +665,7 @@ function renderRibbon(){
     .map(r=>({r, dd: ddayInfo(r.weddingDate)}))
     .filter(x=>x.dd && x.dd.diff>=0)
     .sort((a,b)=>a.dd.diff-b.dd.diff)
-    .slice(0,12);
+    .slice(0,20);
   const el = document.getElementById('ribbon');
   if(upcoming.length===0){ el.innerHTML = '<div class="empty-state" style="padding:20px;">다가오는 예식이 없습니다</div>'; return; }
   el.innerHTML = upcoming.map(({r,dd})=>`
@@ -748,6 +771,7 @@ function renderList(){
       <td class="mono">${esc(r.phone||'-')}</td>
       <td class="mono">${esc(r.contractCode||'-')}</td>
       <td>${fmtDate(r.weddingDate)}</td>
+      <td class="mono">${esc(r.weddingTime||'-')}</td>
       <td>${esc(r.venueName||'-')}</td>
       <td>${esc(r.region||'-')}</td>
       <td>${esc(r.productType||'-')}</td>
@@ -871,6 +895,168 @@ function renderAll(){
 }
 
 function esc(s){ if(s===undefined||s===null) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* =========================================================
+   엑셀로 가져오기
+========================================================= */
+const importOverlay = document.getElementById('importOverlay');
+let importNewRows = [];
+
+document.getElementById('importExcelBtn').addEventListener('click', openImportModal);
+document.getElementById('importModalClose').addEventListener('click', closeImportModal);
+document.getElementById('importCancelBtn').addEventListener('click', closeImportModal);
+importOverlay.addEventListener('click', (e)=>{ if(e.target===importOverlay) closeImportModal(); });
+
+function openImportModal(){
+  document.getElementById('importFileInput').value = '';
+  document.getElementById('importSummary').textContent = '엑셀 파일(.xlsx)을 선택하면 자동으로 분석합니다.';
+  document.getElementById('importConfirmBtn').disabled = true;
+  importNewRows = [];
+  importOverlay.classList.add('active');
+}
+function closeImportModal(){ importOverlay.classList.remove('active'); }
+
+function normHeader(s){ return String(s===null||s===undefined?'':s).replace(/\s+/g,'').trim(); }
+
+async function parseExcelFile(file){
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, {type:'array', cellDates:true});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null});
+  const headerIdx = rows.findIndex(r => Array.isArray(r) && r.some(c => normHeader(c)==='계약자명'));
+  if(headerIdx===-1){ throw new Error('"계약자명" 열을 찾을 수 없습니다. 기존 현황판과 같은 양식인지 확인해주세요.'); }
+  const headerRow = rows[headerIdx];
+  const colIdx = {};
+  headerRow.forEach((cell, i)=>{ const k = normHeader(cell); if(k) colIdx[k] = i; });
+  const need = (key)=> (colIdx[key]!==undefined ? colIdx[key] : -1);
+  const IDX = {
+    contractDate: need('계약일자'), clientName: need('계약자명'), phone: need('연락처'),
+    contractCode: need('계약코드'), weddingDate: need('예식일자'), weddingTime: need('예식시간'),
+    venueName: need('예식장'), hallName: need('웨딩홀'), region: need('지역'), productType: need('계약상품'),
+    groomGuests: need('신랑하객수'), brideGuests: need('신부하객수'), baseAmount: need('기준금액'),
+    earlyBird: need('얼리버드'), earlyBirdDiscount: need('얼리버드할인금액'),
+    partnerCode: need('짝꿍코드'), partnerDiscount: need('짝꿍코드할인금액'),
+    travelFee: need('출장비'), deposit: need('계약금'),
+    referralCountTotal: need('추천횟수(전체)'), referralCountUnder60: need('추천횟수(D-60미만)'),
+    reviewCountContract: need('계약후기작성수'), reviewDiscountContract: need('계약후기할인금액'),
+    reviewCountDay: need('본식후기작성수'), reviewDiscountDay: need('본식후기할인금액'),
+    settlementDone: need('정산금완료여부'),
+  };
+  if(IDX.clientName===-1){ throw new Error('"계약자명" 열 위치를 찾지 못했습니다.'); }
+
+  const toDateStr = (v)=>{
+    if(v===null || v===undefined || v==='') return '';
+    if(v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,'0')}-${String(v.getDate()).padStart(2,'0')}`;
+    const s = String(v).trim();
+    const m = s.match(/(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})/);
+    if(m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+    return s;
+  };
+  const toTimeStr = (v)=>{
+    if(v===null || v===undefined || v==='') return '';
+    if(v instanceof Date && !isNaN(v)) return `${String(v.getHours()).padStart(2,'0')}:${String(v.getMinutes()).padStart(2,'0')}`;
+    if(typeof v === 'number'){
+      const totalMin = Math.round(v*24*60);
+      return `${String(Math.floor(totalMin/60)).padStart(2,'0')}:${String(totalMin%60).padStart(2,'0')}`;
+    }
+    const s = String(v).trim();
+    const m = s.match(/(\d{1,2}):(\d{2})/);
+    if(m) return `${m[1].padStart(2,'0')}:${m[2]}`;
+    return s;
+  };
+  const toNum = (v)=>{ if(v===null||v===undefined||v==='') return 0; const n = Number(String(v).replace(/[,원]/g,'')); return isNaN(n)?0:n; };
+  const toStr = (v)=> (v===null||v===undefined) ? '' : String(v).trim();
+
+  const results = [];
+  for(let i=headerIdx+1; i<rows.length; i++){
+    const row = rows[i];
+    if(!row) continue;
+    const name = toStr(row[IDX.clientName]);
+    if(!name) continue;
+    const partnerCodeRaw = IDX.partnerCode>=0 ? toStr(row[IDX.partnerCode]) : '';
+    results.push({
+      type:'contract',
+      clientName: name,
+      phone: IDX.phone>=0 ? toStr(row[IDX.phone]) : '',
+      contractDate: IDX.contractDate>=0 ? toDateStr(row[IDX.contractDate]) : '',
+      contractCode: IDX.contractCode>=0 ? toStr(row[IDX.contractCode]) : '',
+      weddingDate: IDX.weddingDate>=0 ? toDateStr(row[IDX.weddingDate]) : '',
+      weddingTime: IDX.weddingTime>=0 ? toTimeStr(row[IDX.weddingTime]) : '',
+      venueName: IDX.venueName>=0 ? toStr(row[IDX.venueName]) : '',
+      hallName: IDX.hallName>=0 ? toStr(row[IDX.hallName]) : '',
+      region: IDX.region>=0 ? toStr(row[IDX.region]) : '',
+      productType: IDX.productType>=0 ? (toStr(row[IDX.productType]) || '양측') : '양측',
+      groomGuests: IDX.groomGuests>=0 ? toNum(row[IDX.groomGuests]) : 0,
+      brideGuests: IDX.brideGuests>=0 ? toNum(row[IDX.brideGuests]) : 0,
+      baseAmount: IDX.baseAmount>=0 ? toNum(row[IDX.baseAmount]) : 0,
+      earlyBird: IDX.earlyBird>=0 ? (toStr(row[IDX.earlyBird])==='O' ? 'O':'X') : 'X',
+      earlyBirdDiscount: IDX.earlyBirdDiscount>=0 ? toNum(row[IDX.earlyBirdDiscount]) : 0,
+      partnerCode: (partnerCodeRaw==='-' ? '' : partnerCodeRaw),
+      partnerDiscount: IDX.partnerDiscount>=0 ? toNum(row[IDX.partnerDiscount]) : 0,
+      travelFee: IDX.travelFee>=0 ? toNum(row[IDX.travelFee]) : 0,
+      deposit: IDX.deposit>=0 ? toNum(row[IDX.deposit]) : 100000,
+      referralCountTotal: IDX.referralCountTotal>=0 ? toNum(row[IDX.referralCountTotal]) : 0,
+      referralCountUnder60: IDX.referralCountUnder60>=0 ? toNum(row[IDX.referralCountUnder60]) : 0,
+      reviewCountContract: IDX.reviewCountContract>=0 ? toNum(row[IDX.reviewCountContract]) : 0,
+      reviewDiscountContract: IDX.reviewDiscountContract>=0 ? toNum(row[IDX.reviewDiscountContract]) : 0,
+      reviewCountDay: IDX.reviewCountDay>=0 ? toNum(row[IDX.reviewCountDay]) : 0,
+      reviewDiscountDay: IDX.reviewDiscountDay>=0 ? toNum(row[IDX.reviewDiscountDay]) : 0,
+      settlementDone: IDX.settlementDone>=0 ? (toStr(row[IDX.settlementDone])==='O') : false,
+      memo: '',
+    });
+  }
+  return results;
+}
+
+function isDuplicateRecord(row){
+  if(row.contractCode){
+    return RECORDS.some(r=> r.type==='contract' && r.contractCode && r.contractCode.trim()===row.contractCode.trim());
+  }
+  return RECORDS.some(r=> r.type==='contract' && r.clientName===row.clientName && r.phone===row.phone && r.weddingDate===row.weddingDate);
+}
+
+document.getElementById('importFileInput').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  const summaryEl = document.getElementById('importSummary');
+  document.getElementById('importConfirmBtn').disabled = true;
+  importNewRows = [];
+  if(!file) return;
+  summaryEl.textContent = '엑셀 파일을 분석하고 있어요…';
+  try{
+    if(typeof XLSX === 'undefined'){ throw new Error('엑셀 처리 라이브러리를 불러오지 못했습니다. 네트워크 연결을 확인해주세요.'); }
+    const parsed = await parseExcelFile(file);
+    if(parsed.length===0){ throw new Error('엑셀에서 계약 데이터를 찾지 못했습니다.'); }
+    importNewRows = parsed.filter(r=> !isDuplicateRecord(r));
+    const dupCount = parsed.length - importNewRows.length;
+    if(importNewRows.length===0){
+      summaryEl.innerHTML = `엑셀에서 ${parsed.length}건을 확인했지만, 모두 이미 등록되어 있어 새로 추가할 내역이 없습니다.`;
+    } else {
+      const preview = importNewRows.slice(0,10).map(r=> `· ${esc(r.clientName)} (${esc(r.contractCode||'코드없음')}) · 예식일 ${fmtDate(r.weddingDate)}`).join('<br>');
+      const more = importNewRows.length>10 ? `<br>…외 ${importNewRows.length-10}건` : '';
+      summaryEl.innerHTML = `총 ${parsed.length}건 중 <b style="color:var(--wine);">${importNewRows.length}건 신규</b>, ${dupCount}건은 이미 등록되어 있어 제외됩니다.<div style="margin-top:8px;">${preview}${more}</div>`;
+      document.getElementById('importConfirmBtn').disabled = false;
+    }
+  }catch(err){
+    console.error('엑셀 가져오기 분석 실패', err);
+    summaryEl.innerHTML = `<span style="color:var(--coral);">엑셀을 읽는 중 오류가 발생했습니다: ${esc(err.message||'알 수 없는 오류')}</span>`;
+  }
+});
+
+document.getElementById('importConfirmBtn').addEventListener('click', async ()=>{
+  if(importNewRows.length===0) return;
+  const btn = document.getElementById('importConfirmBtn');
+  btn.disabled = true;
+  importNewRows.forEach(row=>{
+    const rec = blankRecord('contract');
+    Object.assign(rec, row);
+    RECORDS.push(rec);
+  });
+  await persist();
+  const count = importNewRows.length;
+  closeImportModal();
+  renderAll();
+  showToast(`${count}건을 새로 가져왔습니다`);
+});
 
 /* =========================================================
    MODAL / FORM
