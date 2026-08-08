@@ -295,6 +295,9 @@ a{color:var(--wine);}
 
   <!-- DASHBOARD -->
   <section class="section active" id="tab-dashboard">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+      <button class="btn btn-primary btn-sm" id="dashboardImportBtn">📁 엑셀로 업데이트</button>
+    </div>
     <div class="kpi-grid" id="kpiGrid"></div>
 
     <div class="section-head">
@@ -312,7 +315,17 @@ a{color:var(--wine);}
         <p class="section-desc">다가오는 토·일요일 기준 예약 현황이에요 · 클릭하면 상세로 이동합니다</p>
       </div>
     </div>
-    <div id="weekendTimetable" style="margin-bottom:26px;"></div>
+    <div id="weekendTimetable" style="margin-bottom:10px;"></div>
+    <div style="text-align:center;margin-bottom:14px;">
+      <button class="btn btn-sm" id="weekendMoreBtn">연도별 전체 보기 ▾</button>
+    </div>
+    <div id="weekendTimetableExpanded" style="display:none;margin-bottom:26px;">
+      <div class="section-head" style="margin-bottom:10px;">
+        <div><h3 style="font-family:'Noto Serif KR',serif;font-size:14px;margin:0;color:var(--wine);">연도별 전체 주말 일정</h3></div>
+        <select id="weekendYearSelect"></select>
+      </div>
+      <div id="weekendTimetableExpandedGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;"></div>
+    </div>
 
     <div class="grid-2col" style="margin-bottom:26px;">
       <div>
@@ -442,9 +455,6 @@ a{color:var(--wine);}
 
 </div>
 
-<button class="fab fab-secondary" id="fabUpload">📄 계약서로 등록</button>
-<button class="fab" id="fabAdd">＋ 새 상담·계약 등록</button>
-
 <!-- MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal">
@@ -524,55 +534,6 @@ function sheet_(){var ss=SpreadsheetApp.getActiveSpreadsheet();var sh=ss.getShee
   </div>
 </div>
 
-<div class="overlay" id="uploadOverlay">
-  <div class="modal" style="max-width:520px;">
-    <div class="modal-head">
-      <h3>계약서로 자동 등록</h3>
-      <button class="modal-close" id="uploadModalClose">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="seg" id="uploadModeSeg" style="margin-bottom:14px;">
-        <button type="button" data-mode="paste" class="active">📋 붙여넣기로 등록 (무료)</button>
-        <button type="button" data-mode="ai">🤖 AI 자동인식 (API 키 필요)</button>
-      </div>
-
-      <div id="pasteModeBody">
-        <p class="section-desc" style="margin-bottom:10px;line-height:1.7;">채팅창에 계약서 사진을 올리고 <b>"아래 양식대로 정리해줘"</b>라고 요청하면, 무료로 텍스트를 정리해드려요. 그 내용을 복사해서 아래에 붙여넣으면 등록 화면이 자동으로 채워집니다.</p>
-        <button class="btn btn-sm" id="copyTemplateBtn" style="margin-bottom:10px;">📋 양식 복사하기</button>
-        <textarea id="pasteTextarea" rows="9" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:9px 10px;font-family:'Pretendard';font-size:12.5px;box-sizing:border-box;" placeholder="계약자명: 권혜림
-연락처: 010-2880-9026
-계약일자: 2026-08-03
-예식일자: 2026-12-05
-...채팅에서 받은 텍스트를 여기에 붙여넣어주세요"></textarea>
-      </div>
-
-      <div id="aiModeBody" style="display:none;">
-        <p class="section-desc" style="margin-bottom:14px;line-height:1.6;">계약서 사진 또는 PDF 파일을 올리면 회원님의 Anthropic API 키로 자동으로 읽어 채워드려요. 호출마다 소액의 API 사용 요금이 발생해요.</p>
-        <div id="apiKeyRow" style="margin-bottom:14px;padding:11px 13px;background:#F5F3EA;border:1px solid var(--line);border-radius:8px;font-size:12px;line-height:1.6;">
-          <div id="apiKeyStatus"></div>
-          <div id="apiKeyForm" style="display:none;margin-top:8px;">
-            <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." style="width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;font-family:'Pretendard';font-size:12.5px;margin-bottom:7px;box-sizing:border-box;">
-            <div style="display:flex;gap:6px;">
-              <button class="btn btn-sm btn-primary" id="apiKeySaveBtn">저장</button>
-              <button class="btn btn-sm" id="apiKeyCancelBtn">취소</button>
-            </div>
-          </div>
-        </div>
-        <input type="file" id="uploadFileInput" accept="image/*,.pdf" style="margin-bottom:12px;width:100%;">
-        <div id="uploadPreview" style="margin-bottom:10px;"></div>
-      </div>
-
-      <div id="uploadStatus" style="font-size:12.5px;color:var(--ink-soft);min-height:16px;margin-top:6px;"></div>
-    </div>
-    <div class="modal-foot">
-      <div><button class="btn btn-ghost btn-sm" id="uploadManualBtn">인식 없이 수동으로 등록</button></div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn" id="uploadCancelBtn">취소</button>
-        <button class="btn btn-primary" id="uploadAnalyzeBtn">붙여넣은 내용으로 등록</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
@@ -583,19 +544,6 @@ function sheet_(){var ss=SpreadsheetApp.getActiveSpreadsheet();var sh=ss.getShee
 ========================================================= */
 
 const STORAGE_KEY = 'mw_records_v1';
-const API_KEY_STORAGE = 'mw_anthropic_api_key';
-let API_KEY = '';
-async function loadApiKey(){
-  try{
-    const res = await window.storage.get(API_KEY_STORAGE, false);
-    API_KEY = (res && res.value) ? res.value : '';
-  }catch(e){ API_KEY = ''; }
-}
-async function saveApiKey(key){
-  API_KEY = key || '';
-  try{ await window.storage.set(API_KEY_STORAGE, API_KEY, false); }
-  catch(e){ console.error('API 키 저장 실패', e); showToast('API 키 저장에 실패했습니다'); }
-}
 const PRODUCT_BASE = {'양측':580000,'한측':315000,'통합':315000};
 const SEED_RECORDS = [{"id": "seed-1", "type": "contract", "stage": "contracted", "clientName": "김혜린", "phone": "010-8539-0857", "contractDate": "2026-07-21", "contractCode": "HR260721", "weddingDate": "2026-08-15", "weddingTime": "11:20", "venueName": "합정 웨딩시그니처", "hallName": "아너스홀", "region": "합정", "productType": "양측", "groomGuests": 80, "brideGuests": 170, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-21T09:00:00"}, {"id": "seed-2", "type": "contract", "stage": "contracted", "clientName": "양희민", "phone": "010-3904-1408", "contractDate": "2026-07-29", "contractCode": "HM260729", "weddingDate": "2026-08-22", "weddingTime": "12:10", "venueName": "송파문정 더컨벤션", "hallName": "그랜드볼룸홀", "region": "송파", "productType": "양측", "groomGuests": 160, "brideGuests": 110, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-29T09:00:00"}, {"id": "seed-3", "type": "contract", "stage": "contracted", "clientName": "이나현", "phone": "010-8767-2730", "contractDate": "2026-07-28", "contractCode": "NH260728", "weddingDate": "2026-08-23", "weddingTime": "15:00", "venueName": "빌라드지디 논현", "hallName": "단독홀", "region": "논현", "productType": "양측", "groomGuests": 150, "brideGuests": 200, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-28T09:00:00"}, {"id": "seed-4", "type": "contract", "stage": "contracted", "clientName": "심윤하", "phone": "010-5718-3931", "contractDate": "2026-07-21", "contractCode": "YH260721", "weddingDate": "2026-09-05", "weddingTime": "14:30", "venueName": "규수당 운정점", "hallName": "9층 베일리홀", "region": "파주", "productType": "양측", "groomGuests": 80, "brideGuests": 70, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "", "partnerDiscount": 0, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-21T09:00:00"}, {"id": "seed-5", "type": "contract", "stage": "contracted", "clientName": "윤혜련", "phone": "010-5172-3645", "contractDate": "2026-07-29", "contractCode": "HR260729", "weddingDate": "2026-09-13", "weddingTime": "12:00", "venueName": "평택 국제웨딩컨벤션", "hallName": "라루스홀", "region": "평택", "productType": "한측", "groomGuests": 0, "brideGuests": 100, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 1, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-29T09:00:00"}, {"id": "seed-6", "type": "contract", "stage": "contracted", "clientName": "김예나", "phone": "010-3728-5383", "contractDate": "2026-07-26", "contractCode": "YN260726", "weddingDate": "2026-09-19", "weddingTime": "14:00", "venueName": "서울 벨라루체", "hallName": "7층 플로체홀", "region": "회기", "productType": "한측", "groomGuests": 0, "brideGuests": 60, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-26T09:00:00"}, {"id": "seed-7", "type": "contract", "stage": "contracted", "clientName": "손이나", "phone": "010-6624-1135", "contractDate": "2026-07-16", "contractCode": "IN20260716", "weddingDate": "2026-10-04", "weddingTime": "12:30", "venueName": "잠실 아펠가모", "hallName": "단독홀", "region": "잠실", "productType": "양측", "groomGuests": 150, "brideGuests": 100, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-16T09:00:00"}, {"id": "seed-8", "type": "contract", "stage": "contracted", "clientName": "구본의", "phone": "010-2016-9583", "contractDate": "2026-07-15", "contractCode": "BU20260715", "weddingDate": "2026-10-17", "weddingTime": "14:00", "venueName": "분당 우리교회", "hallName": "단독홀", "region": "분당", "productType": "양측", "groomGuests": 200, "brideGuests": 200, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "", "partnerDiscount": 0, "travelFee": 0, "deposit": 100000, "referralCountTotal": 14, "referralCountUnder60": 5, "reviewCountContract": 0, "reviewDiscountContract": 30000, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-15T09:00:00"}, {"id": "seed-9", "type": "contract", "stage": "contracted", "clientName": "김봄", "phone": "010-5583-9650", "contractDate": "2026-07-31", "contractCode": "KB260801", "weddingDate": "2026-10-18", "weddingTime": "11:00", "venueName": "군산 스테이웨딩", "hallName": "단독홀", "region": "군산", "productType": "한측", "groomGuests": 0, "brideGuests": 200, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "HR260729", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-31T09:00:00"}, {"id": "seed-10", "type": "contract", "stage": "contracted", "clientName": "윤다영", "phone": "010-4723-6641", "contractDate": "2026-07-31", "contractCode": "DY260731", "weddingDate": "2026-10-25", "weddingTime": "13:40", "venueName": "강동 KWD웨딩홀", "hallName": "마이더스홀", "region": "강동", "productType": "양측", "groomGuests": 100, "brideGuests": 100, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-31T09:00:00"}, {"id": "seed-11", "type": "contract", "stage": "contracted", "clientName": "강수경", "phone": "010-4333-3315", "contractDate": "2026-07-18", "contractCode": "SK20260718", "weddingDate": "2026-11-07", "weddingTime": "12:20", "venueName": "영등포 공군호텔", "hallName": "3층 그랜드볼룸홀", "region": "영등포", "productType": "양측", "groomGuests": 150, "brideGuests": 100, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-18T09:00:00"}, {"id": "seed-12", "type": "contract", "stage": "contracted", "clientName": "김도현", "phone": "010-2058-3056", "contractDate": "2026-07-26", "contractCode": "DH260726", "weddingDate": "2026-11-08", "weddingTime": "11:00", "venueName": "규수당 운정점", "hallName": "9층 베일리홀", "region": "파주", "productType": "통합", "groomGuests": 60, "brideGuests": 50, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "", "partnerDiscount": 0, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-26T09:00:00"}, {"id": "seed-13", "type": "contract", "stage": "contracted", "clientName": "김수경", "phone": "010-3218-9202", "contractDate": "2026-07-29", "contractCode": "SK260729", "weddingDate": "2026-11-14", "weddingTime": "11:10", "venueName": "신도림 라마다 호텔", "hallName": "14층 하늘정원홀", "region": "신도림", "productType": "한측", "groomGuests": 0, "brideGuests": 200, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "", "partnerDiscount": 0, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-29T09:00:00"}, {"id": "seed-14", "type": "contract", "stage": "contracted", "clientName": "임소현", "phone": "010-2008-5496", "contractDate": "2026-07-18", "contractCode": "HS20260718", "weddingDate": "2026-11-14", "weddingTime": "14:30", "venueName": "양재 엘타워", "hallName": "그랜드홀", "region": "양재", "productType": "양측", "groomGuests": 120, "brideGuests": 200, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "SJ20260718", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-18T09:00:00"}, {"id": "seed-15", "type": "contract", "stage": "contracted", "clientName": "박지희", "phone": "010-9707-7847", "contractDate": "2026-07-25", "contractCode": "JH260725", "weddingDate": "2026-11-15", "weddingTime": "13:00", "venueName": "방배 오드힐하우스", "hallName": "단독홀", "region": "방배", "productType": "양측", "groomGuests": 80, "brideGuests": 120, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "", "partnerDiscount": 0, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-25T09:00:00"}, {"id": "seed-16", "type": "contract", "stage": "contracted", "clientName": "박유라", "phone": "010-9454-8583", "contractDate": "2026-07-17", "contractCode": "YR20260717", "weddingDate": "2026-11-21", "weddingTime": "11:00", "venueName": "송파 하비오", "hallName": "단독홀", "region": "송파", "productType": "한측", "groomGuests": 0, "brideGuests": 100, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "", "partnerDiscount": 0, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-17T09:00:00"}, {"id": "seed-17", "type": "contract", "stage": "contracted", "clientName": "이현주", "phone": "010-7773-2071", "contractDate": "2026-07-21", "contractCode": "HJ260721", "weddingDate": "2026-11-21", "weddingTime": "15:40", "venueName": "인천 카리스호텔", "hallName": "벨라지오홀", "region": "인천", "productType": "통합", "groomGuests": 75, "brideGuests": 75, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "", "partnerDiscount": 0, "travelFee": 0, "deposit": 100000, "referralCountTotal": 2, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-21T09:00:00"}, {"id": "seed-18", "type": "contract", "stage": "contracted", "clientName": "박선영", "phone": "010-4902-2155", "contractDate": "2026-07-26", "contractCode": "SY260726", "weddingDate": "2026-11-28", "weddingTime": "14:00", "venueName": "평택 국제웨딩컨벤션", "hallName": "라루스홀", "region": "평택", "productType": "양측", "groomGuests": 120, "brideGuests": 150, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "HJ260721", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-26T09:00:00"}, {"id": "seed-19", "type": "contract", "stage": "contracted", "clientName": "정채은", "phone": "010-9037-9760", "contractDate": "2026-07-30", "contractCode": "JC260730", "weddingDate": "2026-12-06", "weddingTime": "12:30", "venueName": "학동 셀럽앤어썸", "hallName": "디아이올라홀", "region": "학동", "productType": "한측", "groomGuests": 0, "brideGuests": 125, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-30T09:00:00"}, {"id": "seed-20", "type": "contract", "stage": "contracted", "clientName": "노태열", "phone": "010-5055-2978", "contractDate": "2026-07-26", "contractCode": "TY260727", "weddingDate": "2026-12-12", "weddingTime": "15:40", "venueName": "전주 더 메이 호텔", "hallName": "그랜드볼룸홀", "region": "전주", "productType": "양측", "groomGuests": 100, "brideGuests": 100, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "", "partnerDiscount": 0, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-26T09:00:00"}, {"id": "seed-21", "type": "contract", "stage": "contracted", "clientName": "허미란", "phone": "010-5646-7319", "contractDate": "2026-07-31", "contractCode": "HM260731", "weddingDate": "2027-01-31", "weddingTime": "13:40", "venueName": "광명 아이벡스 컨벤션", "hallName": "단독홀", "region": "광명", "productType": "양측", "groomGuests": 150, "brideGuests": 100, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-31T09:00:00"}, {"id": "seed-22", "type": "contract", "stage": "contracted", "clientName": "한강은", "phone": "010-6380-7959", "contractDate": "2026-07-23", "contractCode": "GE260723", "weddingDate": "2027-02-20", "weddingTime": "11:00", "venueName": "의정부 웨딩더낙원", "hallName": "샬롬홀", "region": "의정부", "productType": "양측", "groomGuests": 75, "brideGuests": 75, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "HJ260721", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-23T09:00:00"}, {"id": "seed-23", "type": "contract", "stage": "contracted", "clientName": "임수지", "phone": "010-8734-3703", "contractDate": "2026-07-18", "contractCode": "SJ20260718", "weddingDate": "2027-02-21", "weddingTime": "14:00", "venueName": "양재 엘타워", "hallName": "오르체홀", "region": "양재", "productType": "양측", "groomGuests": 150, "brideGuests": 150, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 1, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-18T09:00:00"}, {"id": "seed-24", "type": "contract", "stage": "contracted", "clientName": "김진주", "phone": "010-6489-0576", "contractDate": "2026-07-28", "contractCode": "JJ260728", "weddingDate": "2027-03-20", "weddingTime": "12:30", "venueName": "용인 페이지웨딩", "hallName": "클래식홀", "region": "용인", "productType": "통합", "groomGuests": 70, "brideGuests": 80, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-28T09:00:00"}, {"id": "seed-25", "type": "contract", "stage": "contracted", "clientName": "함정은", "phone": "010-6850-3699", "contractDate": "2026-07-29", "contractCode": "JE260729", "weddingDate": "2027-03-20", "weddingTime": "15:30", "venueName": "수원 더시그니처클래스", "hallName": "단독홀", "region": "수원", "productType": "통합", "groomGuests": 60, "brideGuests": 60, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "CS260729", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 1, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-29T09:00:00"}, {"id": "seed-26", "type": "contract", "stage": "contracted", "clientName": "유시연", "phone": "010-6259-2386", "contractDate": "2026-07-30", "contractCode": "YS260730", "weddingDate": "2027-03-27", "weddingTime": "13:50", "venueName": "천안 티웨딩", "hallName": "그레이스홀", "region": "천안", "productType": "양측", "groomGuests": 300, "brideGuests": 150, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-30T09:00:00"}, {"id": "seed-27", "type": "contract", "stage": "contracted", "clientName": "정혜준", "phone": "010-3942-2830", "contractDate": "2026-07-29", "contractCode": "HJ260729", "weddingDate": "2027-04-10", "weddingTime": "12:20", "venueName": "동탄 아르떼벨라", "hallName": "단독홀", "region": "동탄", "productType": "한측", "groomGuests": 100, "brideGuests": 0, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "HS260729", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-29T09:00:00"}, {"id": "seed-28", "type": "contract", "stage": "contracted", "clientName": "황수영", "phone": "010-8937-8226", "contractDate": "2026-07-29", "contractCode": "HS260729", "weddingDate": "2027-04-10", "weddingTime": "12:20", "venueName": "동탄 아르떼벨라", "hallName": "단독홀", "region": "동탄", "productType": "한측", "groomGuests": 0, "brideGuests": 100, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "BU20260715", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 1, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-29T09:00:00"}, {"id": "seed-29", "type": "contract", "stage": "contracted", "clientName": "김예진", "phone": "010-5548-8733", "contractDate": "2026-07-20", "contractCode": "YJ260720", "weddingDate": "2027-04-11", "weddingTime": "11:30", "venueName": "천안 웨딩베리컨벤션", "hallName": "피에스타홀", "region": "천안", "productType": "한측", "groomGuests": 0, "brideGuests": 150, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "", "partnerDiscount": 0, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-20T09:00:00"}, {"id": "seed-30", "type": "contract", "stage": "contracted", "clientName": "창선영", "phone": "010-9221-1792", "contractDate": "2026-07-29", "contractCode": "CS260729", "weddingDate": "2027-05-15", "weddingTime": "17:00", "venueName": "수원 SY 컨벤션", "hallName": "단독홀", "region": "수원", "productType": "양측", "groomGuests": 150, "brideGuests": 150, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "JE260729", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-29T09:00:00"}, {"id": "seed-31", "type": "contract", "stage": "contracted", "clientName": "신상은", "phone": "010-9860-3338", "contractDate": "2026-07-29", "contractCode": "SE260729", "weddingDate": "2027-07-17", "weddingTime": "12:20", "venueName": "동탄 아르떼벨라", "hallName": "단독홀", "region": "동탄", "productType": "양측", "groomGuests": 300, "brideGuests": 150, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "", "partnerDiscount": 0, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-07-29T09:00:00"}, {"id": "seed-32", "type": "contract", "stage": "contracted", "clientName": "백지선", "phone": "010-3279-2209", "contractDate": "2026-08-03", "contractCode": "MWB26080309", "weddingDate": "2026-09-12", "weddingTime": "16:40", "venueName": "인천 그랜드 오스티엄", "hallName": "블리스홀", "region": "인천", "productType": "한측", "groomGuests": 0, "brideGuests": 100, "baseAmount": 315000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "JC260730", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-08-03T09:00:00"}, {"id": "seed-33", "type": "contract", "stage": "contracted", "clientName": "권혜림", "phone": "010-2880-9026", "contractDate": "2026-08-03", "contractCode": "MWG26080326", "weddingDate": "2026-12-05", "weddingTime": "12:00", "venueName": "서초 서초동성당", "hallName": "단독홀", "region": "서울", "productType": "양측", "groomGuests": 150, "brideGuests": 150, "baseAmount": 580000, "earlyBird": "O", "earlyBirdDiscount": 20000, "partnerCode": "", "partnerDiscount": 10000, "travelFee": 0, "deposit": 100000, "referralCountTotal": 0, "referralCountUnder60": 0, "reviewCountContract": 0, "reviewDiscountContract": 0, "reviewCountDay": 0, "reviewDiscountDay": 0, "settlementDone": false, "memo": "", "createdAt": "2026-08-03T09:00:00"}];
 const SERVER_URL_STORAGE = 'mw_server_url';
@@ -1172,6 +1120,73 @@ function renderWeekendTimetable(){
   el.querySelectorAll('[data-id]').forEach(x=> x.addEventListener('click', ()=> openModal(x.dataset.id)));
 }
 
+/* ---------- 주말 예약 - 연도별 전체보기(더보기) ---------- */
+function weekendCardHTML(dateStr, contracts){
+  const wd = new Date(dateStr);
+  const isSun = wd.getDay()===0;
+  const bookings = contracts.filter(r=>r.weddingDate===dateStr);
+  const available = bookings.length===0;
+  return `<div style="border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:${available?'var(--sage-soft)':'var(--paper-card)'};">
+    <div style="font-size:10.5px;font-weight:700;color:${isSun?'var(--wine)':'var(--ink-soft)'};">${fmtDate(dateStr)}</div>
+    <div style="margin-top:5px;">
+      ${available
+        ? `<span class="badge badge-done">예약 가능</span>`
+        : bookings.map(b=>`<div style="font-size:10.5px;margin-bottom:2px;cursor:pointer;" data-id="${b.id}">${esc(b.weddingTime||'')} ${esc(b.clientName)}</div>`).join('') + `<span class="badge badge-pending" style="margin-top:2px;">${bookings.length}건</span>`
+      }
+    </div>
+  </div>`;
+}
+function populateWeekendYearSelect(){
+  const sel = document.getElementById('weekendYearSelect');
+  if(sel.dataset.filled) return;
+  const years = new Set();
+  RECORDS.filter(r=>r.type==='contract' && r.weddingDate).forEach(r=> years.add(new Date(r.weddingDate).getFullYear()));
+  const now = new Date().getFullYear();
+  years.add(now); years.add(now+1);
+  const sorted = [...years].sort((a,b)=>a-b);
+  sel.innerHTML = sorted.map(y=> `<option value="${y}" ${y===now?'selected':''}>${y}년</option>`).join('');
+  sel.dataset.filled = '1';
+}
+function renderWeekendTimetableExpanded(year){
+  const contracts = RECORDS.filter(r=>r.type==='contract' && r.weddingDate);
+  let html = '';
+  for(let m=0;m<12;m++){
+    const daysInMonth = new Date(year, m+1, 0).getDate();
+    const monthDays = [];
+    for(let day=1; day<=daysInMonth; day++){
+      const dow = new Date(year,m,day).getDay();
+      if(dow===0 || dow===6) monthDays.push(day);
+    }
+    if(monthDays.length===0) continue;
+    html += `<div style="grid-column:1/-1;font-weight:700;font-size:12.5px;color:var(--wine);margin-top:8px;">${m+1}월</div>`;
+    html += monthDays.map(day=>{
+      const dateStr = `${year}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      return weekendCardHTML(dateStr, contracts);
+    }).join('');
+  }
+  const el = document.getElementById('weekendTimetableExpandedGrid');
+  el.innerHTML = html;
+  el.querySelectorAll('[data-id]').forEach(x=> x.addEventListener('click', ()=> openModal(x.dataset.id)));
+}
+document.getElementById('weekendMoreBtn').addEventListener('click', ()=>{
+  const box = document.getElementById('weekendTimetableExpanded');
+  const btn = document.getElementById('weekendMoreBtn');
+  const showing = box.style.display !== 'none';
+  if(showing){
+    box.style.display = 'none';
+    btn.textContent = '연도별 전체 보기 ▾';
+  } else {
+    box.style.display = 'block';
+    btn.textContent = '접기 ▴';
+    populateWeekendYearSelect();
+    renderWeekendTimetableExpanded(Number(document.getElementById('weekendYearSelect').value));
+  }
+});
+document.getElementById('weekendYearSelect').addEventListener('change', (e)=>{
+  renderWeekendTimetableExpanded(Number(e.target.value));
+});
+document.getElementById('dashboardImportBtn').addEventListener('click', openImportModal);
+
 /* ---------- 캘린더 ---------- */
 let calYear, calMonth;
 function initCalendarState(){
@@ -1411,380 +1426,9 @@ document.getElementById('importConfirmBtn').addEventListener('click', async ()=>
    MODAL / FORM
 ========================================================= */
 const overlay = document.getElementById('overlay');
-document.getElementById('fabAdd').addEventListener('click', ()=> openModal(null));
 document.getElementById('modalClose').addEventListener('click', closeModal);
 document.getElementById('cancelBtn').addEventListener('click', closeModal);
 overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeModal(); });
-
-/* ---------- 계약서 업로드로 자동 등록 ---------- */
-const uploadOverlay = document.getElementById('uploadOverlay');
-let uploadMode = 'paste';
-const PASTE_TEMPLATE = `계약자명: 
-연락처: 
-계약일자: 
-예식일자: 
-예식시간: 
-예식장: 
-홀명: 
-지역: 
-계약상품(양측/한측/통합): 
-신랑하객수: 
-신부하객수: 
-기준금액: 
-얼리버드(O/X): 
-얼리버드할인: 
-짝꿍코드(추천인, 없으면 -): 
-계약금: 
-계약코드: 
-메모: `;
-
-document.getElementById('fabUpload').addEventListener('click', openUploadModal);
-document.getElementById('uploadModalClose').addEventListener('click', closeUploadModal);
-document.getElementById('uploadCancelBtn').addEventListener('click', closeUploadModal);
-document.getElementById('uploadManualBtn').addEventListener('click', ()=>{ closeUploadModal(); openModal(null); });
-uploadOverlay.addEventListener('click', (e)=>{ if(e.target===uploadOverlay) closeUploadModal(); });
-
-document.querySelectorAll('#uploadModeSeg button').forEach(b=>{
-  b.addEventListener('click', ()=> setUploadMode(b.dataset.mode));
-});
-function setUploadMode(mode){
-  uploadMode = mode;
-  document.querySelectorAll('#uploadModeSeg button').forEach(b=> b.classList.toggle('active', b.dataset.mode===mode));
-  document.getElementById('pasteModeBody').style.display = mode==='paste' ? 'block' : 'none';
-  document.getElementById('aiModeBody').style.display = mode==='ai' ? 'block' : 'none';
-  document.getElementById('uploadAnalyzeBtn').textContent = mode==='paste' ? '붙여넣은 내용으로 등록' : '분석해서 등록하기';
-  showUploadStatus('');
-  if(mode==='ai') renderApiKeyStatus();
-}
-
-function openUploadModal(){
-  document.getElementById('uploadFileInput').value = '';
-  document.getElementById('uploadPreview').innerHTML = '';
-  document.getElementById('pasteTextarea').value = '';
-  showUploadStatus('');
-  document.getElementById('uploadAnalyzeBtn').disabled = false;
-  setUploadMode('paste');
-  uploadOverlay.classList.add('active');
-}
-function closeUploadModal(){ uploadOverlay.classList.remove('active'); }
-function showUploadStatus(msg, isError){
-  const el = document.getElementById('uploadStatus');
-  el.textContent = msg || '';
-  el.style.color = isError ? 'var(--coral)' : 'var(--ink-soft)';
-}
-
-document.getElementById('copyTemplateBtn').addEventListener('click', async ()=>{
-  try{
-    await navigator.clipboard.writeText(PASTE_TEMPLATE);
-    showToast('양식이 복사되었습니다 · 채팅에 계약서 사진과 함께 붙여넣어보세요');
-  }catch(e){
-    showUploadStatus('복사에 실패했습니다. 아래 양식을 직접 선택해 복사해주세요: ' + PASTE_TEMPLATE.replace(/\n/g,' / '), true);
-  }
-});
-
-function renderApiKeyStatus(){
-  const el = document.getElementById('apiKeyStatus');
-  document.getElementById('apiKeyForm').style.display = 'none';
-  if(API_KEY){
-    el.innerHTML = `🔑 API 키가 설정되어 있어요 · 이 브라우저에서 계약서 인식 시 이 키로 직접 호출됩니다 (Anthropic 사용량 요금 발생) <button class="btn btn-sm btn-ghost" id="apiKeyChangeBtn" style="margin-left:4px;">키 변경</button>`;
-  } else {
-    el.innerHTML = `⚠️ 계약서 자동 인식을 쓰려면 본인의 Anthropic API 키가 필요해요.<br>
-      <button class="btn btn-sm btn-primary" id="apiKeySetBtn" style="margin-top:6px;">API 키 입력하기</button>
-      <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" style="margin-left:8px;font-size:11.5px;">키 발급받기 ↗</a>`;
-  }
-  const setBtn = document.getElementById('apiKeySetBtn');
-  const changeBtn = document.getElementById('apiKeyChangeBtn');
-  if(setBtn) setBtn.addEventListener('click', ()=>{ document.getElementById('apiKeyForm').style.display='block'; document.getElementById('apiKeyInput').focus(); });
-  if(changeBtn) changeBtn.addEventListener('click', ()=>{ document.getElementById('apiKeyForm').style.display='block'; document.getElementById('apiKeyInput').focus(); });
-}
-document.getElementById('apiKeySaveBtn').addEventListener('click', async ()=>{
-  const v = document.getElementById('apiKeyInput').value.trim();
-  if(!v){ showToast('API 키를 입력해주세요'); return; }
-  await saveApiKey(v);
-  document.getElementById('apiKeyInput').value = '';
-  renderApiKeyStatus();
-  showToast('API 키가 저장되었습니다');
-});
-document.getElementById('apiKeyCancelBtn').addEventListener('click', ()=>{
-  document.getElementById('apiKeyForm').style.display = 'none';
-  document.getElementById('apiKeyInput').value = '';
-});
-
-/* ---------- 서버(구글시트) 연결 설정 ---------- */
-const serverOverlay = document.getElementById('serverOverlay');
-document.getElementById('serverSettingsBtn').addEventListener('click', openServerModal);
-document.getElementById('serverModalClose').addEventListener('click', closeServerModal);
-document.getElementById('serverCancelBtn').addEventListener('click', closeServerModal);
-serverOverlay.addEventListener('click', (e)=>{ if(e.target===serverOverlay) closeServerModal(); });
-
-function openServerModal(){
-  document.getElementById('serverUrlInput').value = SERVER_URL || '';
-  renderServerStatus();
-  serverOverlay.classList.add('active');
-}
-function closeServerModal(){ serverOverlay.classList.remove('active'); }
-function renderServerStatus(msg){
-  const el = document.getElementById('serverStatusRow');
-  if(msg){ el.innerHTML = msg; return; }
-  el.innerHTML = SERVER_URL
-    ? `🟢 서버에 연결되어 있어요. 이제 이 페이지를 어디서 열어도 같은 데이터를 불러옵니다.`
-    : `⚪ 아직 서버에 연결되어 있지 않아요. 지금은 이 브라우저에만 데이터가 저장됩니다.`;
-}
-document.getElementById('copyScriptBtn').addEventListener('click', async ()=>{
-  try{
-    await navigator.clipboard.writeText(document.getElementById('appsScriptCode').value);
-    showToast('스크립트가 복사되었습니다');
-  }catch(e){
-    document.getElementById('appsScriptCode').select();
-    showToast('직접 선택해서 복사해주세요');
-  }
-});
-document.getElementById('serverSaveBtn').addEventListener('click', async ()=>{
-  const url = document.getElementById('serverUrlInput').value.trim();
-  if(!url){ renderServerStatus('<span style="color:var(--coral);">웹 앱 URL을 입력해주세요</span>'); return; }
-  renderServerStatus('연결을 확인하고 있어요…');
-  try{
-    const res = await fetch(url, { method:'GET' });
-    if(!res.ok) throw new Error('응답 오류 ' + res.status);
-    await res.json();
-    await saveServerUrl(url);
-    renderServerStatus();
-    showToast('서버 연결이 완료되었습니다');
-    await loadRecords();
-  }catch(e){
-    console.error('서버 연결 확인 실패', e);
-    renderServerStatus(`<span style="color:var(--coral);">연결에 실패했습니다 (${esc(e.message||'')}). 배포 시 액세스 권한이 "모든 사용자"인지 확인해주세요.</span>`);
-  }
-});
-document.getElementById('serverDisconnectBtn').addEventListener('click', async ()=>{
-  await saveServerUrl('');
-  document.getElementById('serverUrlInput').value = '';
-  renderServerStatus();
-  showToast('서버 연결이 해제되었습니다 (이 브라우저 저장 데이터만 사용)');
-});
-
-document.getElementById('uploadFileInput').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  const preview = document.getElementById('uploadPreview');
-  if(!file){ preview.innerHTML=''; return; }
-  if(file.type.startsWith('image/')){
-    const url = URL.createObjectURL(file);
-    preview.innerHTML = `<img src="${url}" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid var(--line);display:block;">`;
-  } else {
-    preview.innerHTML = `<div style="font-size:12.5px;color:var(--ink-soft);padding:8px 0;">📄 ${esc(file.name)}</div>`;
-  }
-  showUploadStatus('');
-});
-
-document.getElementById('uploadAnalyzeBtn').addEventListener('click', async ()=>{
-  if(uploadMode==='paste'){
-    handlePasteRegister();
-    return;
-  }
-  const file = document.getElementById('uploadFileInput').files[0];
-  if(!file){ showUploadStatus('먼저 계약서 파일을 선택해주세요', true); return; }
-  const btn = document.getElementById('uploadAnalyzeBtn');
-  btn.disabled = true;
-  showUploadStatus('계약서를 분석하고 있어요… 잠시만 기다려주세요');
-  try{
-    await analyzeContractFile(file);
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-const PASTE_LABEL_MAP = {
-  '계약자명':'clientName', '계약자':'clientName', '이름':'clientName',
-  '연락처':'phone', '전화번호':'phone',
-  '계약일자':'contractDate', '계약일':'contractDate',
-  '예식일자':'weddingDate', '예식일':'weddingDate',
-  '예식시간':'weddingTime',
-  '예식장':'venueName',
-  '홀명':'hallName', '웨딩홀':'hallName',
-  '지역':'region',
-  '계약상품(양측/한측/통합)':'productType', '계약상품':'productType', '상품':'productType',
-  '신랑하객수':'groomGuests', '신랑 하객수':'groomGuests',
-  '신부하객수':'brideGuests', '신부 하객수':'brideGuests',
-  '기준금액':'baseAmount',
-  '얼리버드(O/X)':'earlyBird', '얼리버드':'earlyBird',
-  '얼리버드할인':'earlyBirdDiscount', '얼리버드 할인':'earlyBirdDiscount', '얼리버드할인금액':'earlyBirdDiscount',
-  '짝꿍코드(추천인, 없으면 -)':'partnerCode', '짝꿍코드(추천인)':'partnerCode',
-  '계약금':'deposit',
-  '출장비':'travelFee',
-  '계약코드':'contractCode',
-  '메모':'memo',
-};
-function parseTextToDraft(text){
-  const draft = blankRecord('contract');
-  const numFields = ['groomGuests','brideGuests','baseAmount','deposit','travelFee','earlyBirdDiscount'];
-  const extracted = {};
-  text.split(/\n/).forEach(line=>{
-    const m = line.match(/^\s*([^:：]+)[:：]\s*(.*)$/);
-    if(!m) return;
-    const label = m[1].trim();
-    const value = m[2].trim();
-    const key = PASTE_LABEL_MAP[label];
-    if(!key || !value || value==='-') return;
-    extracted[key] = value;
-  });
-  Object.keys(extracted).forEach(k=>{
-    let v = extracted[k];
-    if(k==='earlyBird'){ v = (/^O$/i.test(v) || /적용/.test(v)) && !/미적용/.test(v) ? 'O' : 'X'; }
-    draft[k] = numFields.includes(k) ? (Number(String(v).replace(/[,원]/g,''))||0) : v;
-  });
-  if(draft.productType && PRODUCT_BASE[draft.productType] && !extracted.baseAmount){
-    draft.baseAmount = PRODUCT_BASE[draft.productType];
-  }
-  if(draft.earlyBird==='O' && !extracted.earlyBirdDiscount){ draft.earlyBirdDiscount = 20000; }
-  if(draft.partnerCode && !extracted.partnerDiscount){ draft.partnerDiscount = 10000; }
-  if(!draft.contractDate){ draft.contractDate = new Date().toISOString().slice(0,10); }
-  if(!draft.contractCode && draft.clientName){
-    draft.contractCode = suggestCode(draft.clientName, draft.contractDate);
-  }
-  return draft;
-}
-function handlePasteRegister(){
-  const text = document.getElementById('pasteTextarea').value;
-  if(!text || !text.trim()){ showUploadStatus('붙여넣을 내용이 없습니다', true); return; }
-  const draft = parseTextToDraft(text);
-  if(!draft.clientName){ showUploadStatus('계약자명을 인식하지 못했습니다. 양식의 라벨(계약자명: )을 그대로 유지했는지 확인해주세요', true); return; }
-  closeUploadModal();
-  showToast('붙여넣은 내용으로 등록 화면을 채웠습니다 · 확인 후 저장해주세요');
-  openModal(null, draft);
-}
-
-function fileToBase64(file){
-  return new Promise((resolve, reject)=>{
-    const reader = new FileReader();
-    reader.onload = ()=> resolve(String(reader.result).split(',')[1] || '');
-    reader.onerror = ()=> reject(new Error('파일을 읽는 중 오류가 발생했습니다'));
-    reader.readAsDataURL(file);
-  });
-}
-
-async function analyzeContractFile(file){
-  try{
-    if(!API_KEY){
-      showUploadStatus('먼저 API 키를 입력해주세요 (위 안내 참고)', true);
-      return;
-    }
-    const base64 = await fileToBase64(file);
-    const isPdf = (file.type === 'application/pdf') || /\.pdf$/i.test(file.name||'');
-    const mediaType = file.type || (isPdf ? 'application/pdf' : 'image/jpeg');
-    const contentBlock = isPdf
-      ? { type:'document', source:{ type:'base64', media_type: mediaType, data: base64 } }
-      : { type:'image', source:{ type:'base64', media_type: mediaType, data: base64 } };
-
-    const promptText = `다음은 모먼트웍스(결혼식 축의대 접수 대행 서비스)의 공식 "축의대 대행 서비스 계약서" 문서입니다. 이 계약서는 보통 아래와 같은 구조로 되어 있습니다.
-- "계약 정보" 표: 예식일, 예식시간, 지역, 예식장, 홀명, 상담일, 계약자, 연락처, 신랑/신부 하객인원, 한측/양측/통합 구분, 기준인원, 기준금액
-- "계약금 및 결제" 표: 얼리버드 할인 적용 여부, 짝꿍코드(추천인), 계약금액, 계약금/입금일, 잔금
-- 하단 "짝꿍코드" 섹션: "본 계약 발급 짝꿍코드" (이 계약 건 자체가 다른 고객에게 추천용으로 발급한 코드)
-- 문서 맨 아래 서명란: 계약일자, 계약자 이름(신랑/신부 모두 표기될 수 있음), 연락처
-
-이 문서를 읽고 아래 JSON 스키마에 맞춰 확인 가능한 정보만 정확하게 추출해줘.
-- 계약서에서 값을 확인할 수 없는 항목은 반드시 null로 남겨줘. 절대 추측해서 값을 채우지 마.
-- "계약자" 이름 앞에 붙은 (신랑)/(신부) 같은 표시는 제외하고 이름만 추출해줘. 계약자로 명시된 사람(문서 상단 표의 "계약자" 항목)을 clientName으로 써줘. 만약 배우자(상대방) 이름도 서명란 등에 별도로 나오면 memo에 "배우자: 이름" 형태로 적어줘.
-- 날짜는 YYYY-MM-DD, 시간은 HH:MM(24시간제) 형식으로 변환해줘. contractDate는 문서 하단 서명란의 "계약일자"를 우선 쓰고, 없으면 표의 "상담일"을 써줘.
-- 지역이 "서울/서초"처럼 "시/구" 형태로 되어 있으면 뒤쪽 구/동 이름만 (예: "서초") region으로 써줘.
-- 얼리버드는 "적용"이면 "O", "미적용"이면 "X"로 써줘. 할인금액도 함께 추출해줘.
-- 짝꿍코드(추천인) 항목이 "-" 이거나 비어 있으면 partnerCode는 null로 해줘.
-- contractCode는 문서 하단 "짝꿍코드" 섹션의 "본 계약 발급 짝꿍코드" 값을 그대로 써줘(예: MWG26080326 같은 형태). 이 항목이 없으면 null로 해줘.
-- 금액은 콤마 없이 숫자만.
-- 다른 설명이나 마크다운 코드블록 없이 JSON 객체 하나만 응답해줘.
-
-스키마:
-{
- "clientName": "계약자 이름 ((신랑)/(신부) 표시 제외)",
- "phone": "연락처",
- "contractDate": "계약일자",
- "weddingDate": "예식일",
- "weddingTime": "예식시간",
- "venueName": "예식장 이름",
- "hallName": "홀명",
- "region": "지역(구/동 이름만)",
- "productType": "양측 | 한측 | 통합 중 하나",
- "groomGuests": 신랑 하객인원(숫자),
- "brideGuests": 신부 하객인원(숫자),
- "baseAmount": 기준금액(숫자),
- "earlyBird": "O 또는 X",
- "earlyBirdDiscount": 얼리버드 할인금액(숫자),
- "partnerCode": "짝꿍코드(추천인), 없으면 null",
- "deposit": 계약금(숫자),
- "contractCode": "본 계약 발급 짝꿍코드",
- "memo": "기타 특이사항 (배우자 이름, 기준인원 등)"
-}`;
-
-    if(file.size > 15*1024*1024){
-      showUploadStatus('파일 용량이 너무 큽니다(15MB 이하 권장). 사진이라면 해상도를 조금 낮춰서 다시 올려주세요.', true);
-      return;
-    }
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1500,
-        messages: [{ role:'user', content:[ contentBlock, { type:'text', text: promptText } ] }]
-      })
-    });
-    if(!response.ok){
-      let detail = '';
-      try{ const errBody = await response.json(); detail = (errBody && errBody.error && errBody.error.message) || ''; }catch(e){}
-      if(response.status===401){ throw new Error('API 키가 올바르지 않습니다. 키를 다시 확인해주세요'); }
-      throw new Error(`API 오류 ${response.status}${detail ? ' - ' + detail : ''}`);
-    }
-    const data = await response.json();
-    const textPart = (data.content||[]).map(b=> b.text || '').join('\n').trim();
-    if(!textPart){ throw new Error('모델이 빈 응답을 반환했습니다'); }
-    const jsonMatch = textPart.match(/\{[\s\S]*\}/);
-    const cleaned = jsonMatch ? jsonMatch[0] : textPart.replace(/```json|```/g,'').trim();
-    let extracted;
-    try{
-      extracted = JSON.parse(cleaned);
-    }catch(parseErr){
-      throw new Error('인식 결과를 해석하지 못했습니다 (응답: ' + textPart.slice(0,80) + (textPart.length>80?'…':'') + ')');
-    }
-    const draft = mapExtractedToDraft(extracted);
-    closeUploadModal();
-    showToast('계약서 인식이 완료되었습니다 · 내용을 확인 후 저장해주세요');
-    openModal(null, draft);
-  }catch(err){
-    console.error('계약서 분석 실패', err);
-    const reason = (err && err.message) ? err.message : '알 수 없는 오류';
-    showUploadStatus(`계약서 인식에 실패했습니다. (${reason}) 다시 시도하거나 직접 입력해주세요.`, true);
-  }
-}
-
-function mapExtractedToDraft(extracted){
-  const draft = blankRecord('contract');
-  const numFields = ['groomGuests','brideGuests','baseAmount','deposit','travelFee','earlyBirdDiscount'];
-  Object.keys(extracted || {}).forEach(k=>{
-    let v = extracted[k];
-    if(v===null || v===undefined || v==='') return;
-    if(!(k in draft)) return;
-    if(k==='partnerCode' && (String(v).trim()==='-' || String(v).trim()==='')) return;
-    if(k==='earlyBird'){ v = (String(v).trim()==='O' || /적용/.test(String(v))) && !/미적용/.test(String(v)) ? 'O' : 'X'; }
-    draft[k] = numFields.includes(k) ? (Number(v)||0) : v;
-  });
-  if(draft.productType && PRODUCT_BASE[draft.productType] && !extracted.baseAmount){
-    draft.baseAmount = PRODUCT_BASE[draft.productType];
-  }
-  if(draft.earlyBird==='O' && !extracted.earlyBirdDiscount){ draft.earlyBirdDiscount = 20000; }
-  if(draft.partnerCode && !extracted.partnerDiscount){ draft.partnerDiscount = 10000; }
-  if(!draft.contractDate){ draft.contractDate = new Date().toISOString().slice(0,10); }
-  // 계약서에 "본 계약 발급 짝꿍코드"가 명시되어 있으면 그대로 사용하고,
-  // 없을 때만 이름+계약일자 기반으로 자동 제안한다.
-  if(!draft.contractCode && draft.clientName){
-    draft.contractCode = suggestCode(draft.clientName, draft.contractDate);
-  }
-  return draft;
-}
 
 function blankRecord(type){
   return {
@@ -2032,7 +1676,6 @@ document.getElementById('deleteBtn').addEventListener('click', async ()=>{
 });
 
 loadRecords();
-loadApiKey();
 </script>
 </body>
 </html>
