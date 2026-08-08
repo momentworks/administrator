@@ -235,6 +235,19 @@ tbody tr:last-child td{border-bottom:none;}
   font-family:'Pretendard';font-weight:700;font-size:11px;padding:4px 9px;border-radius:6px;cursor:pointer;white-space:nowrap;}
 .map-btn:hover{background:var(--wine);color:#fff;}
 .map-btn.icon-only{padding:5px 7px;font-size:13px;}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.cal-weekday{background:#F3F1E9;padding:8px 4px;text-align:center;font-size:11px;font-weight:700;color:var(--ink-soft);}
+.cal-weekday.weekend{color:var(--wine);}
+.cal-cell{background:var(--paper-card);min-height:92px;padding:6px;}
+.cal-cell.other-month{background:#F7F6F0;}
+.cal-cell.other-month .cal-date{color:var(--slate);}
+.cal-cell.today{background:var(--gold-soft);}
+.cal-date{font-size:11.5px;font-weight:700;margin-bottom:4px;}
+.cal-date.weekend{color:var(--wine);}
+.cal-event{background:var(--wine);color:#fff;font-size:10px;border-radius:4px;padding:1px 5px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;}
+.cal-event.lead{background:var(--slate);}
+.cal-more{font-size:9.5px;color:var(--ink-soft);}
+@media (max-width:920px){.cal-cell{min-height:60px;padding:4px;} .cal-event{font-size:8.5px;padding:0 3px;} .cal-date{font-size:10px;}}
 .chart-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12.5px;}
 .chart-label{width:88px;flex-shrink:0;color:var(--ink-soft);text-align:right;}
 .chart-bar-track{flex:1;background:#EAE8DC;border-radius:5px;height:16px;overflow:hidden;}
@@ -275,6 +288,7 @@ a{color:var(--wine);}
   <button data-tab="list">전체 내역</button>
   <button data-tab="settlement">정산 관리</button>
   <button data-tab="referral">짝꿍코드 현황</button>
+  <button data-tab="calendar">캘린더</button>
 </div>
 
 <div class="app">
@@ -291,6 +305,14 @@ a{color:var(--wine);}
       <select id="yearSelect"></select>
     </div>
     <div class="kpi-grid" id="yearKpiGrid" style="grid-template-columns:repeat(2,1fr);margin-bottom:26px;"></div>
+
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">📅 주말 예약 가능 일정</h2>
+        <p class="section-desc">다가오는 토·일요일 기준 예약 현황이에요 · 클릭하면 상세로 이동합니다</p>
+      </div>
+    </div>
+    <div id="weekendTimetable" style="margin-bottom:26px;"></div>
 
     <div class="grid-2col" style="margin-bottom:26px;">
       <div>
@@ -399,6 +421,23 @@ a{color:var(--wine);}
     </div>
     <div class="note-box">확정 금액은 소개받은 계약 중 예식일이 D-59 이하로 임박했거나 이미 끝난 건만 반영한 금액입니다(건당 10,000원). 계약자 이름을 클릭하면 추천 내역을 펼쳐볼 수 있습니다.</div>
     <div id="referralList"></div>
+  </section>
+
+  <!-- CALENDAR -->
+  <section class="section" id="tab-calendar">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">캘린더</h2>
+        <p class="section-desc">예식 일정을 달력으로 확인하세요 (월요일 시작)</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="btn btn-sm" id="calPrevBtn">◀</button>
+        <div id="calMonthLabel" style="font-family:'Noto Serif KR',serif;font-weight:700;font-size:15px;min-width:100px;text-align:center;">-</div>
+        <button class="btn btn-sm" id="calNextBtn">▶</button>
+        <button class="btn btn-sm" id="calTodayBtn">오늘</button>
+      </div>
+    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
   </section>
 
 </div>
@@ -641,7 +680,8 @@ async function persist(){
 /* ---------- helpers ---------- */
 function todayDate(){ const d = new Date(); d.setHours(0,0,0,0); return d; }
 function fmtMoney(n){ n = Number(n)||0; return n.toLocaleString('ko-KR') + '원'; }
-function fmtDate(s){ if(!s) return '-'; const d = new Date(s); if(isNaN(d)) return s; return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`; }
+const WEEKDAY_KR = ['일','월','화','수','목','금','토'];
+function fmtDate(s){ if(!s) return '-'; const d = new Date(s); if(isNaN(d)) return s; return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}(${WEEKDAY_KR[d.getDay()]})`; }
 
 function productTypeClass(pt){
   if(pt==='양측') return 'ptype-both';
@@ -1103,18 +1143,96 @@ function renderReferral(){
 }
 
 /* ---------- master render ---------- */
+/* ---------- 주말 예약 가능 일정 ---------- */
+function renderWeekendTimetable(){
+  const contracts = RECORDS.filter(r=>r.type==='contract' && r.weddingDate);
+  let d = todayDate();
+  const weekends = [];
+  while(weekends.length<12){
+    if(d.getDay()===0 || d.getDay()===6){ weekends.push(new Date(d)); }
+    d.setDate(d.getDate()+1);
+  }
+  const el = document.getElementById('weekendTimetable');
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;">` +
+    weekends.map(wd=>{
+      const dateStr = `${wd.getFullYear()}-${String(wd.getMonth()+1).padStart(2,'0')}-${String(wd.getDate()).padStart(2,'0')}`;
+      const isSun = wd.getDay()===0;
+      const bookings = contracts.filter(r=>r.weddingDate===dateStr);
+      const available = bookings.length===0;
+      return `<div style="border:1px solid var(--line);border-radius:9px;padding:11px 12px;background:${available?'var(--sage-soft)':'var(--paper-card)'};">
+        <div style="font-size:11px;font-weight:700;color:${isSun?'var(--wine)':'var(--ink-soft)'};">${fmtDate(dateStr)}</div>
+        <div style="margin-top:6px;">
+          ${available
+            ? `<span class="badge badge-done">예약 가능</span>`
+            : bookings.map(b=>`<div style="font-size:11px;margin-bottom:2px;cursor:pointer;" data-id="${b.id}">${esc(b.weddingTime||'')} ${esc(b.clientName)}</div>`).join('') + `<span class="badge badge-pending" style="margin-top:2px;">${bookings.length}건 예약됨</span>`
+          }
+        </div>
+      </div>`;
+    }).join('') + `</div>`;
+  el.querySelectorAll('[data-id]').forEach(x=> x.addEventListener('click', ()=> openModal(x.dataset.id)));
+}
+
+/* ---------- 캘린더 ---------- */
+let calYear, calMonth;
+function initCalendarState(){
+  const t = new Date();
+  calYear = t.getFullYear();
+  calMonth = t.getMonth();
+}
+function renderCalendar(){
+  if(calYear===undefined){ initCalendarState(); }
+  const grid = document.getElementById('calendarGrid');
+  const labels = ['월','화','수','목','금','토','일'];
+  let html = labels.map((l,i)=> `<div class="cal-weekday ${i>=5?'weekend':''}">${l}</div>`).join('');
+
+  const first = new Date(calYear, calMonth, 1);
+  const startOffset = (first.getDay()+6)%7; // 월요일=0
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const prevDaysInMonth = new Date(calYear, calMonth, 0).getDate();
+  const totalCells = Math.ceil((startOffset+daysInMonth)/7)*7;
+  const t = new Date(); const todayStr = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+  const events = RECORDS.filter(r=> (r.type==='contract' && r.weddingDate) || (r.type==='lead' && r.hopeDate));
+
+  for(let i=0;i<totalCells;i++){
+    let dateNum, cellMonth=calMonth, cellYear=calYear, other=false;
+    if(i<startOffset){ dateNum = prevDaysInMonth-startOffset+i+1; cellMonth=calMonth-1; other=true; }
+    else if(i>=startOffset+daysInMonth){ dateNum = i-(startOffset+daysInMonth)+1; cellMonth=calMonth+1; other=true; }
+    else { dateNum = i-startOffset+1; }
+    let mm=cellMonth, yy=cellYear;
+    if(mm<0){ mm=11; yy--; } if(mm>11){ mm=0; yy++; }
+    const dateStr = `${yy}-${String(mm+1).padStart(2,'0')}-${String(dateNum).padStart(2,'0')}`;
+    const dow = new Date(yy,mm,dateNum).getDay();
+    const isWeekend = dow===0||dow===6;
+    const isToday = dateStr===todayStr;
+    const dayEvents = events.filter(r=> (r.weddingDate===dateStr) || (r.hopeDate===dateStr));
+    html += `<div class="cal-cell ${other?'other-month':''} ${isToday?'today':''}">
+      <div class="cal-date ${isWeekend?'weekend':''}">${dateNum}</div>
+      ${dayEvents.slice(0,3).map(r=>`<div class="cal-event ${r.type==='lead'?'lead':''}" data-id="${r.id}">${esc(r.weddingTime||'')} ${esc(r.clientName)}</div>`).join('')}
+      ${dayEvents.length>3?`<div class="cal-more">+${dayEvents.length-3}건</div>`:''}
+    </div>`;
+  }
+  grid.innerHTML = html;
+  document.getElementById('calMonthLabel').textContent = `${calYear}년 ${calMonth+1}월`;
+  grid.querySelectorAll('.cal-event').forEach(elx=> elx.addEventListener('click', ()=> openModal(elx.dataset.id)));
+}
+document.getElementById('calPrevBtn').addEventListener('click', ()=>{ if(calYear===undefined) initCalendarState(); calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); });
+document.getElementById('calNextBtn').addEventListener('click', ()=>{ if(calYear===undefined) initCalendarState(); calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); });
+document.getElementById('calTodayBtn').addEventListener('click', ()=>{ initCalendarState(); renderCalendar(); });
+
 function renderAll(){
   renderHeader();
   renderKPI();
   populateYearSelect();
   renderYearStats();
   renderAlerts();
+  renderWeekendTimetable();
   renderRibbon();
   renderRegionChart();
   renderRecentList();
   renderList();
   renderSettlement();
   renderReferral();
+  renderCalendar();
 }
 
 function esc(s){ if(s===undefined||s===null) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -1140,6 +1258,14 @@ function openImportModal(){
 function closeImportModal(){ importOverlay.classList.remove('active'); }
 
 function normHeader(s){ return String(s===null||s===undefined?'':s).replace(/\s+/g,'').trim(); }
+function normalizeEarlyBird(v){
+  if(v===null||v===undefined||v==='') return 'X';
+  if(v===true) return 'O';
+  if(v===false) return 'X';
+  const s = String(v).trim();
+  if(/^(o|y|yes|true|1|적용)$/i.test(s)) return 'O';
+  return 'X';
+}
 
 async function parseExcelFile(file){
   const buf = await file.arrayBuffer();
@@ -1212,8 +1338,8 @@ async function parseExcelFile(file){
       groomGuests: IDX.groomGuests>=0 ? toNum(row[IDX.groomGuests]) : 0,
       brideGuests: IDX.brideGuests>=0 ? toNum(row[IDX.brideGuests]) : 0,
       baseAmount: IDX.baseAmount>=0 ? toNum(row[IDX.baseAmount]) : 0,
-      earlyBird: IDX.earlyBird>=0 ? (toStr(row[IDX.earlyBird])==='O' ? 'O':'X') : 'X',
-      earlyBirdDiscount: IDX.earlyBirdDiscount>=0 ? toNum(row[IDX.earlyBirdDiscount]) : 0,
+      earlyBird: IDX.earlyBird>=0 ? normalizeEarlyBird(row[IDX.earlyBird]) : 'X',
+      earlyBirdDiscount: (IDX.earlyBirdDiscount>=0 ? toNum(row[IDX.earlyBirdDiscount]) : 0) || (normalizeEarlyBird(IDX.earlyBird>=0?row[IDX.earlyBird]:'X')==='O' ? 20000 : 0),
       partnerCode: (partnerCodeRaw==='-' ? '' : partnerCodeRaw),
       partnerDiscount: IDX.partnerDiscount>=0 ? toNum(row[IDX.partnerDiscount]) : 0,
       travelFee: IDX.travelFee>=0 ? toNum(row[IDX.travelFee]) : 0,
