@@ -279,7 +279,10 @@ a{color:var(--wine);}
     <div class="topbar-right">
       <div class="today" id="todayLabel">-</div>
       <div id="headerSummary">불러오는 중…</div>
-      <div style="margin-top:4px;"><button id="serverSettingsBtn" style="background:none;border:1px solid rgba(245,239,230,0.35);color:#F5EFE6;font-size:11px;padding:3px 9px;border-radius:999px;cursor:pointer;font-family:'Pretendard';">🔗 서버 연결</button></div>
+      <div style="margin-top:4px;display:flex;gap:6px;justify-content:flex-end;">
+        <button id="syncNowBtn" style="background:none;border:1px solid rgba(245,239,230,0.35);color:#F5EFE6;font-size:11px;padding:3px 9px;border-radius:999px;cursor:pointer;font-family:'Pretendard';">🔄 지금 동기화</button>
+        <button id="serverSettingsBtn" style="background:none;border:1px solid rgba(245,239,230,0.35);color:#F5EFE6;font-size:11px;padding:3px 9px;border-radius:999px;cursor:pointer;font-family:'Pretendard';">🔗 서버 연결</button>
+      </div>
     </div>
   </div>
 </div>
@@ -295,10 +298,19 @@ a{color:var(--wine);}
 
   <!-- DASHBOARD -->
   <section class="section active" id="tab-dashboard">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px;">
+      <button class="btn btn-sm" id="sheetSyncBtn">🔄 구글시트에서 업데이트</button>
       <button class="btn btn-primary btn-sm" id="dashboardImportBtn">📁 엑셀로 업데이트</button>
     </div>
     <div class="kpi-grid" id="kpiGrid"></div>
+
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">누적 현황</h2>
+        <p class="section-desc">지금까지의 전체 계약 진행 건수와 매출(계약금+잔금) 합계예요</p>
+      </div>
+    </div>
+    <div class="kpi-grid" id="cumulativeKpiGrid" style="grid-template-columns:repeat(2,1fr);margin-bottom:26px;"></div>
 
     <div class="section-head">
       <div>
@@ -741,6 +753,22 @@ document.getElementById('tabnav').addEventListener('click', (e)=>{
   document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
   renderAll();
 });
+
+/* ---------- 누적 현황 ---------- */
+function renderCumulativeStats(){
+  const contracts = RECORDS.filter(r=>r.type==='contract');
+  const totalRevenue = contracts.reduce((s,r)=>{ const fin = computeFinancials(r); return s + fin.deposit + fin.balance; }, 0);
+  const cards = [
+    {label:'누적 계약 진행 건수', value: contracts.length + '건', sub:'전체 기간 합계'},
+    {label:'누적 매출(계약금+잔금)', value: fmtMoney(totalRevenue), sub:`${contracts.length}건 합계`},
+  ];
+  document.getElementById('cumulativeKpiGrid').innerHTML = cards.map(k=>`
+    <div class="kpi-card accent">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`).join('');
+}
 
 /* ---------- 연도별 현황 ---------- */
 let selectedYear = null;
@@ -1237,6 +1265,7 @@ document.getElementById('calTodayBtn').addEventListener('click', ()=>{ initCalen
 function renderAll(){
   renderHeader();
   renderKPI();
+  renderCumulativeStats();
   populateYearSelect();
   renderYearStats();
   renderAlerts();
@@ -1287,6 +1316,10 @@ async function parseExcelFile(file){
   const wb = XLSX.read(buf, {type:'array', cellDates:true});
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null});
+  return parseRowsToRecords(rows);
+}
+
+function parseRowsToRecords(rows){
   const headerIdx = rows.findIndex(r => Array.isArray(r) && r.some(c => normHeader(c)==='계약자명'));
   if(headerIdx===-1){ throw new Error('"계약자명" 열을 찾을 수 없습니다. 기존 현황판과 같은 양식인지 확인해주세요.'); }
   const headerRow = rows[headerIdx];
@@ -1372,6 +1405,57 @@ async function parseExcelFile(file){
   return results;
 }
 
+const MANUAL_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1bSZC9CEqC25URN8bBbnF9qjsJubHx7em-3HqnhjDnGw/export?format=csv&gid=0';
+
+async function syncFromGoogleSheet(){
+  const btn = document.getElementById('sheetSyncBtn');
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '업데이트 중…';
+  try{
+    if(typeof XLSX === 'undefined'){ throw new Error('엑셀 처리 라이브러리를 불러오지 못했습니다'); }
+    const res = await fetch(MANUAL_SHEET_CSV_URL);
+    if(!res.ok){
+      throw new Error(`시트를 불러오지 못했습니다 (오류 ${res.status}). 구글시트 공유 설정을 "링크가 있는 모든 사용자 - 뷰어"로 바꿔주세요.`);
+    }
+    const csvText = await res.text();
+    const wb = XLSX.read(csvText, {type:'string'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null});
+    const parsed = parseRowsToRecords(rows);
+    if(parsed.length===0){ showToast('시트에서 계약 데이터를 찾지 못했습니다'); return; }
+
+    let updated=0, added=0;
+    parsed.forEach(row=>{
+      let existing = null;
+      if(row.contractCode){
+        existing = RECORDS.find(r=> r.type==='contract' && r.contractCode && r.contractCode.trim()===row.contractCode.trim());
+      }
+      if(!existing){
+        existing = RECORDS.find(r=> r.type==='contract' && r.clientName===row.clientName && r.phone===row.phone && r.weddingDate===row.weddingDate);
+      }
+      if(existing){
+        Object.assign(existing, row);
+        updated++;
+      } else {
+        const rec = blankRecord('contract');
+        Object.assign(rec, row);
+        RECORDS.push(rec);
+        added++;
+      }
+    });
+    await persist();
+    renderAll();
+    showToast(`구글시트 업데이트 완료 · 수정 ${updated}건, 신규 ${added}건`);
+  }catch(err){
+    console.error('구글시트 동기화 실패', err);
+    showToast('업데이트 실패: ' + (err.message||'알 수 없는 오류'));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
+
 function isDuplicateRecord(row){
   if(row.contractCode){
     return RECORDS.some(r=> r.type==='contract' && r.contractCode && r.contractCode.trim()===row.contractCode.trim());
@@ -1429,6 +1513,77 @@ const overlay = document.getElementById('overlay');
 document.getElementById('modalClose').addEventListener('click', closeModal);
 document.getElementById('cancelBtn').addEventListener('click', closeModal);
 overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeModal(); });
+
+/* ---------- 서버(구글시트) 연결 설정 ---------- */
+const serverOverlay = document.getElementById('serverOverlay');
+document.getElementById('serverSettingsBtn').addEventListener('click', openServerModal);
+document.getElementById('serverModalClose').addEventListener('click', closeServerModal);
+document.getElementById('serverCancelBtn').addEventListener('click', closeServerModal);
+serverOverlay.addEventListener('click', (e)=>{ if(e.target===serverOverlay) closeServerModal(); });
+
+function openServerModal(){
+  document.getElementById('serverUrlInput').value = SERVER_URL || '';
+  renderServerStatus();
+  serverOverlay.classList.add('active');
+}
+function closeServerModal(){ serverOverlay.classList.remove('active'); }
+function renderServerStatus(msg){
+  const el = document.getElementById('serverStatusRow');
+  if(msg){ el.innerHTML = msg; return; }
+  el.innerHTML = SERVER_URL
+    ? `🟢 서버에 연결되어 있어요. 이제 이 페이지를 어디서 열어도 같은 데이터를 불러옵니다.`
+    : `⚪ 아직 서버에 연결되어 있지 않아요. 지금은 이 브라우저에만 데이터가 저장됩니다.`;
+}
+document.getElementById('copyScriptBtn').addEventListener('click', async ()=>{
+  try{
+    await navigator.clipboard.writeText(document.getElementById('appsScriptCode').value);
+    showToast('스크립트가 복사되었습니다');
+  }catch(e){
+    document.getElementById('appsScriptCode').select();
+    showToast('직접 선택해서 복사해주세요');
+  }
+});
+document.getElementById('serverSaveBtn').addEventListener('click', async ()=>{
+  const url = document.getElementById('serverUrlInput').value.trim();
+  if(!url){ renderServerStatus('<span style="color:var(--coral);">웹 앱 URL을 입력해주세요</span>'); return; }
+  renderServerStatus('연결을 확인하고 있어요…');
+  try{
+    const res = await fetch(url, { method:'GET' });
+    if(!res.ok) throw new Error('응답 오류 ' + res.status);
+    await res.json();
+    await saveServerUrl(url);
+    renderServerStatus();
+    showToast('서버 연결이 완료되었습니다');
+    await loadRecords();
+  }catch(e){
+    console.error('서버 연결 확인 실패', e);
+    renderServerStatus(`<span style="color:var(--coral);">연결에 실패했습니다 (${esc(e.message||'')}). 배포 시 액세스 권한이 "모든 사용자"인지 확인해주세요.</span>`);
+  }
+});
+document.getElementById('serverDisconnectBtn').addEventListener('click', async ()=>{
+  await saveServerUrl('');
+  document.getElementById('serverUrlInput').value = '';
+  renderServerStatus();
+  showToast('서버 연결이 해제되었습니다 (이 브라우저 저장 데이터만 사용)');
+});
+
+/* ---------- 지금 동기화 (수동 업데이트) ---------- */
+document.getElementById('syncNowBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('syncNowBtn');
+  const prevText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '동기화 중…';
+  try{
+    await loadRecords();
+    showToast('최신 데이터로 동기화했습니다');
+  }catch(e){
+    console.error('동기화 실패', e);
+    showToast('동기화에 실패했습니다');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = prevText;
+  }
+});
 
 function blankRecord(type){
   return {
