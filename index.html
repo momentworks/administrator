@@ -171,6 +171,7 @@ tbody tr:last-child td{border-bottom:none;}
 .badge-lead{background:#E4E7EF;color:#3E5079;}
 .badge-done{background:var(--sage-soft);color:var(--sage);}
 .badge-pending{background:var(--coral-soft);color:var(--coral);}
+.badge-cancelled{background:#E7E5DC;color:#8A857A;text-decoration:line-through;}
 .mono{font-variant-numeric:tabular-nums;color:var(--ink-soft);font-size:12px;}
 .empty-state{padding:60px 20px;text-align:center;color:var(--ink-soft);}
 .empty-state .big{font-family:'Noto Serif KR',serif;font-size:17px;color:var(--ink);margin-bottom:6px;}
@@ -312,6 +313,7 @@ a{color:var(--wine);}
   <button data-tab="settlement">정산 관리</button>
   <button data-tab="referral">짝꿍코드 현황</button>
   <button data-tab="review">리뷰관리</button>
+  <button data-tab="cancelled">계약취소관리</button>
 </div>
 
 <div class="app">
@@ -330,7 +332,7 @@ a{color:var(--wine);}
         <p class="section-desc">지금까지의 전체 계약 진행 건수와 매출(계약금+잔금) 합계예요</p>
       </div>
     </div>
-    <div class="kpi-grid" id="cumulativeKpiGrid" style="grid-template-columns:repeat(2,1fr);margin-bottom:26px;"></div>
+    <div class="kpi-grid" id="cumulativeKpiGrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:26px;"></div>
 
     <div class="section-head">
       <div>
@@ -339,7 +341,22 @@ a{color:var(--wine);}
       </div>
       <select id="yearSelect"></select>
     </div>
-    <div class="kpi-grid" id="yearKpiGrid" style="grid-template-columns:repeat(2,1fr);margin-bottom:26px;"></div>
+    <div class="kpi-grid" id="yearKpiGrid" style="grid-template-columns:repeat(2,1fr);margin-bottom:16px;"></div>
+
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">월별 수금 현황</h2>
+        <p class="section-desc">계약금은 계약 시점에, 잔금은 예식일이 지나야 수취한 것으로 계산해요 (선택한 연도 기준)</p>
+      </div>
+    </div>
+    <div class="table-wrap" style="margin-bottom:26px;">
+      <div style="overflow-x:auto;">
+      <table id="monthlyTable">
+        <thead><tr><th>월</th><th>계약 건수</th><th>수취한 금액</th><th>수취할 금액</th><th>합계</th></tr></thead>
+        <tbody id="monthlyBody"></tbody>
+      </table>
+      </div>
+    </div>
 
     <div class="section-head">
       <div>
@@ -419,6 +436,7 @@ a{color:var(--wine);}
         <option value="contracted">계약완료</option>
         <option value="held">예식완료</option>
         <option value="settled">정산완료</option>
+        <option value="cancelled">취소</option>
       </select>
       <select id="filterRegion"><option value="">전체 지역</option></select>
       <select id="sortBy">
@@ -432,7 +450,7 @@ a{color:var(--wine);}
       <table id="listTable">
         <thead><tr>
           <th>D-DAY</th><th>단계</th><th>계약자명</th><th>연락처</th><th>계약코드</th>
-          <th>예식일자</th><th>예식시간</th><th>예식장</th><th>지역</th><th>상품</th><th>잔금</th><th>설정서</th><th>정산</th><th>길찾기</th>
+          <th>예식일자</th><th>예식시간</th><th>예식장</th><th>지역</th><th>상품</th><th>잔금</th><th>설정서</th><th>정산</th><th>계약취소</th><th>길찾기</th>
         </tr></thead>
         <tbody id="listBody"></tbody>
       </table>
@@ -506,6 +524,31 @@ a{color:var(--wine);}
       </div>
       <div class="empty-state" id="reviewEmpty" style="display:none;">
         <div class="big">등록된 계약이 없습니다</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CANCELLED -->
+  <section class="section" id="tab-cancelled">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">계약취소관리</h2>
+        <p class="section-desc">취소된 계약을 모아서 확인합니다 · 취소된 건은 대시보드·정산·리뷰·캘린더 등 다른 화면 통계에서 자동으로 제외돼요</p>
+      </div>
+    </div>
+    <div class="kpi-grid" id="cancelledKpiGrid" style="grid-template-columns:repeat(2,1fr);margin-bottom:20px;"></div>
+    <div class="table-wrap">
+      <div style="overflow-x:auto;">
+      <table id="cancelledTable">
+        <thead><tr>
+          <th>취소일자</th><th>계약자명</th><th>연락처</th><th>계약코드</th>
+          <th>원 예식일자</th><th>예식장</th><th>기준금액</th><th>계약금</th><th>취소사유</th><th></th>
+        </tr></thead>
+        <tbody id="cancelledBody"></tbody>
+      </table>
+      </div>
+      <div class="empty-state" id="cancelledEmpty" style="display:none;">
+        <div class="big">취소된 계약이 없습니다</div>
       </div>
     </div>
   </section>
@@ -749,12 +792,15 @@ function computeFinancials(r){
 
 function recordStage(r){
   if(r.type === 'lead') return 'lead';
+  if(r.cancelled) return 'cancelled';
   if(r.settlementDone) return 'settled';
   const dd = ddayInfo(r.weddingDate);
   if(dd && dd.diff < 0) return 'held';
   return 'contracted';
 }
-const STAGE_LABEL = {lead:'상담중', contracted:'계약완료', held:'예식완료', settled:'정산완료'};
+const STAGE_LABEL = {lead:'상담중', contracted:'계약완료', held:'예식완료', settled:'정산완료', cancelled:'취소'};
+function isActiveContract(r){ return r.type==='contract' && !r.cancelled; }
+function activeContracts(){ return RECORDS.filter(isActiveContract); }
 
 /* ---------- 네이버지도 길찾기 연동 ---------- */
 function openNaverMap(rec){
@@ -803,14 +849,16 @@ document.getElementById('tabnav').addEventListener('click', (e)=>{
 
 /* ---------- 누적 현황 ---------- */
 function renderCumulativeStats(){
-  const contracts = RECORDS.filter(r=>r.type==='contract');
+  const contracts = activeContracts();
+  const cancelled = RECORDS.filter(r=>r.type==='contract' && r.cancelled);
   const totalRevenue = contracts.reduce((s,r)=>{ const fin = computeFinancials(r); return s + fin.deposit + fin.balance; }, 0);
   const cards = [
-    {label:'누적 계약 진행 건수', value: contracts.length + '건', sub:'전체 기간 합계'},
-    {label:'누적 매출(계약금+잔금)', value: fmtMoney(totalRevenue), sub:`${contracts.length}건 합계`},
+    {label:'누적 계약 진행 건수', value: contracts.length + '건', sub:'전체 기간 합계 · 취소 제외', cls:'accent'},
+    {label:'누적 매출(계약금+잔금)', value: fmtMoney(totalRevenue), sub:`${contracts.length}건 합계`, cls:'accent'},
+    {label:'누적 계약취소 건수', value: cancelled.length + '건', sub: cancelled.length ? '계약취소관리 탭에서 확인' : '취소된 계약이 없습니다', cls: cancelled.length?'warn':''},
   ];
   document.getElementById('cumulativeKpiGrid').innerHTML = cards.map(k=>`
-    <div class="kpi-card accent">
+    <div class="kpi-card ${k.cls}">
       <div class="kpi-label">${k.label}</div>
       <div class="kpi-value">${k.value}</div>
       <div class="kpi-sub">${k.sub}</div>
@@ -820,7 +868,7 @@ function renderCumulativeStats(){
 /* ---------- 연도별 현황 ---------- */
 let selectedYear = null;
 function populateYearSelect(){
-  const contracts = RECORDS.filter(r=>r.type==='contract');
+  const contracts = activeContracts();
   const years = new Set();
   contracts.forEach(r=>{
     if(r.weddingDate){ const y = new Date(r.weddingDate).getFullYear(); if(!isNaN(y)) years.add(y); }
@@ -835,10 +883,10 @@ function populateYearSelect(){
 }
 function renderYearStats(){
   const year = selectedYear;
-  const contracts = RECORDS.filter(r=> r.type==='contract' && r.weddingDate && new Date(r.weddingDate).getFullYear()===year);
+  const contracts = activeContracts().filter(r=> r.weddingDate && new Date(r.weddingDate).getFullYear()===year);
   const revenue = contracts.reduce((s,r)=> s + computeFinancials(r).balance, 0);
   const cards = [
-    {label:`${year}년 전체 계약 진행 건`, value: contracts.length + '건', sub:'예식일 기준'},
+    {label:`${year}년 전체 계약 진행 건`, value: contracts.length + '건', sub:'예식일 기준 · 취소 제외'},
     {label:`${year}년 계약 매출(잔금 기준)`, value: fmtMoney(revenue), sub: `${contracts.length}건 합계`},
   ];
   document.getElementById('yearKpiGrid').innerHTML = cards.map(k=>`
@@ -847,6 +895,39 @@ function renderYearStats(){
       <div class="kpi-value">${k.value}</div>
       <div class="kpi-sub">${k.sub}</div>
     </div>`).join('');
+  renderMonthlyCollection(year);
+}
+function renderMonthlyCollection(year){
+  const contracts = activeContracts().filter(r=> r.weddingDate && new Date(r.weddingDate).getFullYear()===year);
+  const today = todayDate();
+  const months = Array.from({length:12}, ()=> ({count:0, received:0, pending:0}));
+  contracts.forEach(r=>{
+    const wd = new Date(r.weddingDate); wd.setHours(0,0,0,0);
+    const m = new Date(r.weddingDate).getMonth();
+    const fin = computeFinancials(r);
+    const held = wd.getTime() <= today.getTime();
+    months[m].count++;
+    months[m].received += fin.deposit + (held ? fin.balance : 0);
+    months[m].pending += held ? 0 : fin.balance;
+  });
+  const body = document.getElementById('monthlyBody');
+  let totalReceived=0, totalPending=0, totalCount=0;
+  body.innerHTML = months.map((mo,i)=>{
+    totalReceived += mo.received; totalPending += mo.pending; totalCount += mo.count;
+    return `<tr>
+      <td>${i+1}월</td>
+      <td class="mono">${mo.count}건</td>
+      <td class="mono">${fmtMoney(mo.received)}</td>
+      <td class="mono">${fmtMoney(mo.pending)}</td>
+      <td class="mono" style="font-weight:700;">${fmtMoney(mo.received+mo.pending)}</td>
+    </tr>`;
+  }).join('') + `<tr style="background:#F3F1E9;font-weight:700;">
+      <td>합계</td>
+      <td class="mono">${totalCount}건</td>
+      <td class="mono">${fmtMoney(totalReceived)}</td>
+      <td class="mono">${fmtMoney(totalPending)}</td>
+      <td class="mono">${fmtMoney(totalReceived+totalPending)}</td>
+    </tr>`;
 }
 document.getElementById('yearSelect').addEventListener('change', (e)=>{
   selectedYear = Number(e.target.value);
@@ -855,7 +936,7 @@ document.getElementById('yearSelect').addEventListener('change', (e)=>{
 
 /* ---------- 설정서 발송(D-30) / 제출확인(D-10) 알림 ---------- */
 function renderAlerts(){
-  const contracts = RECORDS.filter(r=>r.type==='contract' && r.weddingDate);
+  const contracts = activeContracts().filter(r=>r.weddingDate);
   const withDD = contracts.map(r=>({r, dd: ddayInfo(r.weddingDate)})).filter(x=>x.dd && x.dd.diff>=0);
 
   const sendTargets = withDD.filter(x=> x.dd.diff<=30 && x.dd.diff>10 && !x.r.settingsSentNotified).sort((a,b)=>a.dd.diff-b.dd.diff);
@@ -910,12 +991,12 @@ function renderAlerts(){
 function renderHeader(){
   const t = new Date();
   document.getElementById('todayLabel').textContent = `${t.getFullYear()}년 ${t.getMonth()+1}월 ${t.getDate()}일`;
-  const contracts = RECORDS.filter(r=>r.type==='contract');
+  const contracts = activeContracts();
   document.getElementById('headerSummary').textContent = `총 ${contracts.length}건 관리 중 · 상담 ${RECORDS.filter(r=>r.type==='lead').length}건`;
 }
 
 function renderKPI(){
-  const contracts = RECORDS.filter(r=>r.type==='contract');
+  const contracts = activeContracts();
   const now = new Date();
   const thisMonthContracts = contracts.filter(r=>{
     if(!r.contractDate) return false;
@@ -942,7 +1023,7 @@ function renderKPI(){
 
 /* ---------- ribbon ---------- */
 function renderRibbon(){
-  const contracts = RECORDS.filter(r=>r.type==='contract' && r.weddingDate);
+  const contracts = activeContracts().filter(r=>r.weddingDate);
   const upcoming = contracts
     .map(r=>({r, dd: ddayInfo(r.weddingDate)}))
     .filter(x=>x.dd && x.dd.diff>=0)
@@ -966,7 +1047,7 @@ function renderRibbon(){
 
 /* ---------- region chart ---------- */
 function renderRegionChart(){
-  const contracts = RECORDS.filter(r=>r.type==='contract');
+  const contracts = activeContracts();
   const map = {};
   contracts.forEach(r=>{ const k = r.region||'미상'; map[k]=(map[k]||0)+1; });
   const entries = Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,8);
@@ -989,7 +1070,7 @@ function renderRecentList(){
     const stage = recordStage(r);
     return `<div class="lb-item" style="cursor:pointer;" data-id="${r.id}">
       <div>
-        <div class="lb-name">${esc(r.clientName)} <span class="badge badge-${stage==='lead'?'lead':stage==='settled'?'done':stage==='held'?'pending':'normal'}" style="margin-left:6px;">${STAGE_LABEL[stage]}</span></div>
+        <div class="lb-name">${esc(r.clientName)} <span class="badge badge-${stage==='lead'?'lead':stage==='cancelled'?'cancelled':stage==='settled'?'done':stage==='held'?'pending':'normal'}" style="margin-left:6px;">${STAGE_LABEL[stage]}</span></div>
         <div class="lb-code">${esc(r.venueName||r.hallName||'')}</div>
       </div>
       <div class="lb-count" style="text-align:right;font-size:11.5px;color:var(--ink-soft);">${fmtDate(r.contractDate||r.createdAt)}</div>
@@ -1020,6 +1101,7 @@ function renderList(){
       if(!hay.includes(q)) return false;
     }
     if(stageFilter && recordStage(r)!==stageFilter) return false;
+    if(!stageFilter && r.cancelled) return false;
     if(regionFilter && r.region!==regionFilter) return false;
     return true;
   });
@@ -1047,7 +1129,7 @@ function renderList(){
       : `<span class="badge badge-normal">미정</span>`;
     return `<tr data-id="${r.id}">
       <td>${ddayBadge}</td>
-      <td><span class="badge badge-${stage==='lead'?'lead':stage==='settled'?'done':stage==='held'?'pending':'normal'}">${STAGE_LABEL[stage]}</span></td>
+      <td><span class="badge badge-${stage==='lead'?'lead':stage==='cancelled'?'cancelled':stage==='settled'?'done':stage==='held'?'pending':'normal'}">${STAGE_LABEL[stage]}</span></td>
       <td>${esc(r.clientName||'-')}</td>
       <td class="mono">${esc(r.phone||'-')}</td>
       <td class="mono">${esc(r.contractCode||'-')}</td>
@@ -1059,6 +1141,7 @@ function renderList(){
       <td class="mono">${r.type==='contract'? fmtMoney(fin.balance): '-'}</td>
       <td>${r.type==='contract' ? `<button class="badge-toggle-btn" data-settings-id="${r.id}"><span class="badge ${r.settingsSubmitted?'badge-done':'badge-pending'}">${r.settingsSubmitted?'제출완료':'미제출'}</span></button>` : '-'}</td>
       <td>${r.type==='contract' ? (r.settlementDone? '<span class="badge badge-done">완료</span>':'<span class="badge badge-pending">대기</span>') : '-'}</td>
+      <td>${r.type==='contract' ? `<button class="btn btn-sm btn-danger" data-cancel-id="${r.id}">계약취소</button>` : '-'}</td>
       <td>${r.type==='contract' && (r.venueName||r.hallName) ? `<button class="map-btn icon-only" data-map-id="${r.id}">📍</button>` : '-'}</td>
     </tr>`;
   }).join('');
@@ -1074,6 +1157,21 @@ function renderList(){
       renderAll();
     });
   });
+  body.querySelectorAll('[data-cancel-id]').forEach(btn=>{
+    btn.addEventListener('click', async (e)=>{
+      e.stopPropagation();
+      const rec = RECORDS.find(r=>r.id===btn.dataset.cancelId);
+      if(!rec) return;
+      if(!confirm(`${rec.clientName}님 계약을 취소 처리할까요?\n전체 내역에서 사라지고 '계약취소관리'로 이동합니다.`)) return;
+      const reason = prompt('취소 사유를 입력해주세요 (선택, 비워두면 나중에 추가 가능)', '') || '';
+      rec.cancelled = true;
+      rec.cancelDate = new Date().toISOString().slice(0,10);
+      rec.cancelReason = reason;
+      await persist();
+      showToast(`${rec.clientName}님 계약이 취소 처리되어 계약취소관리로 이동했습니다`);
+      renderAll();
+    });
+  });
 }
 ['searchInput','filterStage','filterRegion','sortBy'].forEach(id=>{
   document.getElementById(id).addEventListener('input', renderList);
@@ -1082,7 +1180,7 @@ function renderList(){
 
 /* ---------- settlement tab ---------- */
 function renderSettlement(){
-  const contracts = RECORDS.filter(r=>r.type==='contract' && !r.settlementDone);
+  const contracts = activeContracts().filter(r=>!r.settlementDone);
   const withDD = contracts.map(r=>({r, dd: ddayInfo(r.weddingDate)}));
   withDD.sort((a,b)=>{
     const heldA = a.dd && a.dd.diff<0, heldB = b.dd && b.dd.diff<0;
@@ -1120,7 +1218,7 @@ function renderSettlement(){
 
 /* ---------- referral tab ---------- */
 function renderReferral(){
-  const contracts = RECORDS.filter(r=>r.type==='contract');
+  const contracts = activeContracts();
   const groups = {};
   contracts.forEach(r=>{
     if(r.partnerCode && r.partnerCode.trim()){
@@ -1177,7 +1275,7 @@ function renderReferral(){
 /* ---------- 리뷰관리 ---------- */
 function reviewDiscountFor(count){ return Math.min((Number(count)||0) * 10000, 30000); }
 function renderReview(){
-  const contracts = RECORDS.filter(r=>r.type==='contract').slice().sort((a,b)=>{
+  const contracts = activeContracts().slice().sort((a,b)=>{
     if(!a.weddingDate && !b.weddingDate) return 0;
     if(!a.weddingDate) return 1;
     if(!b.weddingDate) return -1;
@@ -1228,10 +1326,63 @@ function renderReview(){
   });
 }
 
+/* ---------- 계약취소관리 ---------- */
+function renderCancelled(){
+  const cancelled = RECORDS.filter(r=>r.type==='contract' && r.cancelled)
+    .slice().sort((a,b)=> new Date(b.cancelDate||0) - new Date(a.cancelDate||0));
+
+  const thisMonthCount = cancelled.filter(r=>{
+    if(!r.cancelDate) return false;
+    const d = new Date(r.cancelDate); const now = new Date();
+    return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+  }).length;
+  document.getElementById('cancelledKpiGrid').innerHTML = `
+    <div class="kpi-card warn">
+      <div class="kpi-label">누적 취소 건수</div>
+      <div class="kpi-value">${cancelled.length}건</div>
+      <div class="kpi-sub">전체 기간 합계</div>
+    </div>
+    <div class="kpi-card warn">
+      <div class="kpi-label">이번달 취소 건수</div>
+      <div class="kpi-value">${thisMonthCount}건</div>
+      <div class="kpi-sub">계약금 환불 여부를 확인해주세요</div>
+    </div>`;
+
+  const body = document.getElementById('cancelledBody');
+  document.getElementById('cancelledEmpty').style.display = cancelled.length ? 'none':'block';
+  body.innerHTML = cancelled.map(r=>`
+    <tr data-id="${r.id}">
+      <td>${fmtDate(r.cancelDate)}</td>
+      <td>${esc(r.clientName)}</td>
+      <td class="mono">${esc(r.phone||'-')}</td>
+      <td class="mono">${esc(r.contractCode||'-')}</td>
+      <td>${fmtDate(r.weddingDate)}</td>
+      <td>${esc(r.venueName||'-')}</td>
+      <td class="mono">${fmtMoney(r.baseAmount)}</td>
+      <td class="mono">${fmtMoney(r.deposit)}</td>
+      <td style="max-width:220px;white-space:normal;">${esc(r.cancelReason||'-')}</td>
+      <td><button class="btn btn-sm" data-restore-id="${r.id}">취소 해제</button></td>
+    </tr>`).join('');
+  body.querySelectorAll('tr[data-id]').forEach(tr=> tr.addEventListener('click', (e)=>{
+    if(e.target.closest('[data-restore-id]')) return;
+    openModal(tr.dataset.id);
+  }));
+  body.querySelectorAll('[data-restore-id]').forEach(btn=> btn.addEventListener('click', async (e)=>{
+    e.stopPropagation();
+    const rec = RECORDS.find(r=>r.id===btn.dataset.restoreId);
+    if(!rec) return;
+    if(!confirm(`${rec.clientName}님 계약의 취소 상태를 해제할까요?`)) return;
+    rec.cancelled = false;
+    await persist();
+    showToast(`${rec.clientName}님 취소가 해제되었습니다`);
+    renderAll();
+  }));
+}
+
 /* ---------- master render ---------- */
 /* ---------- 주말 예약 가능 일정 ---------- */
 function renderWeekendTimetable(){
-  const contracts = RECORDS.filter(r=>r.type==='contract' && r.weddingDate);
+  const contracts = activeContracts().filter(r=>r.weddingDate);
   let d = todayDate();
   const weekends = [];
   while(weekends.length<12){
@@ -1278,7 +1429,7 @@ function populateWeekendYearSelect(){
   const sel = document.getElementById('weekendYearSelect');
   if(sel.dataset.filled) return;
   const years = new Set();
-  RECORDS.filter(r=>r.type==='contract' && r.weddingDate).forEach(r=> years.add(new Date(r.weddingDate).getFullYear()));
+  activeContracts().filter(r=>r.weddingDate).forEach(r=> years.add(new Date(r.weddingDate).getFullYear()));
   const now = new Date().getFullYear();
   years.add(now); years.add(now+1);
   const sorted = [...years].sort((a,b)=>a-b);
@@ -1286,7 +1437,7 @@ function populateWeekendYearSelect(){
   sel.dataset.filled = '1';
 }
 function renderWeekendTimetableExpanded(year){
-  const contracts = RECORDS.filter(r=>r.type==='contract' && r.weddingDate);
+  const contracts = activeContracts().filter(r=>r.weddingDate);
   let html = '';
   for(let m=0;m<12;m++){
     const daysInMonth = new Date(year, m+1, 0).getDate();
@@ -1388,6 +1539,7 @@ function renderAll(){
   renderReferral();
   renderCalendar();
   renderReview();
+  renderCancelled();
 }
 
 function esc(s){ if(s===undefined||s===null) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -1717,6 +1869,7 @@ function blankRecord(type){
     settingsSentNotified:false,
     reviewContractUrls:'',
     reviewDayUrls:'',
+    cancelled:false, cancelDate:'', cancelReason:'',
     createdAt: new Date().toISOString(),
   };
 }
@@ -1842,6 +1995,18 @@ function renderFormInner(rec){
       <div class="form-field span2"><label>메모</label><textarea id="f_memo">${esc(rec.memo||'')}</textarea></div>
     </div>
 
+    <div class="fieldset-title" style="color:var(--coral);">계약 취소</div>
+    <div class="form-grid">
+      <div class="form-field"><label>취소 여부</label>
+        <select id="f_cancelled">
+          <option value="X" ${!rec.cancelled?'selected':''}>정상 진행</option>
+          <option value="O" ${rec.cancelled?'selected':''}>취소됨</option>
+        </select>
+      </div>
+      <div class="form-field"><label>취소일자</label><input type="date" id="f_cancelDate" value="${rec.cancelDate||''}"></div>
+      <div class="form-field span2"><label>취소 사유</label><textarea id="f_cancelReason" placeholder="취소 사유, 환불 처리 메모 등">${esc(rec.cancelReason||'')}</textarea></div>
+    </div>
+
     <div class="calc-box" id="calcBox"></div>
     <div id="calcPdfWrap" style="margin-top:10px;text-align:right;display:none;">
       <button type="button" class="btn btn-sm" id="calcPdfBtn">🧾 정산내역표 PDF로 저장</button>
@@ -1946,6 +2111,9 @@ function collectFormValues(type){
     reviewDiscountDay: Number(val('f_reviewDiscountDay'))||0,
     settlementDone: val('f_settlementDone')==='O',
     settingsSubmitted: val('f_settingsSubmitted')==='O',
+    cancelled: val('f_cancelled')==='O',
+    cancelDate: val('f_cancelDate'),
+    cancelReason: val('f_cancelReason'),
     memo: val('f_memo'),
   };
 }
