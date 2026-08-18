@@ -250,20 +250,25 @@ tbody tr:last-child td{border-bottom:none;}
 .cal-more{font-size:9.5px;color:var(--ink-soft);}
 @media (max-width:920px){.cal-cell{min-height:60px;padding:4px;} .cal-event{font-size:8.5px;padding:0 3px;} .cal-date{font-size:10px;}}
 .print-only{display:none;}
-#printStatement{font-family:'Pretendard', sans-serif; color:#1a1a1a;}
-#printStatement .p-brand{font-family:'Cormorant Garamond', serif;font-style:italic;font-size:13px;letter-spacing:0.25em;color:#7A2E3A;text-transform:uppercase;margin-bottom:2px;}
-#printStatement .p-title{font-family:'Noto Serif KR', serif;font-size:22px;font-weight:700;margin:0 0 4px;}
-#printStatement .p-sub{font-size:12px;color:#666;margin-bottom:20px;}
-#printStatement .p-info{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:13px;}
-#printStatement .p-info td{padding:5px 8px;border-bottom:1px solid #eee;}
-#printStatement .p-info td.k{color:#888;width:110px;}
+#printStatement{font-family:'Pretendard', sans-serif; color:#222; max-width:680px; margin:0 auto;}
+#printStatement .p-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #222;padding-bottom:16px;margin-bottom:22px;}
+#printStatement .p-brand{font-family:'Cormorant Garamond', serif;font-style:italic;font-size:13px;letter-spacing:0.28em;color:#7A2E3A;text-transform:uppercase;margin-bottom:6px;}
+#printStatement .p-title{font-family:'Noto Serif KR', serif;font-size:26px;font-weight:700;margin:0;letter-spacing:-0.01em;}
+#printStatement .p-head-right{text-align:right;font-size:11.5px;color:#777;line-height:1.7;}
+#printStatement .p-section-label{font-size:11px;font-weight:700;letter-spacing:0.08em;color:#7A2E3A;text-transform:uppercase;margin:26px 0 8px;}
+#printStatement .p-section-label:first-of-type{margin-top:0;}
+#printStatement .p-info{width:100%;border-collapse:collapse;font-size:13px;}
+#printStatement .p-info td{padding:7px 4px;border-bottom:1px solid #E5E3DA;}
+#printStatement .p-info td.k{color:#888;width:88px;white-space:nowrap;}
 #printStatement .p-table{width:100%;border-collapse:collapse;font-size:13.5px;}
-#printStatement .p-table td{padding:8px 8px;border-bottom:1px solid #eee;}
-#printStatement .p-table td.k{color:#555;}
-#printStatement .p-table td.v{text-align:right;font-variant-numeric:tabular-nums;}
-#printStatement .p-table tr.total td{font-weight:700;font-size:15px;border-top:2px solid #333;border-bottom:none;padding-top:12px;}
-#printStatement .p-footer{margin-top:30px;font-size:11px;color:#999;text-align:center;}
+#printStatement .p-table td{padding:9px 4px;border-bottom:1px solid #E5E3DA;}
+#printStatement .p-table td.k{color:#444;}
+#printStatement .p-table td.v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+#printStatement .p-table tr.subtotal td{font-weight:700;border-top:1px solid #999;border-bottom:1px solid #E5E3DA;}
+#printStatement .p-table tr.total td{font-weight:700;font-size:18px;border-top:3px double #222;border-bottom:none;padding-top:16px;}
+#printStatement .p-footer{margin-top:36px;padding-top:14px;border-top:1px solid #E5E3DA;font-size:10.5px;color:#999;text-align:center;line-height:1.8;}
 @media print{
+  body{background:#fff !important;}
   body *{visibility:hidden;}
   #printStatement, #printStatement *{visibility:visible;}
   #printStatement{position:absolute;top:0;left:0;width:100%;padding:36px;display:block !important;}
@@ -314,6 +319,7 @@ a{color:var(--wine);}
   <button data-tab="referral">짝꿍코드 현황</button>
   <button data-tab="review">리뷰관리</button>
   <button data-tab="cancelled">계약취소관리</button>
+  <button data-tab="held">예식완료</button>
 </div>
 
 <div class="app">
@@ -325,6 +331,7 @@ a{color:var(--wine);}
       <button class="btn btn-primary btn-sm" id="dashboardImportBtn">📁 엑셀로 업데이트</button>
     </div>
     <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="kpi-grid" id="monthlyRevenueKpiGrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:26px;"></div>
 
     <div class="section-head">
       <div>
@@ -332,7 +339,8 @@ a{color:var(--wine);}
         <p class="section-desc">지금까지의 전체 계약 진행 건수와 매출(계약금+잔금) 합계예요</p>
       </div>
     </div>
-    <div class="kpi-grid" id="cumulativeKpiGrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:26px;"></div>
+    <div class="kpi-grid" id="cumulativeKpiGrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:10px;"></div>
+    <div class="kpi-grid" id="cumulativeRevenueKpiGrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:26px;"></div>
 
     <div class="section-head">
       <div>
@@ -424,7 +432,7 @@ a{color:var(--wine);}
     <div class="section-head">
       <div>
         <h2 class="section-title">전체 내역</h2>
-        <p class="section-desc">상담·계약 전 건을 검색하고 관리합니다</p>
+        <p class="section-desc">상담·계약 전 건을 검색하고 관리합니다 · 예식완료·취소 건은 자동으로 각 전용 탭으로 이동해요</p>
       </div>
       <button class="btn btn-sm" id="importExcelBtn">📁 엑셀로 가져오기</button>
     </div>
@@ -549,6 +557,31 @@ a{color:var(--wine);}
       </div>
       <div class="empty-state" id="cancelledEmpty" style="display:none;">
         <div class="big">취소된 계약이 없습니다</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HELD (예식완료) -->
+  <section class="section" id="tab-held">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">예식완료</h2>
+        <p class="section-desc">예식이 끝난 고객을 모아서 사후 관리(정산·설정서·리뷰)를 확인합니다</p>
+      </div>
+    </div>
+    <div class="kpi-grid" id="heldKpiGrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;"></div>
+    <div class="table-wrap">
+      <div style="overflow-x:auto;">
+      <table id="heldTable">
+        <thead><tr>
+          <th>예식일자</th><th>계약자명</th><th>연락처</th><th>계약코드</th><th>예식장</th>
+          <th>잔금</th><th>정산</th><th>설정서</th><th>계약후기</th><th>본식후기</th>
+        </tr></thead>
+        <tbody id="heldBody"></tbody>
+      </table>
+      </div>
+      <div class="empty-state" id="heldEmpty" style="display:none;">
+        <div class="big">예식이 완료된 고객이 없습니다</div>
       </div>
     </div>
   </section>
@@ -851,14 +884,29 @@ document.getElementById('tabnav').addEventListener('click', (e)=>{
 function renderCumulativeStats(){
   const contracts = activeContracts();
   const cancelled = RECORDS.filter(r=>r.type==='contract' && r.cancelled);
-  const totalRevenue = contracts.reduce((s,r)=>{ const fin = computeFinancials(r); return s + fin.deposit + fin.balance; }, 0);
+  const held = contracts.filter(r=>{ const dd = ddayInfo(r.weddingDate); return dd && dd.diff<0; });
+  const totalDeposit = contracts.reduce((s,r)=> s + computeFinancials(r).deposit, 0);
+  const totalBalance = contracts.reduce((s,r)=> s + computeFinancials(r).balance, 0);
+
   const cards = [
     {label:'누적 계약 진행 건수', value: contracts.length + '건', sub:'전체 기간 합계 · 취소 제외', cls:'accent'},
-    {label:'누적 매출(계약금+잔금)', value: fmtMoney(totalRevenue), sub:`${contracts.length}건 합계`, cls:'accent'},
+    {label:'누적 예식완료 건수', value: held.length + '건', sub:'예식완료 탭에서 확인 가능', cls:'accent'},
     {label:'누적 계약취소 건수', value: cancelled.length + '건', sub: cancelled.length ? '계약취소관리 탭에서 확인' : '취소된 계약이 없습니다', cls: cancelled.length?'warn':''},
   ];
   document.getElementById('cumulativeKpiGrid').innerHTML = cards.map(k=>`
     <div class="kpi-card ${k.cls}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`).join('');
+
+  const revCards = [
+    {label:'누적 계약금', value: fmtMoney(totalDeposit), sub:`${contracts.length}건 합계`},
+    {label:'누적 잔금', value: fmtMoney(totalBalance), sub:`${contracts.length}건 합계`},
+    {label:'누적 합계', value: fmtMoney(totalDeposit+totalBalance), sub:'계약금+잔금'},
+  ];
+  document.getElementById('cumulativeRevenueKpiGrid').innerHTML = revCards.map(k=>`
+    <div class="kpi-card accent">
       <div class="kpi-label">${k.label}</div>
       <div class="kpi-value">${k.value}</div>
       <div class="kpi-sub">${k.sub}</div>
@@ -1004,17 +1052,36 @@ function renderKPI(){
     return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
   });
   const upcoming = contracts.filter(r=>{ const dd = ddayInfo(r.weddingDate); return dd && dd.diff>=0; });
-  const thisMonthRevenue = thisMonthContracts.reduce((s,r)=> s + computeFinancials(r).balance, 0);
   const pendingSettlement = contracts.filter(r=> recordStage(r)==='held');
+  const thisMonthHeld = contracts.filter(r=>{
+    if(!r.weddingDate) return false;
+    const wd = new Date(r.weddingDate);
+    const dd = ddayInfo(r.weddingDate);
+    return wd.getFullYear()===now.getFullYear() && wd.getMonth()===now.getMonth() && dd && dd.diff<0;
+  });
 
   const kpis = [
     {label:'이번달 신규 계약', value: thisMonthContracts.length + '건', sub: `상담 ${RECORDS.filter(r=>r.type==='lead').length}건 진행 중`, cls:''},
     {label:'예정된 예식', value: upcoming.length + '건', sub: upcoming[0] ? `가장 임박: ${ddayInfo(upcoming.sort((a,b)=>ddayInfo(a.weddingDate).diff-ddayInfo(b.weddingDate).diff)[0].weddingDate).label}` : '-', cls:'accent'},
-    {label:'이번달 계약 매출(잔금 기준)', value: fmtMoney(thisMonthRevenue), sub: `${thisMonthContracts.length}건 합계`, cls:''},
     {label:'정산 대기', value: pendingSettlement.length + '건', sub:'예식 완료 · 정산 미완료', cls: pendingSettlement.length>0?'warn':''},
+    {label:'이번달 예식완료', value: thisMonthHeld.length + '건', sub:'예식완료 탭에서 확인 가능', cls:''},
   ];
   document.getElementById('kpiGrid').innerHTML = kpis.map(k=>`
     <div class="kpi-card ${k.cls}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`).join('');
+
+  const mDeposit = thisMonthContracts.reduce((s,r)=> s + computeFinancials(r).deposit, 0);
+  const mBalance = thisMonthContracts.reduce((s,r)=> s + computeFinancials(r).balance, 0);
+  const revCards = [
+    {label:'이번달 계약금', value: fmtMoney(mDeposit), sub:`${thisMonthContracts.length}건 합계`},
+    {label:'이번달 잔금', value: fmtMoney(mBalance), sub:`${thisMonthContracts.length}건 합계`},
+    {label:'이번달 합계', value: fmtMoney(mDeposit+mBalance), sub:'계약금+잔금'},
+  ];
+  document.getElementById('monthlyRevenueKpiGrid').innerHTML = revCards.map(k=>`
+    <div class="kpi-card accent">
       <div class="kpi-label">${k.label}</div>
       <div class="kpi-value">${k.value}</div>
       <div class="kpi-sub">${k.sub}</div>
@@ -1102,6 +1169,10 @@ function renderList(){
     }
     if(stageFilter && recordStage(r)!==stageFilter) return false;
     if(!stageFilter && r.cancelled) return false;
+    if(!stageFilter && r.type==='contract'){
+      const dd = ddayInfo(r.weddingDate);
+      if(dd && dd.diff<0) return false;
+    }
     if(regionFilter && r.region!==regionFilter) return false;
     return true;
   });
@@ -1140,7 +1211,7 @@ function renderList(){
       <td>${esc(r.productType||'-')}</td>
       <td class="mono">${r.type==='contract'? fmtMoney(fin.balance): '-'}</td>
       <td>${r.type==='contract' ? `<button class="badge-toggle-btn" data-settings-id="${r.id}"><span class="badge ${r.settingsSubmitted?'badge-done':'badge-pending'}">${r.settingsSubmitted?'제출완료':'미제출'}</span></button>` : '-'}</td>
-      <td>${r.type==='contract' ? (r.settlementDone? '<span class="badge badge-done">완료</span>':'<span class="badge badge-pending">대기</span>') : '-'}</td>
+      <td>${r.type==='contract' ? `<button class="badge-toggle-btn" data-settle-id="${r.id}"><span class="badge ${r.settlementDone?'badge-done':'badge-pending'}">${r.settlementDone?'완료':'대기'}</span></button>` : '-'}</td>
       <td>${r.type==='contract' ? `<button class="btn btn-sm btn-danger" data-cancel-id="${r.id}">계약취소</button>` : '-'}</td>
       <td>${r.type==='contract' && (r.venueName||r.hallName) ? `<button class="map-btn icon-only" data-map-id="${r.id}">📍</button>` : '-'}</td>
     </tr>`;
@@ -1154,6 +1225,17 @@ function renderList(){
       if(!rec) return;
       rec.settingsSubmitted = !rec.settingsSubmitted;
       await persist();
+      renderAll();
+    });
+  });
+  body.querySelectorAll('[data-settle-id]').forEach(btn=>{
+    btn.addEventListener('click', async (e)=>{
+      e.stopPropagation();
+      const rec = RECORDS.find(r=>r.id===btn.dataset.settleId);
+      if(!rec) return;
+      rec.settlementDone = !rec.settlementDone;
+      await persist();
+      showToast(`${rec.clientName}님 정산 ${rec.settlementDone?'완료':'대기'} 처리되었습니다`);
       renderAll();
     });
   });
@@ -1379,6 +1461,52 @@ function renderCancelled(){
   }));
 }
 
+/* ---------- 예식완료 ---------- */
+function renderHeld(){
+  const held = activeContracts().filter(r=>{
+    const dd = ddayInfo(r.weddingDate);
+    return dd && dd.diff < 0;
+  }).sort((a,b)=> new Date(b.weddingDate) - new Date(a.weddingDate));
+
+  const unsettled = held.filter(r=>!r.settlementDone).length;
+  const pendingSettings = held.filter(r=>!r.settingsSubmitted).length;
+  document.getElementById('heldKpiGrid').innerHTML = `
+    <div class="kpi-card accent">
+      <div class="kpi-label">누적 예식완료 건수</div>
+      <div class="kpi-value">${held.length}건</div>
+      <div class="kpi-sub">전체 기간 합계</div>
+    </div>
+    <div class="kpi-card ${unsettled?'warn':''}">
+      <div class="kpi-label">정산 미완료</div>
+      <div class="kpi-value">${unsettled}건</div>
+      <div class="kpi-sub">정산 관리 탭에서 처리 가능</div>
+    </div>
+    <div class="kpi-card ${pendingSettings?'warn':''}">
+      <div class="kpi-label">설정서 제출 미확인</div>
+      <div class="kpi-value">${pendingSettings}건</div>
+      <div class="kpi-sub">대시보드 알림에서 확인 가능</div>
+    </div>`;
+
+  const body = document.getElementById('heldBody');
+  document.getElementById('heldEmpty').style.display = held.length ? 'none':'block';
+  body.innerHTML = held.map(r=>{
+    const fin = computeFinancials(r);
+    return `<tr data-id="${r.id}">
+      <td>${fmtDate(r.weddingDate)}</td>
+      <td>${esc(r.clientName)}</td>
+      <td class="mono">${esc(r.phone||'-')}</td>
+      <td class="mono">${esc(r.contractCode||'-')}</td>
+      <td>${esc(r.venueName||'-')}</td>
+      <td class="mono">${fmtMoney(fin.balance)}</td>
+      <td>${r.settlementDone? '<span class="badge badge-done">완료</span>':'<span class="badge badge-pending">대기</span>'}</td>
+      <td>${r.settingsSubmitted? '<span class="badge badge-done">제출완료</span>':'<span class="badge badge-pending">미제출</span>'}</td>
+      <td>${r.reviewCountContract||0}개</td>
+      <td>${r.reviewCountDay||0}개</td>
+    </tr>`;
+  }).join('');
+  body.querySelectorAll('tr[data-id]').forEach(tr=> tr.addEventListener('click', ()=> openModal(tr.dataset.id)));
+}
+
 /* ---------- master render ---------- */
 /* ---------- 주말 예약 가능 일정 ---------- */
 function renderWeekendTimetable(){
@@ -1540,6 +1668,7 @@ function renderAll(){
   renderCalendar();
   renderReview();
   renderCancelled();
+  renderHeld();
 }
 
 function esc(s){ if(s===undefined||s===null) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -2037,17 +2166,30 @@ function renderFormInner(rec){
     const draft = collectFormValues(rec.type);
     const fin = computeFinancials(draft);
     const totalDiscount = fin.eb + fin.pd + fin.rd + fin.revC + fin.revD;
+    const afterDiscount = fin.base - totalDiscount;
     const issueDate = new Date();
     const issueDateStr = `${issueDate.getFullYear()}.${String(issueDate.getMonth()+1).padStart(2,'0')}.${String(issueDate.getDate()).padStart(2,'0')}`;
+    const statementNo = `${issueDate.getFullYear()}${String(issueDate.getMonth()+1).padStart(2,'0')}${String(issueDate.getDate()).padStart(2,'0')}-${esc(draft.contractCode||'MW')}`;
     document.getElementById('printStatement').innerHTML = `
-      <div class="p-brand">Moment Works</div>
-      <div class="p-title">정산내역서</div>
-      <div class="p-sub">발행일 ${issueDateStr}</div>
+      <div class="p-head">
+        <div>
+          <div class="p-brand">Moment Works</div>
+          <h1 class="p-title">정산내역서</h1>
+        </div>
+        <div class="p-head-right">
+          발행일 ${issueDateStr}<br>
+          문서번호 ${statementNo}
+        </div>
+      </div>
+
+      <div class="p-section-label">계약 정보</div>
       <table class="p-info">
         <tr><td class="k">계약자명</td><td>${esc(draft.clientName||rec.clientName||'-')}</td><td class="k">계약코드</td><td>${esc(draft.contractCode||'-')}</td></tr>
         <tr><td class="k">연락처</td><td>${esc(draft.phone||'-')}</td><td class="k">예식일자</td><td>${fmtDate(draft.weddingDate)} ${esc(draft.weddingTime||'')}</td></tr>
         <tr><td class="k">예식장</td><td colspan="3">${esc(draft.venueName||'-')} ${esc(draft.hallName||'')}</td></tr>
       </table>
+
+      <div class="p-section-label">정산 내역</div>
       <table class="p-table">
         <tr><td class="k">기준금액</td><td class="v">${fmtMoney(fin.base)}</td></tr>
         <tr><td class="k">얼리버드 할인</td><td class="v">− ${fmtMoney(fin.eb)}</td></tr>
@@ -2055,12 +2197,16 @@ function renderFormInner(rec){
         <tr><td class="k">추천 할인</td><td class="v">− ${fmtMoney(fin.rd)}</td></tr>
         <tr><td class="k">계약후기 할인</td><td class="v">− ${fmtMoney(fin.revC)}</td></tr>
         <tr><td class="k">본식후기 할인</td><td class="v">− ${fmtMoney(fin.revD)}</td></tr>
-        <tr><td class="k">총 할인 금액</td><td class="v">− ${fmtMoney(totalDiscount)}</td></tr>
+        <tr class="subtotal"><td class="k">할인 적용 후 금액</td><td class="v">${fmtMoney(afterDiscount)}</td></tr>
         <tr><td class="k">계약금(기납부)</td><td class="v">− ${fmtMoney(fin.deposit)}</td></tr>
         <tr><td class="k">출장비</td><td class="v">+ ${fmtMoney(fin.travel)}</td></tr>
         <tr class="total"><td class="k">최종 정산액</td><td class="v">${fmtMoney(fin.finalSettlement)}</td></tr>
       </table>
-      <div class="p-footer">MOMENT WORKS · 모먼트웍스 축의대 대행 서비스 · 본 내역서는 계약 내용을 바탕으로 자동 생성되었습니다</div>
+
+      <div class="p-footer">
+        모먼트웍스 · 결혼식 축의대 대행 서비스<br>
+        본 내역서는 계약 내용을 바탕으로 자동 생성되었습니다
+      </div>
     `;
     window.print();
   });
