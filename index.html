@@ -809,11 +809,21 @@ function suggestCode(name, contractDateStr){
   return final;
 }
 
+function confirmedReferralCountFor(contractCode){
+  if(!contractCode || !contractCode.trim()) return 0;
+  const code = contractCode.trim();
+  return RECORDS.filter(r=>{
+    if(r.type!=='contract' || r.cancelled) return false;
+    if(!r.partnerCode || r.partnerCode.trim()!==code) return false;
+    const dd = ddayInfo(r.weddingDate);
+    return dd && dd.diff<=59;
+  }).length;
+}
 function computeFinancials(r){
   const base = Number(r.baseAmount)||0;
   const eb = r.earlyBird==='O' ? ((Number(r.earlyBirdDiscount)||0) || 20000) : 0;
   const pd = (r.partnerCode && r.partnerCode.trim()) ? (Number(r.partnerDiscount)||0) : 0;
-  const rd = (Number(r.referralCountUnder60)||0) * 10000;
+  const rd = confirmedReferralCountFor(r.contractCode) * 10000;
   const revC = Number(r.reviewDiscountContract)||0;
   const deposit = Number(r.deposit)||0;
   const travel = Number(r.travelFee)||0;
@@ -2100,7 +2110,7 @@ function renderFormInner(rec){
       </div>
       <div class="form-field"><label>짝꿍코드 할인금액</label><input type="number" id="f_partnerDiscount" value="${rec.partnerDiscount||10000}"></div>
       <div class="form-field"><label>추천 횟수(전체)</label><input type="number" id="f_referralCountTotal" value="${rec.referralCountTotal||0}"></div>
-      <div class="form-field"><label>추천 횟수(D-60 미만) <span class="hint">1건당 10,000원 자동 할인</span></label><input type="number" id="f_referralCountUnder60" value="${rec.referralCountUnder60||0}"></div>
+      <div class="form-field"><label>추천 횟수(D-60 미만) <span class="hint">참고용 · 실제 할인은 짝꿍코드 현황 기준 자동 계산</span></label><input type="number" id="f_referralCountUnder60" value="${rec.referralCountUnder60||0}"></div>
       <div class="form-field"><label>계약후기 작성수</label><input type="number" id="f_reviewCountContract" value="${rec.reviewCountContract||0}"></div>
       <div class="form-field"><label>계약후기 할인금액</label><input type="number" id="f_reviewDiscountContract" value="${rec.reviewDiscountContract||0}"></div>
       <div class="form-field"><label>본식후기 작성수</label><input type="number" id="f_reviewCountDay" value="${rec.reviewCountDay||0}"></div>
@@ -2150,7 +2160,7 @@ function renderFormInner(rec){
       <div class="calc-row"><span class="lbl">기준금액</span><span>${fmtMoney(fin.base)}</span></div>
       <div class="calc-row"><span class="lbl">− 얼리버드 할인</span><span>${fmtMoney(fin.eb)}</span></div>
       <div class="calc-row"><span class="lbl">− 짝꿍코드 할인</span><span>${fmtMoney(fin.pd)}</span></div>
-      <div class="calc-row"><span class="lbl">− 추천 할인(D-60 미만 × 1만원)</span><span>${fmtMoney(fin.rd)}</span></div>
+      <div class="calc-row"><span class="lbl">− 추천 할인(짝꿍코드 현황 기준, 확정 1건당 1만원)</span><span>${fmtMoney(fin.rd)}</span></div>
       <div class="calc-row"><span class="lbl">− 계약후기 할인</span><span>${fmtMoney(fin.revC)}</span></div>
       <div class="calc-row"><span class="lbl">− 본식후기 할인</span><span>${fmtMoney(fin.revD)}</span></div>
       <div class="calc-row" style="border-top:1px dashed #C3D2C4;margin-top:4px;padding-top:6px;font-weight:700;"><span class="lbl">총 할인 금액</span><span>${fmtMoney(totalDiscount)}</span></div>
@@ -2194,7 +2204,7 @@ function renderFormInner(rec){
         <tr><td class="k">기준금액</td><td class="v">${fmtMoney(fin.base)}</td></tr>
         <tr><td class="k">얼리버드 할인</td><td class="v">− ${fmtMoney(fin.eb)}</td></tr>
         <tr><td class="k">짝꿍코드 할인</td><td class="v">− ${fmtMoney(fin.pd)}</td></tr>
-        <tr><td class="k">추천 할인</td><td class="v">− ${fmtMoney(fin.rd)}</td></tr>
+        <tr><td class="k">추천 할인(짝꿍코드 현황 기준)</td><td class="v">− ${fmtMoney(fin.rd)}</td></tr>
         <tr><td class="k">계약후기 할인</td><td class="v">− ${fmtMoney(fin.revC)}</td></tr>
         <tr><td class="k">본식후기 할인</td><td class="v">− ${fmtMoney(fin.revD)}</td></tr>
         <tr class="subtotal"><td class="k">할인 적용 후 금액</td><td class="v">${fmtMoney(afterDiscount)}</td></tr>
