@@ -349,7 +349,7 @@ a{color:var(--wine);}
       </div>
       <select id="yearSelect"></select>
     </div>
-    <div class="kpi-grid" id="yearKpiGrid" style="grid-template-columns:repeat(2,1fr);margin-bottom:16px;"></div>
+    <div class="kpi-grid" id="yearKpiGrid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:16px;"></div>
 
     <div class="section-head">
       <div>
@@ -714,8 +714,9 @@ async function loadRecords(){
       const res = await fetch(SERVER_URL, { method:'GET' });
       if(!res.ok) throw new Error('서버 응답 오류 ' + res.status);
       const json = await res.json();
-      RECORDS = Array.isArray(json) ? json : (json && json.length===0 ? [] : []);
-      // 최초 연결 시 시트가 비어있으면 기존 로컬/시드 데이터를 한 번 올려준다
+      if(!Array.isArray(json)){ throw new Error('서버 응답 형식이 올바르지 않습니다'); }
+      RECORDS = json;
+      // 최초 연결 시 시트가 정말 비어있으면(빈 배열) 기존 로컬/시드 데이터를 한 번 올려준다
       if(RECORDS.length===0){
         const local = await loadLocalRecords();
         RECORDS = local.length ? local : SEED_RECORDS.slice();
@@ -727,7 +728,7 @@ async function loadRecords(){
       return;
     }catch(e){
       console.error('서버에서 불러오기 실패, 로컬 저장 데이터로 대체합니다', e);
-      showToast('서버 연결에 실패해 로컬 저장 데이터를 불러왔습니다');
+      showToast(`⚠️ 서버에서 불러오기 실패 (${e.message||''}). 이 기기에 저장된 데이터로 표시해요.`);
     }
   }
   RECORDS = await loadLocalRecords();
@@ -743,19 +744,33 @@ async function loadLocalRecords(){
 async function persistLocalCache(){
   try{ await window.storage.set(STORAGE_KEY, JSON.stringify(RECORDS), false); }catch(e){ /* best effort */ }
 }
+async function postToServer_(){
+  const res = await fetch(SERVER_URL, {
+    method:'POST',
+    headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+    body: JSON.stringify(RECORDS)
+  });
+  if(!res.ok) throw new Error('서버 응답 오류 ' + res.status);
+  let result = null;
+  try{ result = await res.json(); }
+  catch(parseErr){ throw new Error('서버 응답을 해석하지 못했습니다'); }
+  if(!result || result.ok !== true){
+    throw new Error((result && result.error) ? result.error : '서버가 저장 실패를 반환했습니다');
+  }
+}
 async function persist(){
   await persistLocalCache();
   if(SERVER_URL){
     try{
-      const res = await fetch(SERVER_URL, {
-        method:'POST',
-        headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-        body: JSON.stringify(RECORDS)
-      });
-      if(!res.ok) throw new Error('서버 저장 오류 ' + res.status);
-    }catch(e){
-      console.error('서버 저장 실패', e);
-      showToast('⚠️ 서버 저장에 실패했습니다. 이 기기에는 저장되었어요.');
+      await postToServer_();
+    }catch(firstErr){
+      console.error('서버 저장 실패(1차), 재시도합니다', firstErr);
+      try{
+        await postToServer_();
+      }catch(e){
+        console.error('서버 저장 실패(재시도)', e);
+        showToast(`⚠️ 서버 저장에 실패했습니다. (${e.message||''}) 이 기기에는 저장됐지만, 다른 곳에서는 최신 내용이 안 보일 수 있어요. "지금 동기화"로 다시 시도해주세요.`);
+      }
     }
   }
 }
@@ -899,7 +914,7 @@ function renderCumulativeStats(){
   const totalBalance = contracts.reduce((s,r)=> s + computeFinancials(r).balance, 0);
 
   const cards = [
-    {label:'누적 계약 진행 건수', value: contracts.length + '건', sub:'전체 기간 합계 · 취소 제외', cls:'accent'},
+    {label:'누적 계약 진행 건수', value: contracts.length + '건', sub:'전체 기간 합계', cls:'accent'},
     {label:'누적 예식완료 건수', value: held.length + '건', sub:'예식완료 탭에서 확인 가능', cls:'accent'},
     {label:'누적 계약취소 건수', value: cancelled.length + '건', sub: cancelled.length ? '계약취소관리 탭에서 확인' : '취소된 계약이 없습니다', cls: cancelled.length?'warn':''},
   ];
@@ -943,9 +958,15 @@ function renderYearStats(){
   const year = selectedYear;
   const contracts = activeContracts().filter(r=> r.weddingDate && new Date(r.weddingDate).getFullYear()===year);
   const revenue = contracts.reduce((s,r)=> s + computeFinancials(r).balance, 0);
+  const depositSum = contracts.reduce((s,r)=> s + computeFinancials(r).deposit, 0);
+  const settledBalance = contracts.filter(r=>r.settlementDone).reduce((s,r)=> s + computeFinancials(r).balance, 0);
+  const pendingBalance = contracts.filter(r=>!r.settlementDone).reduce((s,r)=> s + computeFinancials(r).balance, 0);
   const cards = [
-    {label:`${year}년 전체 계약 진행 건`, value: contracts.length + '건', sub:'예식일 기준 · 취소 제외'},
+    {label:`${year}년 전체 계약 진행 건`, value: contracts.length + '건', sub:'예식일 기준'},
+    {label:`${year}년 수취 계약금`, value: fmtMoney(depositSum), sub:`${contracts.length}건 합계`},
     {label:`${year}년 계약 매출(잔금 기준)`, value: fmtMoney(revenue), sub: `${contracts.length}건 합계`},
+    {label:`${year}년 정산예정 잔금`, value: fmtMoney(pendingBalance), sub:'정산 미완료 건'},
+    {label:`${year}년 정산완료 잔금`, value: fmtMoney(settledBalance), sub:'정산 완료 건'},
   ];
   document.getElementById('yearKpiGrid').innerHTML = cards.map(k=>`
     <div class="kpi-card accent">
