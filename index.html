@@ -1340,7 +1340,9 @@ function renderReferral(){
       (groups[code] = groups[code] || []).push(r);
     }
   });
-  const entries = Object.entries(groups).sort((a,b)=> b[1].length - a[1].length);
+  const entries = Object.entries(groups)
+    .filter(([code]) => contracts.some(r=>r.contractCode===code))
+    .sort((a,b)=> b[1].length - a[1].length);
   const el = document.getElementById('referralList');
   if(entries.length===0){ el.innerHTML = '<div class="empty-state"><div class="big">아직 짝꿍코드 추천 이력이 없습니다</div>계약 등록 시 짝꿍코드를 입력하면 여기에 집계됩니다</div>'; return; }
 
