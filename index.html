@@ -320,6 +320,7 @@ a{color:var(--wine);}
   <button data-tab="review">리뷰관리</button>
   <button data-tab="cancelled">계약취소관리</button>
   <button data-tab="held">예식완료</button>
+  <button data-tab="both">양측계약</button>
 </div>
 
 <div class="app">
@@ -586,6 +587,29 @@ a{color:var(--wine);}
     </div>
   </section>
 
+  <!-- BOTH (양측계약) -->
+  <section class="section" id="tab-both">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">양측계약</h2>
+        <p class="section-desc">계약상품이 "양측"인 계약만 예식일자순으로 정리합니다</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div style="overflow-x:auto;">
+      <table id="bothTable">
+        <thead><tr>
+          <th>예식일자</th><th>예식시간</th><th>지역</th><th>예식장명</th><th>홀명</th><th>계약자명</th><th>파트너</th>
+        </tr></thead>
+        <tbody id="bothBody"></tbody>
+      </table>
+      </div>
+      <div class="empty-state" id="bothEmpty" style="display:none;">
+        <div class="big">양측 계약이 없습니다</div>
+      </div>
+    </div>
+  </section>
+
 </div>
 
 
@@ -786,6 +810,12 @@ function productTypeClass(pt){
   if(pt==='한측') return 'ptype-one';
   if(pt==='통합') return 'ptype-all';
   return 'ptype-none';
+}
+function productTypeShort(pt){
+  if(pt==='양측') return '양';
+  if(pt==='한측') return '한';
+  if(pt==='통합') return '통';
+  return '-';
 }
 function ddayInfo(weddingDateStr){
   if(!weddingDateStr) return null;
@@ -1541,6 +1571,30 @@ function renderHeld(){
   body.querySelectorAll('tr[data-id]').forEach(tr=> tr.addEventListener('click', ()=> openModal(tr.dataset.id)));
 }
 
+/* ---------- 양측계약 ---------- */
+function renderBoth(){
+  const both = activeContracts().filter(r=>r.productType==='양측')
+    .slice().sort((a,b)=>{
+      if(!a.weddingDate && !b.weddingDate) return 0;
+      if(!a.weddingDate) return 1;
+      if(!b.weddingDate) return -1;
+      return new Date(a.weddingDate) - new Date(b.weddingDate);
+    });
+  const body = document.getElementById('bothBody');
+  document.getElementById('bothEmpty').style.display = both.length ? 'none':'block';
+  body.innerHTML = both.map(r=>`
+    <tr data-id="${r.id}">
+      <td>${fmtDate(r.weddingDate)}</td>
+      <td>${esc(r.weddingTime||'-')}</td>
+      <td>${esc(r.region||'-')}</td>
+      <td>${esc(r.venueName||'-')}</td>
+      <td>${esc(r.hallName||'-')}</td>
+      <td>${esc(r.clientName)}</td>
+      <td>${esc(r.partner||'-')}</td>
+    </tr>`).join('');
+  body.querySelectorAll('tr[data-id]').forEach(tr=> tr.addEventListener('click', ()=> openModal(tr.dataset.id)));
+}
+
 /* ---------- master render ---------- */
 /* ---------- 주말 예약 가능 일정 ---------- */
 function renderWeekendTimetable(){
@@ -1563,7 +1617,7 @@ function renderWeekendTimetable(){
         <div style="margin-top:6px;">
           ${available
             ? `<span class="badge badge-done">예약 가능</span>`
-            : bookings.map(b=>`<div style="font-size:11px;margin-bottom:2px;cursor:pointer;" data-id="${b.id}">${esc(b.weddingTime||'')} ${esc(b.clientName)}</div>`).join('') + `<span class="badge badge-pending" style="margin-top:2px;">${bookings.length}건 예약됨</span>`
+            : bookings.map(b=>`<div style="font-size:11px;margin-bottom:2px;cursor:pointer;" data-id="${b.id}">${esc(b.weddingTime||'')} ${esc(b.clientName)} <span class="ticket-product ${productTypeClass(b.productType)}">${esc(b.productType||'-')}</span></div>`).join('') + `<span class="badge badge-pending" style="margin-top:2px;">${bookings.length}건 예약됨</span>`
           }
         </div>
       </div>`;
@@ -1582,7 +1636,7 @@ function weekendCardHTML(dateStr, contracts){
     <div style="margin-top:5px;">
       ${available
         ? `<span class="badge badge-done">예약 가능</span>`
-        : bookings.map(b=>`<div style="font-size:10.5px;margin-bottom:2px;cursor:pointer;" data-id="${b.id}">${esc(b.weddingTime||'')} ${esc(b.clientName)}</div>`).join('') + `<span class="badge badge-pending" style="margin-top:2px;">${bookings.length}건</span>`
+        : bookings.map(b=>`<div style="font-size:10.5px;margin-bottom:2px;cursor:pointer;" data-id="${b.id}">${esc(b.weddingTime||'')} ${esc(b.clientName)} <span class="ticket-product ${productTypeClass(b.productType)}">${esc(b.productType||'-')}</span></div>`).join('') + `<span class="badge badge-pending" style="margin-top:2px;">${bookings.length}건</span>`
       }
     </div>
   </div>`;
@@ -1657,7 +1711,7 @@ function renderCalendar(){
   const prevDaysInMonth = new Date(calYear, calMonth, 0).getDate();
   const totalCells = Math.ceil((startOffset+daysInMonth)/7)*7;
   const t = new Date(); const todayStr = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
-  const events = RECORDS.filter(r=> (r.type==='contract' && r.weddingDate) || (r.type==='lead' && r.hopeDate));
+  const events = RECORDS.filter(r=> (r.type==='contract' && r.weddingDate && !r.cancelled) || (r.type==='lead' && r.hopeDate));
 
   for(let i=0;i<totalCells;i++){
     let dateNum, cellMonth=calMonth, cellYear=calYear, other=false;
@@ -1673,7 +1727,7 @@ function renderCalendar(){
     const dayEvents = events.filter(r=> (r.weddingDate===dateStr) || (r.hopeDate===dateStr));
     html += `<div class="cal-cell ${other?'other-month':''} ${isToday?'today':''}">
       <div class="cal-date ${isWeekend?'weekend':''}">${dateNum}</div>
-      ${dayEvents.slice(0,3).map(r=>`<div class="cal-event ${r.type==='lead'?'lead':''}" data-id="${r.id}">${esc(r.weddingTime||'')} ${esc(r.clientName)}</div>`).join('')}
+      ${dayEvents.slice(0,3).map(r=>`<div class="cal-event ${r.type==='lead'?'lead':''}" data-id="${r.id}">${esc(r.weddingTime||'')} ${esc(r.clientName)}${r.type==='contract'?` (${productTypeShort(r.productType)})`:''}</div>`).join('')}
       ${dayEvents.length>3?`<div class="cal-more">+${dayEvents.length-3}건</div>`:''}
     </div>`;
   }
@@ -1703,6 +1757,7 @@ function renderAll(){
   renderReview();
   renderCancelled();
   renderHeld();
+  renderBoth();
 }
 
 function esc(s){ if(s===undefined||s===null) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
