@@ -817,6 +817,11 @@ function productTypeShort(pt){
   if(pt==='통합') return '통';
   return '-';
 }
+function dateTimeSortKey(r){
+  const d = r.weddingDate || '9999-99-99';
+  const t = r.weddingTime || '99:99';
+  return d + ' ' + t;
+}
 function ddayInfo(weddingDateStr){
   if(!weddingDateStr) return null;
   const t = todayDate();
@@ -1155,7 +1160,7 @@ function renderRibbon(){
   const upcoming = contracts
     .map(r=>({r, dd: ddayInfo(r.weddingDate)}))
     .filter(x=>x.dd && x.dd.diff>=0)
-    .sort((a,b)=>a.dd.diff-b.dd.diff);
+    .sort((a,b)=> a.dd.diff-b.dd.diff || (a.r.weddingTime||'99:99').localeCompare(b.r.weddingTime||'99:99'));
   const el = document.getElementById('ribbon');
   if(upcoming.length===0){ el.innerHTML = '<div class="empty-state" style="padding:20px;">다가오는 예식이 없습니다</div>'; return; }
   el.innerHTML = upcoming.map(({r,dd})=>`
@@ -1242,7 +1247,7 @@ function renderList(){
     rows.sort((a,b)=>{
       const da = ddayInfo(a.weddingDate), db = ddayInfo(b.weddingDate);
       if(!da && !db) return 0; if(!da) return 1; if(!db) return -1;
-      return da.diff - db.diff;
+      return da.diff - db.diff || (a.weddingTime||'99:99').localeCompare(b.weddingTime||'99:99');
     });
   } else if(sortBy==='createdDesc'){
     rows.sort((a,b)=> new Date(b.createdAt||0) - new Date(a.createdAt||0));
@@ -1329,7 +1334,7 @@ function renderSettlement(){
   withDD.sort((a,b)=>{
     const heldA = a.dd && a.dd.diff<0, heldB = b.dd && b.dd.diff<0;
     if(heldA && !heldB) return -1; if(!heldA && heldB) return 1;
-    return (a.dd?a.dd.diff:9999) - (b.dd?b.dd.diff:9999);
+    return ((a.dd?a.dd.diff:9999) - (b.dd?b.dd.diff:9999)) || (a.r.weddingTime||'99:99').localeCompare(b.r.weddingTime||'99:99');
   });
   const el = document.getElementById('settlementList');
   if(withDD.length===0){ el.innerHTML = '<div class="empty-state"><div class="big">정산 대기 건이 없습니다</div>모든 계약의 정산이 완료되었습니다</div>'; return; }
@@ -1421,12 +1426,7 @@ function renderReferral(){
 /* ---------- 리뷰관리 ---------- */
 function reviewDiscountFor(count){ return Math.min((Number(count)||0) * 10000, 30000); }
 function renderReview(){
-  const contracts = activeContracts().slice().sort((a,b)=>{
-    if(!a.weddingDate && !b.weddingDate) return 0;
-    if(!a.weddingDate) return 1;
-    if(!b.weddingDate) return -1;
-    return new Date(a.weddingDate) - new Date(b.weddingDate);
-  });
+  const contracts = activeContracts().slice().sort((a,b)=> dateTimeSortKey(a).localeCompare(dateTimeSortKey(b)));
   const body = document.getElementById('reviewBody');
   document.getElementById('reviewEmpty').style.display = contracts.length ? 'none':'block';
   body.innerHTML = contracts.map(r=>{
@@ -1530,7 +1530,7 @@ function renderHeld(){
   const held = activeContracts().filter(r=>{
     const dd = ddayInfo(r.weddingDate);
     return dd && dd.diff < 0;
-  }).sort((a,b)=> new Date(b.weddingDate) - new Date(a.weddingDate));
+  }).sort((a,b)=> dateTimeSortKey(b).localeCompare(dateTimeSortKey(a)));
 
   const unsettled = held.filter(r=>!r.settlementDone).length;
   const pendingSettings = held.filter(r=>!r.settingsSubmitted).length;
@@ -1574,12 +1574,7 @@ function renderHeld(){
 /* ---------- 양측계약 ---------- */
 function renderBoth(){
   const both = activeContracts().filter(r=>r.productType==='양측')
-    .slice().sort((a,b)=>{
-      if(!a.weddingDate && !b.weddingDate) return 0;
-      if(!a.weddingDate) return 1;
-      if(!b.weddingDate) return -1;
-      return new Date(a.weddingDate) - new Date(b.weddingDate);
-    });
+    .slice().sort((a,b)=> dateTimeSortKey(a).localeCompare(dateTimeSortKey(b)));
   const body = document.getElementById('bothBody');
   document.getElementById('bothEmpty').style.display = both.length ? 'none':'block';
   body.innerHTML = both.map(r=>`
@@ -1610,7 +1605,7 @@ function renderWeekendTimetable(){
     weekends.map(wd=>{
       const dateStr = `${wd.getFullYear()}-${String(wd.getMonth()+1).padStart(2,'0')}-${String(wd.getDate()).padStart(2,'0')}`;
       const isSun = wd.getDay()===0;
-      const bookings = contracts.filter(r=>r.weddingDate===dateStr);
+      const bookings = contracts.filter(r=>r.weddingDate===dateStr).sort((a,b)=> (a.weddingTime||'99:99').localeCompare(b.weddingTime||'99:99'));
       const available = bookings.length===0;
       return `<div style="border:1px solid var(--line);border-radius:9px;padding:11px 12px;background:${available?'var(--sage-soft)':'var(--paper-card)'};">
         <div style="font-size:11px;font-weight:700;color:${isSun?'var(--wine)':'var(--ink-soft)'};">${fmtDate(dateStr)}</div>
@@ -1629,7 +1624,7 @@ function renderWeekendTimetable(){
 function weekendCardHTML(dateStr, contracts){
   const wd = new Date(dateStr);
   const isSun = wd.getDay()===0;
-  const bookings = contracts.filter(r=>r.weddingDate===dateStr);
+  const bookings = contracts.filter(r=>r.weddingDate===dateStr).sort((a,b)=> (a.weddingTime||'99:99').localeCompare(b.weddingTime||'99:99'));
   const available = bookings.length===0;
   return `<div style="border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:${available?'var(--sage-soft)':'var(--paper-card)'};">
     <div style="font-size:10.5px;font-weight:700;color:${isSun?'var(--wine)':'var(--ink-soft)'};">${fmtDate(dateStr)}</div>
@@ -1724,7 +1719,8 @@ function renderCalendar(){
     const dow = new Date(yy,mm,dateNum).getDay();
     const isWeekend = dow===0||dow===6;
     const isToday = dateStr===todayStr;
-    const dayEvents = events.filter(r=> (r.weddingDate===dateStr) || (r.hopeDate===dateStr));
+    const dayEvents = events.filter(r=> (r.weddingDate===dateStr) || (r.hopeDate===dateStr))
+      .sort((a,b)=> (a.weddingTime||'99:99').localeCompare(b.weddingTime||'99:99'));
     html += `<div class="cal-cell ${other?'other-month':''} ${isToday?'today':''}">
       <div class="cal-date ${isWeekend?'weekend':''}">${dateNum}</div>
       ${dayEvents.slice(0,3).map(r=>`<div class="cal-event ${r.type==='lead'?'lead':''}" data-id="${r.id}">${esc(r.weddingTime||'')} ${esc(r.clientName)}${r.type==='contract'?` (${productTypeShort(r.productType)})`:''}</div>`).join('')}
