@@ -345,6 +345,14 @@ a{color:var(--wine);}
 
     <div class="section-head">
       <div>
+        <h2 class="section-title">총 인건비 현황</h2>
+        <p class="section-desc">양측행사 진행 시 지급하는 인건비 내역이에요 · 계약 상세에서 건별로 입력할 수 있어요</p>
+      </div>
+    </div>
+    <div class="kpi-grid" id="laborCostKpiGrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:26px;"></div>
+
+    <div class="section-head">
+      <div>
         <h2 class="section-title">연도별 현황</h2>
         <p class="section-desc">예식일 기준으로 연도를 선택해 진행 건수와 매출을 확인하세요</p>
       </div>
@@ -595,11 +603,12 @@ a{color:var(--wine);}
         <p class="section-desc">계약상품이 "양측"인 계약만 예식일자순으로 정리합니다</p>
       </div>
     </div>
+    <div id="bothSummary" style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;"></div>
     <div class="table-wrap">
       <div style="overflow-x:auto;">
       <table id="bothTable">
         <thead><tr>
-          <th>예식일자</th><th>예식시간</th><th>지역</th><th>예식장명</th><th>홀명</th><th>계약자명</th><th>파트너</th>
+          <th>예식일자</th><th>예식시간</th><th>지역</th><th>예식장명</th><th>홀명</th><th>계약자명</th><th>파트너</th><th>인건비</th>
         </tr></thead>
         <tbody id="bothBody"></tbody>
       </table>
@@ -966,6 +975,32 @@ function renderCumulativeStats(){
     {label:'누적 합계', value: fmtMoney(totalDeposit+totalBalance), sub:'계약금+잔금'},
   ];
   document.getElementById('cumulativeRevenueKpiGrid').innerHTML = revCards.map(k=>`
+    <div class="kpi-card accent">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`).join('');
+
+  renderLaborCostStats();
+}
+
+function renderLaborCostStats(){
+  const bothContracts = activeContracts().filter(r=>r.productType==='양측');
+  const now = new Date();
+  const thisMonth = bothContracts.filter(r=>{
+    if(!r.contractDate) return false;
+    const d = new Date(r.contractDate);
+    return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+  });
+  const thisMonthLabor = thisMonth.reduce((s,r)=> s + (Number(r.laborCost)||0), 0);
+  const totalLabor = bothContracts.reduce((s,r)=> s + (Number(r.laborCost)||0), 0);
+  const avgLabor = bothContracts.length ? Math.round(totalLabor / bothContracts.length) : 0;
+  const cards = [
+    {label:'이번달 인건비', value: fmtMoney(thisMonthLabor), sub:`${thisMonth.length}건 합계`},
+    {label:'누적 총 인건비', value: fmtMoney(totalLabor), sub:`${bothContracts.length}건 합계 · 양측행사`},
+    {label:'건당 평균 인건비', value: fmtMoney(avgLabor), sub:'양측행사 기준'},
+  ];
+  document.getElementById('laborCostKpiGrid').innerHTML = cards.map(k=>`
     <div class="kpi-card accent">
       <div class="kpi-label">${k.label}</div>
       <div class="kpi-value">${k.value}</div>
@@ -1575,6 +1610,8 @@ function renderHeld(){
 function renderBoth(){
   const both = activeContracts().filter(r=>r.productType==='양측')
     .slice().sort((a,b)=> dateTimeSortKey(a).localeCompare(dateTimeSortKey(b)));
+  const totalLabor = both.reduce((s,r)=> s + (Number(r.laborCost)||0), 0);
+  document.getElementById('bothSummary').innerHTML = `양측계약 ${both.length}건 · 총 인건비 합계 ${fmtMoney(totalLabor)}`;
   const body = document.getElementById('bothBody');
   document.getElementById('bothEmpty').style.display = both.length ? 'none':'block';
   body.innerHTML = both.map(r=>`
@@ -1586,6 +1623,7 @@ function renderBoth(){
       <td>${esc(r.hallName||'-')}</td>
       <td>${esc(r.clientName)}</td>
       <td>${esc(r.partner||'-')}</td>
+      <td class="mono">${fmtMoney(r.laborCost)}</td>
     </tr>`).join('');
   body.querySelectorAll('tr[data-id]').forEach(tr=> tr.addEventListener('click', ()=> openModal(tr.dataset.id)));
 }
@@ -2085,6 +2123,7 @@ function blankRecord(type){
     reviewDayUrls:'',
     cancelled:false, cancelDate:'', cancelReason:'',
     partner:'',
+    laborCost:0,
     createdAt: new Date().toISOString(),
   };
 }
@@ -2166,6 +2205,7 @@ function renderFormInner(rec){
         </select>
       </div>
       <div class="form-field"><label>파트너 <span class="hint">양측일 때 함께 운영할 업체/담당자</span></label><input id="f_partner" value="${esc(rec.partner||'')}" placeholder="예: OO웨딩·홍길동"></div>
+      <div class="form-field"><label>인건비 <span class="hint">양측행사 시 지급하는 인건비</span></label><input type="number" id="f_laborCost" value="${rec.laborCost||0}"></div>
       <div class="form-field"><label>신랑 하객수</label><input type="number" id="f_groomGuests" value="${rec.groomGuests||0}"></div>
       <div class="form-field"><label>신부 하객수</label><input type="number" id="f_brideGuests" value="${rec.brideGuests||0}"></div>
     </div>
@@ -2333,6 +2373,7 @@ function collectFormValues(type){
     venueName: val('f_venueName'), hallName: val('f_hallName'), region: val('f_region'),
     productType: val('f_productType'),
     partner: val('f_partner'),
+    laborCost: Number(val('f_laborCost'))||0,
     groomGuests: Number(val('f_groomGuests'))||0, brideGuests: Number(val('f_brideGuests'))||0,
     baseAmount: Number(val('f_baseAmount'))||0, travelFee: Number(val('f_travelFee'))||0,
     earlyBird: val('f_earlyBird'), deposit: Number(val('f_deposit'))||0,
