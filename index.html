@@ -721,6 +721,19 @@ let SERVER_URL = '';
 let RECORDS = [];
 let editingId = null;
 let currentType = 'contract'; // lead | contract, for the modal form
+let dirtyKeys = new Set();
+let deletedKeys = new Set();
+
+function recordKey(r){
+  if(!r) return '';
+  if(r.type==='contract'){
+    if(r.contractCode && r.contractCode.trim()) return 'C:'+r.contractCode.trim();
+    if(r.clientName && r.weddingDate) return 'N:'+String(r.clientName).trim()+'|'+String(r.weddingDate).trim();
+  }
+  return 'ID:'+r.id;
+}
+function markDirty(rec){ if(rec) dirtyKeys.add(recordKey(rec)); }
+function markDeleted(rec){ if(rec){ deletedKeys.add(recordKey(rec)); dirtyKeys.delete(recordKey(rec)); } }
 
 async function loadServerUrl(){
   try{
@@ -747,12 +760,15 @@ async function loadRecords(){
       const res = await fetch(SERVER_URL, { method:'GET' });
       if(!res.ok) throw new Error('서버 응답 오류 ' + res.status);
       const json = await res.json();
-      if(!Array.isArray(json)){ throw new Error('서버 응답 형식이 올바르지 않습니다'); }
+      if(!Array.isArray(json)){
+        throw new Error((json && json.error) ? json.error : '서버 응답 형식이 올바르지 않습니다');
+      }
       RECORDS = json;
       // 최초 연결 시 시트가 정말 비어있으면(빈 배열) 기존 로컬/시드 데이터를 한 번 올려준다
       if(RECORDS.length===0){
         const local = await loadLocalRecords();
         RECORDS = local.length ? local : SEED_RECORDS.slice();
+        RECORDS.forEach(markDirty); // 최초 업로드이므로 전체를 반영 대상으로 표시
         await persist();
       } else {
         await persistLocalCache();
@@ -777,29 +793,56 @@ async function loadLocalRecords(){
 async function persistLocalCache(){
   try{ await window.storage.set(STORAGE_KEY, JSON.stringify(RECORDS), false); }catch(e){ /* best effort */ }
 }
-async function postToServer_(){
-  const res = await fetch(SERVER_URL, {
+
+/* 저장 방식: 저장 직전 서버의 "지금" 상태를 다시 받아온 뒤,
+   이번 세션에서 실제로 편집/삭제한 항목만 그 위에 반영해서 다시 저장한다.
+   -> 다른 탭이나 시트 직접 수정으로 바뀐 내용을 통째로 덮어써서
+      지워버리는 문제를 구조적으로 막는다. */
+async function syncMergeAndPost_(){
+  const getRes = await fetch(SERVER_URL, { method:'GET' });
+  if(!getRes.ok) throw new Error('서버 응답 오류 ' + getRes.status);
+  const fresh = await getRes.json();
+  if(!Array.isArray(fresh)) throw new Error('서버 응답 형식이 올바르지 않습니다');
+
+  const byKey = new Map();
+  fresh.forEach(r=> byKey.set(recordKey(r), r));
+  const localByKey = new Map();
+  RECORDS.forEach(r=> localByKey.set(recordKey(r), r));
+
+  dirtyKeys.forEach(k=>{
+    if(localByKey.has(k)) byKey.set(k, localByKey.get(k));
+  });
+  deletedKeys.forEach(k=> byKey.delete(k));
+
+  const merged = Array.from(byKey.values());
+
+  const postRes = await fetch(SERVER_URL, {
     method:'POST',
     headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-    body: JSON.stringify(RECORDS)
+    body: JSON.stringify(merged)
   });
-  if(!res.ok) throw new Error('서버 응답 오류 ' + res.status);
+  if(!postRes.ok) throw new Error('서버 응답 오류 ' + postRes.status);
   let result = null;
-  try{ result = await res.json(); }
+  try{ result = await postRes.json(); }
   catch(parseErr){ throw new Error('서버 응답을 해석하지 못했습니다'); }
   if(!result || result.ok !== true){
     throw new Error((result && result.error) ? result.error : '서버가 저장 실패를 반환했습니다');
   }
+
+  RECORDS = merged;
+  dirtyKeys.clear();
+  deletedKeys.clear();
+  await persistLocalCache();
 }
 async function persist(){
   await persistLocalCache();
   if(SERVER_URL){
     try{
-      await postToServer_();
+      await syncMergeAndPost_();
     }catch(firstErr){
       console.error('서버 저장 실패(1차), 재시도합니다', firstErr);
       try{
-        await postToServer_();
+        await syncMergeAndPost_();
       }catch(e){
         console.error('서버 저장 실패(재시도)', e);
         showToast(`⚠️ 서버 저장에 실패했습니다. (${e.message||''}) 이 기기에는 저장됐지만, 다른 곳에서는 최신 내용이 안 보일 수 있어요. "지금 동기화"로 다시 시도해주세요.`);
@@ -1108,6 +1151,7 @@ function renderAlerts(){
     const rec = RECORDS.find(r=>r.id===btn.dataset.sentId);
     if(!rec) return;
     rec.settingsSentNotified = true;
+    markDirty(rec);
     await persist();
     showToast(`${rec.clientName}님 발송 알림 완료 · 제출확인 알림으로 이동했습니다`);
     renderAll();
@@ -1130,6 +1174,7 @@ function renderAlerts(){
     const rec = RECORDS.find(r=>r.id===btn.dataset.confirmId);
     if(!rec) return;
     rec.settingsSubmitted = true;
+    markDirty(rec);
     await persist();
     showToast(`${rec.clientName}님 설정서 제출확인 처리 완료`);
     renderAll();
@@ -1326,6 +1371,7 @@ function renderList(){
       const rec = RECORDS.find(r=>r.id===btn.dataset.settingsId);
       if(!rec) return;
       rec.settingsSubmitted = !rec.settingsSubmitted;
+      markDirty(rec);
       await persist();
       renderAll();
     });
@@ -1336,6 +1382,7 @@ function renderList(){
       const rec = RECORDS.find(r=>r.id===btn.dataset.settleId);
       if(!rec) return;
       rec.settlementDone = !rec.settlementDone;
+      markDirty(rec);
       await persist();
       showToast(`${rec.clientName}님 정산 ${rec.settlementDone?'완료':'대기'} 처리되었습니다`);
       renderAll();
@@ -1351,6 +1398,7 @@ function renderList(){
       rec.cancelled = true;
       rec.cancelDate = new Date().toISOString().slice(0,10);
       rec.cancelReason = reason;
+      markDirty(rec);
       await persist();
       showToast(`${rec.clientName}님 계약이 취소 처리되어 계약취소관리로 이동했습니다`);
       renderAll();
@@ -1394,6 +1442,7 @@ function renderSettlement(){
     e.stopPropagation();
     const rec = RECORDS.find(r=>r.id===b.dataset.id);
     rec.settlementDone = true;
+    markDirty(rec);
     await persist();
     showToast(`${rec.clientName}님 정산 처리 완료`);
     renderAll();
@@ -1491,6 +1540,7 @@ function renderReview(){
         rec.reviewCountDay = count;
         rec.reviewDiscountDay = reviewDiscountFor(count);
       }
+      markDirty(rec);
       await persist();
       renderAll();
       showToast(`${rec.clientName}님 후기 건수가 저장되었습니다`);
@@ -1502,6 +1552,7 @@ function renderReview(){
       if(!rec) return;
       if(ta.dataset.reviewKind==='contract'){ rec.reviewContractUrls = ta.value; }
       else { rec.reviewDayUrls = ta.value; }
+      markDirty(rec);
       await persist();
     });
   });
@@ -1554,6 +1605,7 @@ function renderCancelled(){
     if(!rec) return;
     if(!confirm(`${rec.clientName}님 계약의 취소 상태를 해제할까요?`)) return;
     rec.cancelled = false;
+    markDirty(rec);
     await persist();
     showToast(`${rec.clientName}님 취소가 해제되었습니다`);
     renderAll();
@@ -1951,11 +2003,13 @@ async function syncFromGoogleSheet(){
       }
       if(existing){
         Object.assign(existing, row);
+        markDirty(existing);
         updated++;
       } else {
         const rec = blankRecord('contract');
         Object.assign(rec, row);
         RECORDS.push(rec);
+        markDirty(rec);
         added++;
       }
     });
@@ -2013,6 +2067,7 @@ document.getElementById('importConfirmBtn').addEventListener('click', async ()=>
     const rec = blankRecord('contract');
     Object.assign(rec, row);
     RECORDS.push(rec);
+    markDirty(rec);
   });
   await persist();
   const count = importNewRows.length;
@@ -2403,10 +2458,12 @@ document.getElementById('saveBtn').addEventListener('click', async ()=>{
   if(editingId){
     const idx = RECORDS.findIndex(r=>r.id===editingId);
     RECORDS[idx] = Object.assign({}, RECORDS[idx], values, {type});
+    markDirty(RECORDS[idx]);
   } else {
     const rec = blankRecord(type);
     Object.assign(rec, values, {type});
     RECORDS.push(rec);
+    markDirty(rec);
   }
   await persist();
   closeModal();
@@ -2417,6 +2474,8 @@ document.getElementById('saveBtn').addEventListener('click', async ()=>{
 document.getElementById('deleteBtn').addEventListener('click', async ()=>{
   if(!editingId) return;
   if(!confirm('이 내역을 삭제할까요? 되돌릴 수 없습니다.')) return;
+  const target = RECORDS.find(r=>r.id===editingId);
+  markDeleted(target);
   RECORDS = RECORDS.filter(r=>r.id!==editingId);
   await persist();
   closeModal();
