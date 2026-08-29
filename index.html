@@ -525,7 +525,7 @@ a{color:var(--wine);}
     <div class="section-head">
       <div>
         <h2 class="section-title">리뷰관리</h2>
-        <p class="section-desc">계약자별 계약후기·본식후기 작성여부와 URL을 관리합니다 · 후기는 각 유형당 최대 3개, 최대 30,000원까지 할인 반영돼요</p>
+        <p class="section-desc">계약자별 계약후기·본식후기 작성여부와 URL을 관리합니다 · 후기는 각 유형당 최대 3개, 최대 30,000원까지 할인 반영돼요 · 예식완료 건은 "예식완료" 탭에서 관리해요</p>
       </div>
     </div>
     <div class="table-wrap">
@@ -1510,7 +1510,10 @@ function renderReferral(){
 /* ---------- 리뷰관리 ---------- */
 function reviewDiscountFor(count){ return Math.min((Number(count)||0) * 10000, 30000); }
 function renderReview(){
-  const contracts = activeContracts().slice().sort((a,b)=> dateTimeSortKey(a).localeCompare(dateTimeSortKey(b)));
+  const contracts = activeContracts().filter(r=>{
+    const dd = ddayInfo(r.weddingDate);
+    return !(dd && dd.diff<0);
+  }).sort((a,b)=> dateTimeSortKey(a).localeCompare(dateTimeSortKey(b)));
   const body = document.getElementById('reviewBody');
   document.getElementById('reviewEmpty').style.display = contracts.length ? 'none':'block';
   body.innerHTML = contracts.map(r=>{
