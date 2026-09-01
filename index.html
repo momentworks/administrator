@@ -345,11 +345,11 @@ a{color:var(--wine);}
 
     <div class="section-head">
       <div>
-        <h2 class="section-title">총 인건비 현황</h2>
-        <p class="section-desc">양측행사 진행 시 지급하는 인건비 내역이에요 · 계약 상세에서 건별로 입력할 수 있어요</p>
+        <h2 class="section-title">인건비 현황</h2>
+        <p class="section-desc">파트너와 함께 진행한 예식의 인건비 지급 내역이에요 · 월별 내역은 아래 "월별 수금 현황" 표에 함께 나와요</p>
       </div>
     </div>
-    <div class="kpi-grid" id="laborCostKpiGrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:26px;"></div>
+    <div class="kpi-grid" id="laborCostKpiGrid" style="grid-template-columns:repeat(2,1fr);margin-bottom:26px;"></div>
 
     <div class="section-head">
       <div>
@@ -369,7 +369,7 @@ a{color:var(--wine);}
     <div class="table-wrap" style="margin-bottom:26px;">
       <div style="overflow-x:auto;">
       <table id="monthlyTable">
-        <thead><tr><th>월</th><th>계약 건수</th><th>수취한 금액</th><th>수취할 금액</th><th>합계</th></tr></thead>
+        <thead><tr><th>월</th><th>계약 건수</th><th>수취한 금액</th><th>수취할 금액</th><th>합계</th><th>지급 인건비</th></tr></thead>
         <tbody id="monthlyBody"></tbody>
       </table>
       </div>
@@ -1023,25 +1023,14 @@ function renderCumulativeStats(){
       <div class="kpi-value">${k.value}</div>
       <div class="kpi-sub">${k.sub}</div>
     </div>`).join('');
-
-  renderLaborCostStats();
 }
 
 function renderLaborCostStats(){
-  const bothContracts = activeContracts().filter(r=>r.productType==='양측');
-  const now = new Date();
-  const thisMonth = bothContracts.filter(r=>{
-    if(!r.contractDate) return false;
-    const d = new Date(r.contractDate);
-    return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
-  });
-  const thisMonthLabor = thisMonth.reduce((s,r)=> s + (Number(r.laborCost)||0), 0);
-  const totalLabor = bothContracts.reduce((s,r)=> s + (Number(r.laborCost)||0), 0);
-  const avgLabor = bothContracts.length ? Math.round(totalLabor / bothContracts.length) : 0;
+  const partnerContracts = activeContracts().filter(r=> r.partner && r.partner.trim());
+  const totalLabor = partnerContracts.reduce((s,r)=> s + (Number(r.laborCost)||0), 0);
   const cards = [
-    {label:'이번달 인건비', value: fmtMoney(thisMonthLabor), sub:`${thisMonth.length}건 합계`},
-    {label:'누적 총 인건비', value: fmtMoney(totalLabor), sub:`${bothContracts.length}건 합계 · 양측행사`},
-    {label:'건당 평균 인건비', value: fmtMoney(avgLabor), sub:'양측행사 기준'},
+    {label:'파트너와 함께한 예식 건', value: partnerContracts.length + '건', sub:'전체 기간 합계'},
+    {label:'총 누적 인건비', value: fmtMoney(totalLabor), sub:`${partnerContracts.length}건 합계`},
   ];
   document.getElementById('laborCostKpiGrid').innerHTML = cards.map(k=>`
     <div class="kpi-card accent">
@@ -1092,7 +1081,7 @@ function renderYearStats(){
 function renderMonthlyCollection(year){
   const contracts = activeContracts().filter(r=> r.weddingDate && new Date(r.weddingDate).getFullYear()===year);
   const today = todayDate();
-  const months = Array.from({length:12}, ()=> ({count:0, received:0, pending:0}));
+  const months = Array.from({length:12}, ()=> ({count:0, received:0, pending:0, labor:0}));
   contracts.forEach(r=>{
     const wd = new Date(r.weddingDate); wd.setHours(0,0,0,0);
     const m = new Date(r.weddingDate).getMonth();
@@ -1101,17 +1090,19 @@ function renderMonthlyCollection(year){
     months[m].count++;
     months[m].received += fin.deposit + (held ? fin.balance : 0);
     months[m].pending += held ? 0 : fin.balance;
+    if(r.partner && r.partner.trim()){ months[m].labor += Number(r.laborCost)||0; }
   });
   const body = document.getElementById('monthlyBody');
-  let totalReceived=0, totalPending=0, totalCount=0;
+  let totalReceived=0, totalPending=0, totalCount=0, totalLabor=0;
   body.innerHTML = months.map((mo,i)=>{
-    totalReceived += mo.received; totalPending += mo.pending; totalCount += mo.count;
+    totalReceived += mo.received; totalPending += mo.pending; totalCount += mo.count; totalLabor += mo.labor;
     return `<tr>
       <td>${i+1}월</td>
       <td class="mono">${mo.count}건</td>
       <td class="mono">${fmtMoney(mo.received)}</td>
       <td class="mono">${fmtMoney(mo.pending)}</td>
       <td class="mono" style="font-weight:700;">${fmtMoney(mo.received+mo.pending)}</td>
+      <td class="mono">${fmtMoney(mo.labor)}</td>
     </tr>`;
   }).join('') + `<tr style="background:#F3F1E9;font-weight:700;">
       <td>합계</td>
@@ -1119,6 +1110,7 @@ function renderMonthlyCollection(year){
       <td class="mono">${fmtMoney(totalReceived)}</td>
       <td class="mono">${fmtMoney(totalPending)}</td>
       <td class="mono">${fmtMoney(totalReceived+totalPending)}</td>
+      <td class="mono">${fmtMoney(totalLabor)}</td>
     </tr>`;
 }
 document.getElementById('yearSelect').addEventListener('change', (e)=>{
@@ -1834,6 +1826,7 @@ function renderAll(){
   renderCumulativeStats();
   populateYearSelect();
   renderYearStats();
+  renderLaborCostStats();
   renderAlerts();
   renderWeekendTimetable();
   renderRibbon();
