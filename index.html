@@ -363,13 +363,13 @@ a{color:var(--wine);}
     <div class="section-head">
       <div>
         <h2 class="section-title">월별 수금 현황</h2>
-        <p class="section-desc">계약금은 계약 시점에, 잔금은 예식일이 지나야 수취한 것으로 계산해요 (선택한 연도 기준)</p>
+        <p class="section-desc">계약금은 계약일자 기준, 잔금은 예식일이 지나야 수취한 것으로 계산해요 (선택한 연도 기준)</p>
       </div>
     </div>
     <div class="table-wrap" style="margin-bottom:26px;">
       <div style="overflow-x:auto;">
       <table id="monthlyTable">
-        <thead><tr><th>월</th><th>계약 건수</th><th>수취한 금액</th><th>수취할 금액</th><th>합계</th><th>지급 인건비</th></tr></thead>
+        <thead><tr><th>월</th><th>계약 건수</th><th>수취한 금액</th><th>수취할 금액</th><th>지급 인건비</th><th>순수익</th></tr></thead>
         <tbody id="monthlyBody"></tbody>
       </table>
       </div>
@@ -1079,38 +1079,50 @@ function renderYearStats(){
   renderMonthlyCollection(year);
 }
 function renderMonthlyCollection(year){
-  const contracts = activeContracts().filter(r=> r.weddingDate && new Date(r.weddingDate).getFullYear()===year);
+  const weddingContracts = activeContracts().filter(r=> r.weddingDate && new Date(r.weddingDate).getFullYear()===year);
+  const depositContracts = activeContracts().filter(r=> r.contractDate && new Date(r.contractDate).getFullYear()===year);
   const today = todayDate();
-  const months = Array.from({length:12}, ()=> ({count:0, received:0, pending:0, labor:0}));
-  contracts.forEach(r=>{
+  const months = Array.from({length:12}, ()=> ({count:0, depositReceived:0, balanceReceived:0, pending:0, labor:0}));
+
+  // 계약금: 계약일자 기준으로 그 달에 귀속
+  depositContracts.forEach(r=>{
+    const m = new Date(r.contractDate).getMonth();
+    months[m].depositReceived += computeFinancials(r).deposit;
+  });
+
+  // 예식 건수 · 잔금(수취/수취예정) · 인건비: 예식일자 기준
+  weddingContracts.forEach(r=>{
     const wd = new Date(r.weddingDate); wd.setHours(0,0,0,0);
     const m = new Date(r.weddingDate).getMonth();
     const fin = computeFinancials(r);
     const held = wd.getTime() <= today.getTime();
     months[m].count++;
-    months[m].received += fin.deposit + (held ? fin.balance : 0);
+    months[m].balanceReceived += held ? fin.balance : 0;
     months[m].pending += held ? 0 : fin.balance;
     if(r.partner && r.partner.trim()){ months[m].labor += Number(r.laborCost)||0; }
   });
+
   const body = document.getElementById('monthlyBody');
   let totalReceived=0, totalPending=0, totalCount=0, totalLabor=0;
   body.innerHTML = months.map((mo,i)=>{
-    totalReceived += mo.received; totalPending += mo.pending; totalCount += mo.count; totalLabor += mo.labor;
+    const received = mo.depositReceived + mo.balanceReceived;
+    totalReceived += received; totalPending += mo.pending; totalCount += mo.count; totalLabor += mo.labor;
+    const net = received + mo.pending - mo.labor;
     return `<tr>
       <td>${i+1}월</td>
       <td class="mono">${mo.count}건</td>
-      <td class="mono">${fmtMoney(mo.received)}</td>
+      <td class="mono">${fmtMoney(received)}</td>
       <td class="mono">${fmtMoney(mo.pending)}</td>
-      <td class="mono" style="font-weight:700;">${fmtMoney(mo.received+mo.pending)}</td>
       <td class="mono">${fmtMoney(mo.labor)}</td>
+      <td class="mono" style="font-weight:700;">${fmtMoney(net)}</td>
     </tr>`;
   }).join('') + `<tr style="background:#F3F1E9;font-weight:700;">
       <td>합계</td>
       <td class="mono">${totalCount}건</td>
       <td class="mono">${fmtMoney(totalReceived)}</td>
       <td class="mono">${fmtMoney(totalPending)}</td>
-      <td class="mono">${fmtMoney(totalReceived+totalPending)}</td>
       <td class="mono">${fmtMoney(totalLabor)}</td>
+      <td class="mono">${fmtMoney(totalReceived+totalPending-totalLabor)}</td>
     </tr>`;
 }
 document.getElementById('yearSelect').addEventListener('change', (e)=>{
