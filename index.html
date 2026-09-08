@@ -294,6 +294,25 @@ a{color:var(--wine);}
 </head>
 <body>
 
+<div id="loginOverlay" style="position:fixed;inset:0;z-index:500;background:linear-gradient(135deg, var(--wine-deep), var(--wine) 70%);display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--paper-card);border-radius:16px;padding:36px 32px;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <p style="font-family:'Cormorant Garamond', serif;font-style:italic;font-size:13px;letter-spacing:0.28em;color:var(--wine);text-transform:uppercase;margin:0 0 4px;text-align:center;">Moment Works</p>
+    <h1 style="font-family:'Noto Serif KR', serif;font-size:19px;font-weight:700;margin:0 0 24px;text-align:center;">통합 관리 시스템 로그인</h1>
+    <form id="loginForm">
+      <div class="form-field" style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-soft);">아이디</label>
+        <input type="text" id="loginIdInput" autocomplete="username" style="width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:7px;padding:9px 11px;font-family:'Pretendard';font-size:14px;margin-top:5px;">
+      </div>
+      <div class="form-field" style="margin-bottom:16px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-soft);">비밀번호</label>
+        <input type="password" id="loginPwInput" autocomplete="current-password" style="width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:7px;padding:9px 11px;font-family:'Pretendard';font-size:14px;margin-top:5px;">
+      </div>
+      <div id="loginError" style="color:var(--coral);font-size:12px;margin-bottom:12px;min-height:16px;"></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">접속하기</button>
+    </form>
+  </div>
+</div>
+
 <div class="topbar">
   <div class="topbar-inner">
     <div>
@@ -2491,7 +2510,41 @@ document.getElementById('deleteBtn').addEventListener('click', async ()=>{
   showToast('삭제되었습니다');
 });
 
-loadRecords();
+/* ---------- 로그인 ---------- */
+const LOGIN_ID_STORAGE = 'mw_saved_login_id';
+const VALID_LOGIN_ID = 'mw';
+const VALID_LOGIN_PW = '1121';
+
+async function initLoginScreen(){
+  try{
+    const res = await window.storage.get(LOGIN_ID_STORAGE, false);
+    if(res && res.value){
+      document.getElementById('loginIdInput').value = res.value;
+      document.getElementById('loginPwInput').focus();
+    } else {
+      document.getElementById('loginIdInput').focus();
+    }
+  }catch(e){ document.getElementById('loginIdInput').focus(); }
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const id = document.getElementById('loginIdInput').value.trim();
+  const pw = document.getElementById('loginPwInput').value;
+  const errEl = document.getElementById('loginError');
+  if(id===VALID_LOGIN_ID && pw===VALID_LOGIN_PW){
+    errEl.textContent = '';
+    try{ await window.storage.set(LOGIN_ID_STORAGE, id, false); }catch(e){ /* best effort */ }
+    document.getElementById('loginOverlay').style.display = 'none';
+    loadRecords();
+  } else {
+    errEl.textContent = '아이디 또는 비밀번호가 올바르지 않습니다';
+    document.getElementById('loginPwInput').value = '';
+    document.getElementById('loginPwInput').focus();
+  }
+});
+
+initLoginScreen();
 </script>
 </body>
 </html>
