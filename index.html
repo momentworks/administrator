@@ -1025,6 +1025,71 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
 .wk-bk:hover{text-decoration:underline;}
 .wk-bk i{font-style:normal;font-size:10px;padding:1px 5px;color:#fff;margin-left:2px;}
 @media (max-width:900px){.wk-grid{grid-template-columns:1fr;}}
+
+/* ---------- 주말 일정: 1차·2차·3차 타임 ---------- */
+.wk-day.partial{background:#fff;}
+.wk-day.full{background:#F6F2EA;}
+.wk-body{flex-direction:column;gap:3px;}
+.wk-slot{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums;}
+.wk-slot b{flex:0 0 auto;font-size:10.5px;padding:1px 5px;border-radius:2px;background:#E6E0D4;color:var(--ink-soft);}
+.wk-slot.open{color:var(--sage);font-weight:600;}
+.wk-slot.open b{background:var(--sage);color:#fff;}
+.wk-slot.open em{font-style:normal;font-size:11px;}
+.wk-slot.taken{cursor:pointer;color:var(--ink);}
+.wk-slot.taken b{background:#2A2426;color:#F3EDE2;}
+.wk-slot.taken:hover{text-decoration:underline;}
+.wk-slot i{font-style:normal;font-size:10px;padding:1px 5px;color:#fff;}
+.wk-full{font-size:11px;font-weight:700;color:var(--coral);}
+.wk-date{flex-basis:52px;}
+/* 예식완료: 최종금액 */
+.held-pb{color:var(--coral);}
+.held-pb small{display:block;font-size:10.5px;font-weight:600;}
+.held-pb small.due{color:var(--coral);} .held-pb small.ok{color:var(--sage);}
+.held-final{font-weight:700;color:var(--ink);background:#FBF3DF !important;}
+
+/* ---------- 재무제표 ---------- */
+.fin-top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;}
+.fin-actions{display:flex;gap:6px;}
+.fin-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 14px;margin-bottom:16px;}
+.fin-controls select{padding:7px 10px;border:1px solid var(--line-strong);border-radius:2px;background:#fff;font:inherit;}
+.fin-controls select:disabled{opacity:.4;}
+.fin-check{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink-soft);}
+.fin-groups{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-left:auto;font-size:12.5px;color:var(--ink-soft);}
+.fin-groups>span{font-weight:700;color:var(--ink);}
+.fin-groups label{display:flex;align-items:center;gap:4px;cursor:pointer;}
+.fin-kpi{grid-template-columns:repeat(5,1fr) !important;margin-bottom:16px;}
+.fin-table{font-size:12.5px;min-width:100%;}
+.fin-table th.fin-col{text-align:right;cursor:pointer;white-space:nowrap;}
+.fin-table th.fin-col small{display:block;font-size:10px;font-weight:500;color:#CFC5B6;}
+.fin-table th.fin-col.future{color:#CFC5B6 !important;}
+.fin-table th.fin-col:hover{background:#3A3134 !important;}
+.fin-table th.sel{background:var(--gold) !important;color:#1C1719 !important;}
+.fin-table th.fin-total{cursor:default;}
+.fin-table td{text-align:right;white-space:nowrap;padding:7px 10px;}
+.fin-table td.fin-lab,.fin-table th.fin-lab{text-align:left;position:sticky;left:0;z-index:1;min-width:170px;}
+.fin-table td.fin-lab{background:#fff;}
+.fin-table tbody tr:nth-child(even) td.fin-lab{background:#FAF7F1;}
+.fin-table tr.fin-head td{background:#EFE7D6 !important;color:var(--gold-deep);font-weight:700;letter-spacing:.06em;text-align:left;font-size:11.5px;padding:6px 10px;}
+.fin-table tr.fin-sub td.fin-lab{padding-left:22px;color:var(--ink-soft);}
+.fin-table tr.fin-strong td{font-weight:700;border-top:1px solid var(--line-strong);}
+.fin-table tr.fin-key td{background:#FBF3DF !important;color:var(--ink);font-size:13px;}
+.fin-table tr.fin-muted td{color:var(--slate);font-size:11.5px;}
+.fin-table tr.fin-warn td:not(.fin-lab){color:var(--coral);}
+.fin-table td.sel{background:#FBF1DA !important;}
+.fin-table td.fin-total{background:#F3EDE2 !important;font-weight:700;}
+.fin-table td.neg,.fin-detail td.neg{color:var(--coral) !important;}
+.fin-sub-title{font-family:'Noto Serif KR',serif;font-size:14.5px;margin:0;color:var(--ink);}
+.fin-detail{font-size:12.5px;}
+.fin-detail td.mono{text-align:right;}
+.fin-detail tbody tr{cursor:pointer;}
+@media (max-width:1000px){.fin-kpi{grid-template-columns:repeat(2,1fr) !important;}.fin-groups{margin-left:0;}}
+@media print{
+  body.fin-printing .topbar,body.fin-printing .tabnav,body.fin-printing .fin-actions,body.fin-printing .fin-controls,body.fin-printing .mw-footer,body.fin-printing .toast,body.fin-printing #syncStatus{display:none !important;}
+  body.fin-printing .section{display:none !important;} body.fin-printing #tab-finance{display:block !important;padding-top:0;}
+  body.fin-printing .fin-table{font-size:10px;} body.fin-printing .fin-table td,body.fin-printing .fin-table th{padding:4px 5px;}
+  body.fin-printing{background:#fff;}
+}
+#finView button{white-space:nowrap;padding:7px 14px;}
 </style>
 </head>
 <body>
@@ -1084,6 +1149,7 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
   <button data-tab="cancelled">계약취소관리</button>
   <button data-tab="held">예식완료</button>
   <button data-tab="both">양측계약</button>
+  <button data-tab="finance">📊 재무제표</button>
 </div>
 
 <div class="app">
@@ -1128,7 +1194,7 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
     <div class="section-head wk-head">
       <div>
         <h2 class="section-title">📅 주말 예약 가능 일정</h2>
-        <p class="section-desc">토·일요일 예약 현황을 3개월씩 보여줘요 · 초록 = 예약 가능 · 예약된 날을 누르면 상세로 이동</p>
+        <p class="section-desc">토·일요일을 3개월씩 · 하루 최대 3타임(1차·2차·3차), 예약된 예식 앞뒤 4시간 간격 · 10:00~21:00 안의 시간만 예약 가능으로 계산해요 · 예약 건을 누르면 상세로 이동</p>
       </div>
       <div class="wk-nav"><button class="btn btn-sm" id="wkPrev">◀ 이전 3개월</button><button class="btn btn-sm" id="wkToday">이번 달</button><button class="btn btn-sm" id="wkNext">다음 3개월 ▶</button></div>
     </div>
@@ -1349,7 +1415,7 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
     <div class="section-head">
       <div>
         <h2 class="section-title">예식완료</h2>
-        <p class="section-desc">예식이 끝난 고객을 모아서 사후 관리(정산·설정서·리뷰)를 확인합니다</p>
+        <p class="section-desc">예식이 끝난 고객을 모아서 사후 관리(정산·설정서·리뷰)를 확인합니다 · <b>최종금액 = 잔금 − 짝꿍코드 추천 페이백 − 본식후기 페이백</b> (지급 여부와 관계없이 지급할 페이백을 모두 반영한 최종 정산금액)</p>
       </div>
     </div>
     <div class="kpi-grid" id="heldKpiGrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;"></div>
@@ -1358,7 +1424,7 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
       <table id="heldTable">
         <thead><tr>
           <th>예식일자</th><th>계약자명</th><th>연락처</th><th>계약코드</th><th>예식장</th>
-          <th>잔금</th><th>정산</th><th>설정서</th><th>계약후기</th><th>본식후기</th>
+          <th>잔금</th><th>페이백</th><th>최종금액</th><th>정산</th><th>설정서</th><th>계약후기</th><th>본식후기</th>
         </tr></thead>
         <tbody id="heldBody"></tbody>
       </table>
@@ -1370,6 +1436,34 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
   </section>
 
   <!-- BOTH (양측계약) -->
+  <!-- FINANCE (재무제표) -->
+  <section class="section" id="tab-finance">
+    <div class="section-head fin-top">
+      <div>
+        <h2 class="section-title">재무제표</h2>
+        <p class="section-desc">모든 정산이 <b>예식일 기준</b>이라 매출·할인·페이백·인건비를 예식일이 속한 기간에 반영해요 · 취소 계약 제외 · 금액 단위: 원</p>
+      </div>
+      <div class="fin-actions"><button class="btn btn-sm" id="finCsvBtn">⬇ CSV 저장</button><button class="btn btn-sm" id="finPrintBtn">🖨 인쇄</button></div>
+    </div>
+    <div class="fin-controls">
+      <div class="seg" id="finView"><button data-v="year">연도별</button><button data-v="quarter">분기별</button><button data-v="month" class="active">월별</button></div>
+      <select id="finYear"></select>
+      <label class="fin-check"><input type="checkbox" id="finFuture" checked> 예정 예식 포함 (예상 매출)</label>
+      <div class="fin-groups" id="finGroups">
+        <span>표시 항목</span>
+        <label><input type="checkbox" data-g="sales" checked> 매출·할인</label>
+        <label><input type="checkbox" data-g="payback" checked> 페이백</label>
+        <label><input type="checkbox" data-g="cost" checked> 비용·이익</label>
+        <label><input type="checkbox" data-g="cash" checked> 수금·지급</label>
+      </div>
+    </div>
+    <div class="kpi-grid fin-kpi" id="finKpi"></div>
+    <div class="table-wrap fin-wrap"><div style="overflow-x:auto;"><table id="finTable" class="fin-table"></table></div></div>
+    <div class="note-box" style="margin:14px 0 22px;">총매출 = 기준금액 + 출장비 · 순매출 = 총매출 − 할인(얼리버드·짝꿍코드·추천·계약후기) · <b>실매출 = 순매출 − 페이백(추천·본식후기)</b> · 영업이익 = 실매출 − 인건비(파트너스 배정 기준, 배정이 없으면 시트 인건비). 페이백은 본식이 끝난 계약만 확정돼요.</div>
+    <div class="section-head" style="margin-bottom:10px;"><div><h3 class="fin-sub-title" id="finDetailTitle"></h3></div></div>
+    <div class="table-wrap"><div style="overflow-x:auto;"><table id="finDetail" class="fin-detail"></table></div></div>
+  </section>
+
   <section class="section" id="tab-both">
     <div class="section-head">
       <div>
@@ -2464,6 +2558,7 @@ function renderHeld(){
       <td class="mono">${esc(r.contractCode||'-')}</td>
       <td>${esc(r.venueName||'-')}</td>
       <td class="mono">${fmtMoney(fin.balance)}</td>
+      ${(()=>{ const f = finalAmountOf(r); return `<td class="mono held-pb" title="${esc(f.title)}">${f.payback? '-'+fmtMoney(f.payback) : '-'}${f.remaining? `<small class="due">미지급 ${fmtMoney(f.remaining)}</small>` : (f.payback? '<small class="ok">지급완료</small>':'')}</td><td class="mono held-final">${fmtMoney(f.final)}</td>`; })()}
       <td>${r.settlementDone? '<span class="badge badge-done">완료</span>':'<span class="badge badge-pending">대기</span>'}</td>
       <td>${r.settingsSubmitted? '<span class="badge badge-done">제출완료</span>':'<span class="badge badge-pending">미제출</span>'}</td>
       <td>${r.reviewCountContract||0}개</td>
@@ -2513,19 +2608,23 @@ function renderWeekendTimetable(){
     const y = first.getFullYear(), m = first.getMonth();
     const days = [];
     for(let d = new Date(first); d.getMonth()===m; d.setDate(d.getDate()+1)) if(d.getDay()===0 || d.getDay()===6) days.push(new Date(d));
-    let free = 0;
+    let free = 0, freeDays = 0;
     const rows = days.map(d=>{
       const s = ds(d), past = s < todayS;
-      const b = (byDate[s]||[]).slice().sort((a,c)=> (a.weddingTime||'99:99').localeCompare(c.weddingTime||'99:99'));
-      if(!b.length && !past) free++;
+      const b = byDate[s]||[];
       const label = `${d.getMonth()+1}/${d.getDate()} <em>${d.getDay()===0?'일':'토'}</em>`;
-      const cls = past ? 'past' : (b.length ? 'booked' : 'free');
-      const body = b.length
-        ? b.map(r=>`<span class="wk-bk" data-id="${r.id}" title="${esc((r.weddingTime||'')+' '+r.clientName+' · '+(r.productType||'')+' · '+(r.region||''))}">${esc(r.weddingTime||'')} ${esc(r.clientName)} <i class="ticket-product ${productTypeClass(r.productType)}">${esc(r.productType||'-')}</i></span>`).join('')
-        : `<span class="wk-free">${past?'지난 날짜':'예약 가능'}</span>`;
-      return `<div class="wk-day ${cls} ${d.getDay()===0?'sun':''}"><span class="wk-date">${label}</span><span class="wk-body">${body}</span></div>`;
+      if(past) return `<div class="wk-day past ${d.getDay()===0?'sun':''}"><span class="wk-date">${label}</span><span class="wk-body"><span class="wk-free">지난 날짜</span></span></div>`;
+      const plan = weddingSlotsFor(b);
+      free += plan.freeCount; if(plan.freeCount) freeDays++;
+      const cls = plan.freeCount===0 ? 'full' : (b.length ? 'partial' : 'free');
+      const chips = plan.slots.map(x=> x.free
+        ? `<span class="wk-slot open"><b>${x.order}</b> ${x.time} <em>예약 가능</em></span>`
+        : `<span class="wk-slot taken" data-id="${x.rec.id}" title="${esc(x.time+' '+x.rec.clientName+' · '+(x.rec.productType||'')+' · '+(x.rec.venueName||x.rec.region||''))}"><b>${x.order}</b> ${x.time} ${esc(x.rec.clientName)} <i class="ticket-product ${productTypeClass(x.rec.productType)}">${esc(x.rec.productType||'-')}</i></span>`).join('');
+      const unknown = b.filter(r=> hmToMin(r.weddingTime)===null).map(r=>`<span class="wk-slot taken" data-id="${r.id}"><b>시간 미정</b> ${esc(r.clientName)}</span>`).join('');
+      const tail = plan.freeCount===0 ? '<span class="wk-full">마감</span>' : '';
+      return `<div class="wk-day ${cls} ${d.getDay()===0?'sun':''}"><span class="wk-date">${label}</span><span class="wk-body">${chips}${unknown}${tail}</span></div>`;
     }).join('');
-    html += `<div class="wk-month"><div class="wk-mhead"><b>${y}년 ${m+1}월</b><span>예약 가능 <b>${free}</b>일</span></div>${rows}</div>`;
+    html += `<div class="wk-month"><div class="wk-mhead"><b>${y}년 ${m+1}월</b><span>예약 가능 <b>${freeDays}</b>일 · <b>${free}</b>타임</span></div>${rows}</div>`;
   }
   el.innerHTML = html;
   el.querySelectorAll('[data-id]').forEach(x=> x.addEventListener('click', ()=> openModal(x.dataset.id)));
@@ -2702,6 +2801,7 @@ function renderAll(){
   renderBoth();
   renderPartnersTab();
   if(typeof renderPaybackAlerts==='function') renderPaybackAlerts();
+  if(typeof renderFinance==='function') renderFinance();
 }
 
 function esc(s){ if(s===undefined||s===null) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -3570,7 +3670,7 @@ const PartnerPortal = (function(){
         'DTSTART;TZID=Asia/Seoul:'+dt(ev.date,st),'DTEND;TZID=Asia/Seoul:'+dt(endDate,en),
         'SUMMARY:'+icsEsc('[모먼트웍스] '+ev.venueName+' 축의대'),
         'LOCATION:'+icsEsc((ev.venueName+' '+ev.hallName).trim()),
-        'DESCRIPTION:'+icsEsc('출근 '+ev.callTime+' / 예식 '+ev.weddingTime+' / 근무 종료(예상) '+ev.endTime+'\n※ '+workNote()+'\n역할: '+(ev.roles||[]).join(', ')+(ev.note? '\n전달사항: '+ev.note:'')),
+        'DESCRIPTION:'+icsEsc('출근 '+ev.callTime+' / 예식 '+ev.weddingTime+' / 근무 종료(예상) '+ev.endTime+'\n※ '+workNote()+(ev.note? '\n전달사항: '+ev.note:'')),
         'BEGIN:VALARM','TRIGGER:-PT12H','ACTION:DISPLAY','DESCRIPTION:'+icsEsc('내일 축의대 근무가 있어요'),'END:VALARM','END:VEVENT');
     });
     L.push('END:VCALENDAR');
@@ -3591,7 +3691,7 @@ const PartnerPortal = (function(){
   function eventCard(ev, full){
     const t=today(), n=diffDays(t, ev.date), pr=progress(ev);
     const cls = n<0?'past': n===0?'today': n<=3?'soon':'';
-    const team = full && ev.team && ev.team.length>1 ? `<div class="pp-team">${ev.team.map(m=>`<span class="pp-mate ${m.me?'me':''}"><i style="background:${e(m.color)}"></i>${e(m.name)}${m.me?' (나)':''} · ${e(m.role||'')}${m.phone?` <a href="tel:${e(m.phone)}">📞</a>`:''}</span>`).join('')}</div>` : '';
+    const team = full && ev.team && ev.team.length>1 ? `<div class="pp-team">${ev.team.map(m=>`<span class="pp-mate ${m.me?'me':''}"><i style="background:${e(m.color)}"></i>${e(m.name)}${m.me?' (나)':''}${m.phone?` <a href="tel:${e(m.phone)}">📞</a>`:''}</span>`).join('')}</div>` : '';
     const checkin = n===0 ? (ev.checkinAt
         ? `<span class="pp-confirmed">📍 도착 체크인 ${new Date(ev.checkinAt).toTimeString().slice(0,5)}</span>`
         : `<button class="pp-btn gold" data-pp="checkin" data-rid="${e(ev.recordId)}">📍 현장 도착 체크인</button>`) : '';
@@ -3608,7 +3708,6 @@ const PartnerPortal = (function(){
       </div>
       <div class="pp-worknote">※ ${e(workNote())}</div>
       <div class="pp-meta">
-        <div><span>내 역할</span>${(ev.roles||[]).map(r=>`<em>${e(r||'축의대')}</em>`).join('')}</div>
         <div><span>계약자</span>${e(ev.clientName||'-')} ${ev.region?`<small style="color:var(--pp-slate)">· ${e(ev.region)}</small>`:''}</div>
         <div><span>예상 하객</span>신랑측 ${ev.groomGuests}명 · 신부측 ${ev.brideGuests}명</div>
         <div><span>운영 설정서</span>${ev.settingsSubmitted?'<b class="ok">제출완료</b>':'<b class="wait">제출 대기</b>'}</div>
@@ -3735,7 +3834,7 @@ const PartnerPortal = (function(){
       <div class="pp-h">근무 내역</div>
       <div class="pp-worknote" style="margin:0 2px 8px;">※ ${e(workNote())} 실제 근무시간에 따라 정산 금액이 조정될 수 있어요.</div>
       ${evs.length? `<div class="pp-box">${evs.map(ev=>`<div class="pp-list-row">
-          <div><b>${fdate(ev.date)}</b> ${e(ev.venueName)}<div style="font-size:11.5px;color:var(--pp-slate);margin-top:2px;">${e(ev.callTime)}~${e(ev.endTime)} · ${hours(ev.minutes)} · ${e((ev.roles||[]).join(', '))}${ev.date<t?'':' · 예정'}</div>${(ev.payDetail||[]).some(d=>d.allowance)?`<div style="font-size:11px;color:var(--pp-slate);">기본 ${money((ev.payDetail||[]).reduce((s,d)=>s+d.base,0))} + 추가수당 ${(ev.payDetail||[]).filter(d=>d.allowance).map(d=>money(d.allowance)+(d.allowanceNote?' ('+e(d.allowanceNote)+')':'')).join(', ')}</div>`:''}</div>
+          <div><b>${fdate(ev.date)}</b> ${e(ev.venueName)}<div style="font-size:11.5px;color:var(--pp-slate);margin-top:2px;">${e(ev.callTime)}~${e(ev.endTime)} · ${hours(ev.minutes)}${ev.date<t?'':' · 예정'}</div>${(ev.payDetail||[]).some(d=>d.allowance)?`<div style="font-size:11px;color:var(--pp-slate);">기본 ${money((ev.payDetail||[]).reduce((s,d)=>s+d.base,0))} + 추가수당 ${(ev.payDetail||[]).filter(d=>d.allowance).map(d=>money(d.allowance)+(d.allowanceNote?' ('+e(d.allowanceNote)+')':'')).join(', ')}</div>`:''}</div>
           <div style="text-align:right;white-space:nowrap;"><b>${money(ev.pay)}</b><div style="font-size:11px;color:${ev.paid?'var(--pp-sage)':'var(--pp-slate)'};font-weight:700;">${ev.pay? (ev.paid?'지급완료':'지급대기'):'-'}</div></div>
         </div>`).join('')}</div>` : '<div class="pp-empty">이 달의 근무 내역이 없어요</div>'}
       ${done.length||sched.length? `<p style="font-size:11.5px;color:var(--pp-slate);line-height:1.7;margin-top:12px;">※ 인건비는 대표가 확정한 금액 기준이며, 지급 여부는 정산 후 자동으로 표시돼요.</p>`:''}`;
@@ -3871,7 +3970,7 @@ const PDB_KEY = 'mw_partners_v1';
 const ADMIN_KEY_STORAGE = 'mw_admin_key';
 const PARTNER_CODE_STORAGE = 'mw_partner_code';
 const MEMBER_COLORS = ['#7A2E3A','#A9823C','#4F6F52','#3E5079','#C1553D','#6B4E8A','#2F7F7A','#8A5A2B','#B04A7A','#5B6B2F','#1F5F8B','#9C6B00'];
-const MEMBER_TITLES = ['대표','리더','파트너','보조'];
+const MEMBER_TITLES = ['대표','리더','파트너'];
 const PHASES = ['D-7','D-3','D-1','당일','종료 후'];
 const DEFAULT_TEMPLATE = [
   ['D-3','축의대 운영설정서 확인 (방명록·식권 수량, 봉투 전달 방식, 혼주 요청사항)'],
@@ -3976,6 +4075,13 @@ function normalizePdb(db){
   }
   db.settings.slotsByProduct = Object.assign(pvDefaultSettings().slotsByProduct, (db.settings||{}).slotsByProduct||{});
   // 자리 구성: 시트 파트너1~4 기준 (한측 2 · 양측 4 · 통합 2)
+  // 명칭 정리: 직책 '보조' → '파트너', 자리 역할 신랑측·신부측·통합·보조 → '파트너' (구분 없이 배정만)
+  if(Number(db.settings.roleModel||1) < 3){
+    db.members.forEach(m=>{ if(m && m.title==='보조') m.title = '파트너'; });
+    Object.values(db.assignments).forEach(a=>{ ((a&&a.slots)||[]).forEach(s=>{ if(s) s.role = '파트너'; }); });
+    db.settings.roleModel = 3; pdbMigrated = true;
+  }
+  db.members.forEach(m=>{ if(m && m.title==='보조') m.title = '파트너'; });
   if(Number(db.settings.slotModel||1) < 2){
     db.settings.slotsByProduct = pvDefaultSettings().slotsByProduct; db.settings.slotModel = 2; pdbMigrated = true;
   }
@@ -4307,13 +4413,8 @@ function sortedMembers(includeInactive){
   return ensurePdb().members.filter(m=> includeInactive || m.active!==false)
     .slice().sort((a,b)=> (isOwner(b)-isOwner(a)) || (MEMBER_TITLES.indexOf(a.title)-MEMBER_TITLES.indexOf(b.title)) || String(a.name).localeCompare(String(b.name),'ko'));
 }
-/* 시트 파트너1~4 규칙: 한측 = 파트너1·2 (같은 쪽) / 양측 = 파트너1·2 신랑측 + 파트너3·4 신부측 / 통합 = 파트너1·2 */
-function roleForPos(rec, pos){
-  if(pos>4) return '보조';
-  if(rec.productType==='양측') return pos<=2 ? '신랑측' : '신부측';
-  if(rec.productType==='한측') return (Number(rec.groomGuests)>0 && !Number(rec.brideGuests)) ? '신랑측' : '신부측';
-  return '통합';
-}
+/* 시트 파트너1~4 규칙: 한측 2자리 · 양측 4자리 · 통합 2자리 (신랑측·신부측 구분 없이 배정) */
+function roleForPos(rec, pos){ return '파트너'; } // 신랑측·신부측 구분 없이 배정만 표시
 function slotLimitFor(rec){ return Number((pSet().slotsByProduct||{})[rec.productType]) || (rec.productType==='양측' ? 4 : 2); }
 function defaultSlots(rec){
   const n = Math.max(1, slotLimitFor(rec));
@@ -4614,7 +4715,7 @@ function matchSheetPartners(){
       if(existing){ if(!existing.fromSheet){ existing.fromSheet = true; changed = true; } return; }
       const m = memberById(id);
       let slot = a.slots.find(sl=>!sl.memberId);
-      if(!slot){ slot = {id:uid('s'), role:'보조', memberId:'', pay:0, paid:false}; a.slots.push(slot); }
+      if(!slot){ slot = {id:uid('s'), role:'파트너', memberId:'', pay:0, paid:false}; a.slots.push(slot); }
       slot.memberId = id; slot.fromSheet = true; slot.allowance = 0; slot.allowanceNote = ''; slot.paid = false;
       slot.pay = (!isOwner(m) && sheetLabor>0 && partnerCount) ? Math.round(sheetLabor/partnerCount) : defaultPayFor(m, rec);
       changed = true; sum.added++;
@@ -4642,11 +4743,11 @@ async function runSheetPartnerMatch(showResult){
 function slotChipsHTML(rec, a){
   const resp = ensurePdb().responses[rec.id] || {};
   return a.slots.map(s=>{
-    if(!s.memberId) return `<span class="p-slot empty">${s.pos<=4?`<b class="p-pos">P${s.pos}</b>`:''}${esc(s.role||'자리')} · 미배정</span>`;
+    if(!s.memberId) return `<span class="p-slot empty">${s.pos<=4?`<b class="p-pos">P${s.pos}</b>`:''}미배정</span>`;
     const m = memberById(s.memberId) || {name:'(삭제됨)', color:'#999'};
     const r = resp[s.memberId] || {};
     const issues = memberIssues(s.memberId, rec, a);
-    return `<span class="p-slot" ${issues.length?`title="${esc(issues.join(' / '))}" style="border-color:#E3B1A5;"`:(s.fromSheet?'title="구글시트 파트너 항목에서 자동 배정"':'')}>${s.pos<=4?`<b class="p-pos">P${s.pos}</b>`:''}<i style="background:${esc(m.color)}"></i>${esc(m.name)} <span class="st">${esc(s.role||'')}</span>${s.fromSheet?'<span class="p-sheet">시트</span>':''} ${isOwner(m)?'':`<span class="st ${r.confirmed?'ok':''}">${r.confirmed?'✓확인':'⏳'}</span>`}${issues.length?' ⚠':''}</span>`;
+    return `<span class="p-slot" ${issues.length?`title="${esc(issues.join(' / '))}" style="border-color:#E3B1A5;"`:(s.fromSheet?'title="구글시트 파트너 항목에서 자동 배정"':'')}>${s.pos<=4?`<b class="p-pos">P${s.pos}</b>`:''}<i style="background:${esc(m.color)}"></i>${esc(m.name)}${s.fromSheet?'<span class="p-sheet">시트</span>':''} ${isOwner(m)?'':`<span class="st ${r.confirmed?'ok':''}">${r.confirmed?'✓확인':'⏳'}</span>`}${issues.length?' ⚠':''}</span>`;
   }).join('');
 }
 function eventRowHTML(rec, opts){
@@ -4929,14 +5030,13 @@ function payByEventHTML(t, minWage){
       <h3><span>${fmtDate(rec.weddingDate)} ${esc(rec.weddingTime||'')} · ${esc(shortVenue(rec.venueName))} <span class="ticket-product ${productTypeClass(rec.productType)}">${esc(rec.productType||'')}</span>${rec.weddingDate>=t?' <span class="badge badge-normal">예정</span>':''}</span>
         <span style="font-family:'Pretendard';font-size:12.5px;">${esc(rec.clientName)} · 출근 ${win.call} ~ 종료 예상 ${win.endHm} (최대 ${fmtHours(win.minutes)}) · 합계 <b style="color:var(--wine)" class="p-evtot" data-rid="${rec.id}">${fmtMoney(evTotal)}</b></span></h3>
       <div class="table-wrap p-tablewrap" style="box-shadow:none;margin-top:6px;"><div style="overflow-x:auto;"><table>
-        <thead><tr><th>인원</th><th>역할</th><th>기본</th><th>추가수당</th><th>추가 사유</th><th>합계</th><th>환산시급</th><th>지급</th></tr></thead>
+        <thead><tr><th>인원</th><th>기본</th><th>추가수당</th><th>추가 사유</th><th>합계</th><th>환산시급</th><th>지급</th></tr></thead>
         <tbody>${slots.map(sl=>{
           const m = memberById(sl.memberId)||{name:'(삭제됨)',color:'#999'};
           const tot = slotTotal(sl), hr = win.minutes? Math.round(tot/(win.minutes/60)) : 0, low = !isOwner(m) && tot>0 && hr<minWage;
           const base = memberRate(m, rec.productType);
           return `<tr data-payrow="${rec.id}|${sl.id}" data-min="${win.minutes}" data-owner="${isOwner(m)?1:0}">
             <td>${sl.pos<=4?`<b class="p-pos" title="시트 파트너${sl.pos} · 파트너${sl.pos}인건비">P${sl.pos}</b>`:''}<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${esc(m.color)};margin-right:5px;"></span><b>${esc(m.name)}</b> <span style="color:var(--slate);font-size:11px;">${esc(m.title||'')}</span></td>
-            <td>${esc(sl.role||'')}</td>
             <td>${payInput(rec.id, sl.id, 'pay', sl.pay, 96)}${Number(sl.pay)!==base?`<div style="font-size:10.5px;color:var(--slate);">단가 ${fmtMoney(base)}</div>`:''}</td>
             <td>${payInput(rec.id, sl.id, 'allowance', sl.allowance, 90)}</td>
             <td>${payInput(rec.id, sl.id, 'allowanceNote', sl.allowanceNote, 150, '교통비·연장·원거리')}</td>
@@ -4956,9 +5056,9 @@ function payByMemberHTML(rows, t, minWage){
         ${r.total-r.paid>0?`<button class="btn btn-sm btn-primary" data-act="payAll" data-mid="${r.m.id}" style="margin-left:6px;">이 달 전체 지급완료</button>`:''}</span></h3>
       ${r.lowWage.length? `<div class="note-box" style="margin:8px 0;">⚠️ 환산 시급이 최저시급(${fmtMoney(minWage)})보다 낮은 배정 ${r.lowWage.length}건이 있어요. 금액이나 근무시간을 확인해주세요.</div>`:''}
       <div class="table-wrap p-tablewrap" style="box-shadow:none;margin-top:8px;"><div style="overflow-x:auto;"><table>
-        <thead><tr><th>예식일</th><th>예식장</th><th>역할</th><th>근무</th><th>기본</th><th>추가수당</th><th>합계</th><th>환산시급</th><th>지급</th></tr></thead>
+        <thead><tr><th>예식일</th><th>예식장</th><th>근무</th><th>기본</th><th>추가수당</th><th>합계</th><th>환산시급</th><th>지급</th></tr></thead>
         <tbody>${r.list.map(x=>{ const tot=slotTotal(x.slot); const hr = x.win.minutes? Math.round(tot/(x.win.minutes/60)) : 0; const low = !isOwner(r.m) && tot>0 && hr<minWage; const done = x.rec.weddingDate < t;
-          return `<tr><td>${fmtDate(x.rec.weddingDate)}${done?'':' <span class="badge badge-normal">예정</span>'}</td><td>${esc(shortVenue(x.rec.venueName))}</td><td>${esc(x.slot.role||'')}</td><td class="mono">${x.win.call}~${x.win.endHm} (${fmtHours(x.win.minutes)})</td>
+          return `<tr><td>${fmtDate(x.rec.weddingDate)}${done?'':' <span class="badge badge-normal">예정</span>'}</td><td>${esc(shortVenue(x.rec.venueName))}</td><td class="mono">${x.win.call}~${x.win.endHm} (${fmtHours(x.win.minutes)})</td>
             <td class="mono">${fmtMoney(x.slot.pay)}</td><td class="mono">${Number(x.slot.allowance)?fmtMoney(x.slot.allowance)+(x.slot.allowanceNote?` <span style="color:var(--slate)">(${esc(x.slot.allowanceNote)})</span>`:''):'-'}</td><td class="mono"><b>${fmtMoney(tot)}</b></td>
             <td class="mono" style="${low?'color:var(--coral);font-weight:700;':''}">${tot?fmtMoney(hr):'-'}</td>
             <td><button class="badge-toggle-btn" data-act="togglePaid" data-rid="${x.rec.id}" data-sid="${x.slot.id}"><span class="badge ${x.slot.paid?'badge-done':'badge-pending'}">${x.slot.paid?'지급완료':'미지급'}</span></button></td></tr>`; }).join('')}</tbody>
@@ -5100,7 +5200,7 @@ function renderAssignEditor(){
     const tot = slotTotal(slot); const hr = (tot>0 && win.minutes) ? Math.round(tot/(win.minutes/60)) : 0;
     const mm = slot.memberId ? memberById(slot.memberId) : null; const base = mm ? memberRate(mm, rec.productType) : 0;
     return `<div class="p-editor-slot">
-      <div class="p-roleCell"><b class="p-pos" title="${slot.pos<=4?`구글시트 파트너${slot.pos} 열과 연결`:'시트에 없는 추가 자리'}">${slot.pos<=4?'파트너'+slot.pos:'추가'}</b><input value="${esc(slot.role)}" data-ed="role" data-i="${idx}" placeholder="역할"></div>
+      <div class="p-roleCell"><b class="p-pos" title="${slot.pos<=4?`구글시트 파트너${slot.pos} 열과 연결`:'시트에 없는 추가 자리'}">${slot.pos<=4?'파트너'+slot.pos:'추가'}</b></div>
       <select data-ed="member" data-i="${idx}">
         <option value="">— 미배정 —</option>
         ${cands.map((c,ci)=>`<option value="${c.m.id}" ${slot.memberId===c.m.id?'selected':''}>${ci===0&&!c.issues.length&&!c.dup?'★ ':''}${esc(c.m.name)} (${esc(c.m.title||'')}) · 이번달 ${c.load}건${c.reg?' · 지역':''}${c.dup?' · 중복':''}${c.issues.length?' ⚠ '+esc(c.issues[0]):''}</option>`).join('')}
@@ -5339,7 +5439,7 @@ async function onPartnersClick(ev){
         const names2 = r.partner.split(/[,·/]/).map(s=>s.trim()).filter(Boolean);
         const a = getAssignment(r); const copy = JSON.parse(JSON.stringify(a)); delete copy.virtual;
         const per = names2.length ? Math.round((Number(r.laborCost)||0)/names2.length) : 0;
-        names2.forEach(nm=>{ const m=db.members.find(x=>x.name===nm); if(!m) return; let slot=copy.slots.find(s=>!s.memberId); if(!slot){ slot={id:uid('s'), role:'보조', memberId:'', pay:0, paid:false}; copy.slots.push(slot); } slot.memberId=m.id; slot.pay=per; });
+        names2.forEach(nm=>{ const m=db.members.find(x=>x.name===nm); if(!m) return; let slot=copy.slots.find(s=>!s.memberId); if(!slot){ slot={id:uid('s'), role:'파트너', memberId:'', pay:0, paid:false}; copy.slots.push(slot); } slot.memberId=m.id; slot.pay=per; });
         copy.updatedAt=new Date().toISOString(); db.assignments[r.id]=copy; pDirty.assignments.add(r.id);
       });
       await commitPartners(`${names.length}명을 등록했어요 · 연락처와 기본 인건비를 채워주세요`);
@@ -5361,8 +5461,8 @@ async function onPartnersClick(ev){
       break;
     }
     case 'payCsv': {
-      const rows=[['인원','직책','예식일','예식장','상품','역할','출근','종료(예상)','근무 예상(분)','기본','추가수당','추가 사유','합계','지급']];
-      sortedMembers(true).forEach(m=> memberAssignments(m.id, r=>r.weddingDate.slice(0,7)===payMonthSel).forEach(x=> rows.push([m.name,m.title,x.rec.weddingDate,x.rec.venueName,x.rec.productType,x.slot.role,x.win.call,x.win.endHm,x.win.minutes,Number(x.slot.pay)||0,Number(x.slot.allowance)||0,x.slot.allowanceNote||'',slotTotal(x.slot),x.slot.paid?'지급완료':'미지급'])));
+      const rows=[['인원','직책','예식일','예식장','상품','출근','종료(예상)','근무 예상(분)','기본','추가수당','추가 사유','합계','지급']];
+      sortedMembers(true).forEach(m=> memberAssignments(m.id, r=>r.weddingDate.slice(0,7)===payMonthSel).forEach(x=> rows.push([m.name,m.title,x.rec.weddingDate,x.rec.venueName,x.rec.productType,x.win.call,x.win.endHm,x.win.minutes,Number(x.slot.pay)||0,Number(x.slot.allowance)||0,x.slot.allowanceNote||'',slotTotal(x.slot),x.slot.paid?'지급완료':'미지급'])));
       const csv = '﻿'+rows.map(r=> r.map(c=> '"'+String(c===undefined?'':c).replace(/"/g,'""')+'"').join(',')).join('\n');
       downloadFile(`모먼트웍스_인건비_${payMonthSel}.csv`, csv, 'text/csv;charset=utf-8');
       break;
@@ -6658,6 +6758,239 @@ function renderReferral(){
     });
   });
 }
+
+/* ---------- 예식완료: 페이백을 모두 반영한 최종 정산금액 ---------- */
+function finalAmountOf(rec){
+  const fin = computeFinancials(rec);
+  const ref = paybackOf('referral', rec), rev = paybackOf('review', rec);
+  const payback = ref.owed + rev.owed;
+  const paid = Math.min(ref.paid, ref.owed) + Math.min(rev.paid, rev.owed);
+  return {
+    balance: fin.balance, referral: ref.owed, review: rev.owed, payback, paid,
+    remaining: ref.remaining + rev.remaining,
+    final: fin.balance - payback,
+    title: `잔금 ${fmtMoney(fin.balance)} − 추천 페이백 ${fmtMoney(ref.owed)} − 본식후기 페이백 ${fmtMoney(rev.owed)} · 지급한 금액 ${fmtMoney(ref.paid + rev.paid)}`
+  };
+}
+
+/* ---------- 주말 예식 타임 계산 (1차 · 2차 · 3차) ----------
+   · 예식 가능 시간: 10:00 ~ 21:00 (이 범위를 벗어나는 타임은 예약불가로 제외)
+   · 하루 최대 3타임, 예약된 예식 시간 앞뒤로 4시간 간격
+   · 예약이 없는 날은 기본 11:00 · 15:00 · 19:00 */
+const SLOT_MIN = 10*60, SLOT_MAX = 21*60, SLOT_GAP = 4*60, SLOT_LIMIT = 3, SLOT_DEFAULT = [11*60, 15*60, 19*60];
+function hmToMin(s){ const m = /^(\d{1,2}):(\d{2})/.exec(String(s||'').trim()); return m ? (+m[1])*60 + (+m[2]) : null; }
+function minToHm(n){ return String(Math.floor(n/60)).padStart(2,'0') + ':' + String(n%60).padStart(2,'0'); }
+/* bookings: 그 날의 계약 목록 → [{time, min, rec|null, free:bool, order:'1차'…}] , unknown: 시간 미정 예약 수 */
+function weddingSlotsFor(bookings){
+  const timed = bookings.map(r=>({rec:r, min: hmToMin(r.weddingTime)})).filter(x=> x.min!==null).sort((a,b)=> a.min-b.min);
+  const unknown = bookings.length - timed.length;
+  const taken = timed.map(x=>x.min);
+  let free = [];
+  const room = SLOT_LIMIT - bookings.length;
+  if(room > 0){
+    if(!taken.length){
+      free = SLOT_DEFAULT.slice(0, room);
+    } else {
+      // 예약된 시간 기준 ±4시간 배수의 후보 중, 모든 예약과 4시간 이상 떨어지고 10~21시 안에 드는 시간
+      const cand = new Set();
+      taken.forEach(t=>{ for(let k=-3;k<=3;k++){ const c = t + k*SLOT_GAP; if(k!==0 && c>=SLOT_MIN && c<=SLOT_MAX) cand.add(c); } });
+      const list = [...cand].filter(c=> taken.every(t=> Math.abs(c-t) >= SLOT_GAP)).sort((a,b)=>a-b);
+      // 서로 4시간 이상 떨어지게 최대한 많이 고르기 (이른 시간 우선)
+      let best = [];
+      const pick = (i, chosen)=>{
+        if(chosen.length > best.length) best = chosen.slice();
+        if(chosen.length===room) return;
+        for(let j=i;j<list.length;j++){ if(chosen.every(c=> Math.abs(c-list[j])>=SLOT_GAP)){ chosen.push(list[j]); pick(j+1, chosen); chosen.pop(); if(best.length===room) return; } }
+      };
+      pick(0, []);
+      free = best;
+    }
+  }
+  const all = timed.map(x=>({min:x.min, rec:x.rec, free:false})).concat(free.map(m=>({min:m, rec:null, free:true}))).sort((a,b)=> a.min-b.min);
+  all.forEach((s,i)=>{ s.order = (i+1) + '차'; s.time = minToHm(s.min); });
+  return {slots: all, unknown, freeCount: free.length};
+}
+
+/* =========================================================
+   재무제표 (예식일 기준 매출 인식)
+   · 모든 정산이 예식일 기준이므로 매출·할인·페이백·인건비를 예식일이 속한 기간에 귀속
+   · 연도별 / 분기별 / 월별 · 예정 예식 포함 여부 · 항목 그룹 보기 선택 · 기간 상세 · CSV
+========================================================= */
+const FIN_STATE = { view:'month', year:null, includeFuture:true, groups:{sales:true, payback:true, cost:true, cash:true}, sel:null };
+
+function finLaborOf(rec){
+  const a = ensurePdb().assignments[rec.id];
+  const out = {partner:0, owner:0, base:0, allowance:0};
+  const slots = a && Array.isArray(a.slots) ? a.slots.filter(s=> s && s.memberId) : [];
+  if(slots.length){
+    slots.forEach(s=>{
+      const m = memberById(s.memberId); const tot = slotTotal(s);
+      if(m && isOwner(m)) out.owner += tot; else out.partner += tot;
+      out.base += Number(s.pay)||0; out.allowance += Number(s.allowance)||0;
+    });
+  } else {
+    const l = Number(rec.laborCost)||0; out.partner = l; out.base = l;
+  }
+  return out;
+}
+/* 계약 1건의 재무 항목 (예식일 기준) */
+function finRowOf(rec){
+  const f = computeFinancials(rec);
+  const dd = ddayInfo(rec.weddingDate);
+  const done = !!(dd && dd.diff < 0);
+  const ref = paybackOf('referral', rec), rev = paybackOf('review', rec);
+  const lab = finLaborOf(rec);
+  const gross = f.base + f.travel;
+  const discounts = f.eb + f.pd + f.rd + f.revC;
+  const net = gross - discounts;
+  const payback = ref.owed + rev.owed;
+  const real = net - payback;
+  const labor = lab.partner + lab.owner;
+  return {
+    rec, done, count:1, base:f.base, travel:f.travel, gross,
+    eb:f.eb, pd:f.pd, rd:f.rd, revC:f.revC, discounts, net,
+    refPb:ref.owed, revPb:rev.owed, payback, real,
+    laborPartner:lab.partner, laborOwner:lab.owner, laborBase:lab.base, allowance:lab.allowance, labor,
+    profit: real - labor,
+    deposit:f.deposit, balance:f.balance,
+    settled: rec.settlementDone ? f.balance - payback : 0,
+    unsettled: (done && !rec.settlementDone) ? f.balance - payback : 0,
+    pbPaid: Math.min(ref.paid, ref.owed) + Math.min(rev.paid, rev.owed),
+    pbDue: ref.remaining + rev.remaining
+  };
+}
+const FIN_SUM_KEYS = ['count','base','travel','gross','eb','pd','rd','revC','discounts','net','refPb','revPb','payback','real','laborPartner','laborOwner','laborBase','allowance','labor','profit','deposit','balance','settled','unsettled','pbPaid','pbDue'];
+function finSum(rows){ const o = {}; FIN_SUM_KEYS.forEach(k=> o[k] = rows.reduce((t,r)=> t + (Number(r[k])||0), 0)); o.rows = rows; o.doneCount = rows.filter(r=>r.done).length; return o; }
+
+function finYears(){
+  const ys = new Set([new Date().getFullYear()]);
+  activeContracts().forEach(r=>{ const y = Number(String(r.weddingDate||'').slice(0,4)); if(y>2000) ys.add(y); });
+  return [...ys].sort((a,b)=>a-b);
+}
+function finPeriods(){
+  const y = FIN_STATE.year;
+  if(FIN_STATE.view==='year') return finYears().map(yy=>({key:String(yy), label:yy+'년', test:d=> d.slice(0,4)===String(yy), from:yy+'-01-01', to:yy+'-12-31'}));
+  if(FIN_STATE.view==='quarter') return [1,2,3,4].map(q=>{ const m0=(q-1)*3+1, m1=q*3; return {key:y+'-Q'+q, label:q+'분기', sub:`${m0}~${m1}월`, test:d=> d.slice(0,4)===String(y) && Math.ceil(Number(d.slice(5,7))/3)===q, from:`${y}-${String(m0).padStart(2,'0')}-01`, to:`${y}-${String(m1).padStart(2,'0')}-31`}; });
+  return Array.from({length:12}, (_,i)=>{ const mm = String(i+1).padStart(2,'0'); return {key:`${y}-${mm}`, label:(i+1)+'월', test:d=> d.slice(0,7)===`${y}-${mm}`, from:`${y}-${mm}-01`, to:`${y}-${mm}-31`}; });
+}
+function finData(){
+  const t = todayStr();
+  const all = activeContracts().filter(r=> r.weddingDate && /^\d{4}-\d{2}-\d{2}/.test(r.weddingDate)).map(finRowOf)
+    .filter(x=> FIN_STATE.includeFuture || x.done);
+  const periods = finPeriods().map(p=>{ const rows = all.filter(x=> p.test(x.rec.weddingDate)); return Object.assign({}, p, finSum(rows), {future: p.from > t, partial: p.from <= t && p.to >= t}); });
+  const total = finSum(periods.flatMap(p=> p.rows));
+  return {periods, total};
+}
+/* 표 행 정의 */
+const FIN_LINES = [
+  {g:'sales', head:'매출'},
+  {g:'sales', k:'count', label:'예식 건수', fmt:'cnt'},
+  {g:'sales', k:'base', label:'기준금액', sub:true},
+  {g:'sales', k:'travel', label:'출장비', sub:true},
+  {g:'sales', k:'gross', label:'총매출', strong:true},
+  {g:'sales', k:'eb', label:'(−) 얼리버드 할인', sub:true, neg:true},
+  {g:'sales', k:'pd', label:'(−) 짝꿍코드 할인', sub:true, neg:true},
+  {g:'sales', k:'rd', label:'(−) 추천 할인', sub:true, neg:true},
+  {g:'sales', k:'revC', label:'(−) 계약후기 할인', sub:true, neg:true},
+  {g:'sales', k:'net', label:'순매출', strong:true},
+  {g:'payback', head:'페이백'},
+  {g:'payback', k:'refPb', label:'(−) 짝꿍코드 추천 페이백', sub:true, neg:true},
+  {g:'payback', k:'revPb', label:'(−) 본식후기 페이백', sub:true, neg:true},
+  {g:'payback', k:'real', label:'실매출 (페이백 반영)', strong:true, key:true},
+  {g:'cost', head:'비용'},
+  {g:'cost', k:'laborPartner', label:'파트너 인건비', sub:true, neg:true},
+  {g:'cost', k:'laborOwner', label:'대표 인건비', sub:true, neg:true},
+  {g:'cost', k:'allowance', label:'└ 그중 추가수당', sub:true, muted:true},
+  {g:'cost', k:'labor', label:'인건비 합계', strong:true, neg:true},
+  {g:'cost', k:'profit', label:'영업이익', strong:true, key:true, profit:true},
+  {g:'cost', k:'margin', label:'이익률', fmt:'pct'},
+  {g:'cost', k:'avg', label:'건당 평균 실매출', fmt:'money', muted:true},
+  {g:'cash', head:'수금 · 지급 현황'},
+  {g:'cash', k:'deposit', label:'계약금', sub:true},
+  {g:'cash', k:'settled', label:'정산 완료 금액', sub:true},
+  {g:'cash', k:'unsettled', label:'미정산 금액 (예식 종료)', sub:true, warn:true},
+  {g:'cash', k:'pbPaid', label:'페이백 지급 완료', sub:true},
+  {g:'cash', k:'pbDue', label:'페이백 미지급', sub:true, warn:true},
+];
+function finVal(p, line){
+  if(line.k==='margin') return p.real ? p.profit / p.real : null;
+  if(line.k==='avg') return p.count ? Math.round(p.real / p.count) : null;
+  return p[line.k];
+}
+function finFmt(v, line){
+  if(v===null || v===undefined) return '-';
+  if(line.fmt==='cnt') return v + '건';
+  if(line.fmt==='pct') return (Math.round(v*1000)/10) + '%';
+  if(!v) return '-';
+  const sign = line.neg ? (v>0 ? '−' : '+') : (v<0 ? '−' : '');
+  return sign + fmtMoney(Math.abs(v)).replace('원','');
+}
+
+function renderFinance(){
+  const sec = document.getElementById('tab-finance'); if(!sec || !sec.classList.contains('active')) return;
+  const years = finYears();
+  if(FIN_STATE.year===null || !years.includes(FIN_STATE.year)) FIN_STATE.year = years.includes(new Date().getFullYear()) ? new Date().getFullYear() : years[years.length-1];
+  const ysel = document.getElementById('finYear');
+  ysel.innerHTML = years.map(y=>`<option value="${y}" ${y===FIN_STATE.year?'selected':''}>${y}년</option>`).join('');
+  ysel.disabled = FIN_STATE.view==='year';
+  document.querySelectorAll('#finView button').forEach(b=> b.classList.toggle('active', b.dataset.v===FIN_STATE.view));
+  document.getElementById('finFuture').checked = FIN_STATE.includeFuture;
+  document.querySelectorAll('#finGroups input').forEach(c=> c.checked = !!FIN_STATE.groups[c.dataset.g]);
+
+  const {periods, total} = finData();
+  const scope = FIN_STATE.view==='year' ? '전체 연도' : FIN_STATE.year+'년';
+  const margin = total.real ? Math.round(total.profit/total.real*1000)/10 : 0;
+  document.getElementById('finKpi').innerHTML = [
+    {l:'총매출', v:fmtMoney(total.gross), s:`${scope} · 예식 ${total.count}건 (종료 ${total.doneCount}건)`},
+    {l:'순매출 (할인 반영)', v:fmtMoney(total.net), s:`할인 합계 ${fmtMoney(total.discounts)}`},
+    {l:'실매출 (페이백 반영)', v:fmtMoney(total.real), s:`페이백 ${fmtMoney(total.payback)}`, c:'accent'},
+    {l:'인건비', v:fmtMoney(total.labor), s:`파트너 ${fmtMoney(total.laborPartner)} · 대표 ${fmtMoney(total.laborOwner)}`},
+    {l:'영업이익', v:fmtMoney(total.profit), s:`이익률 ${margin}%`, c: total.profit<0?'warn':'accent'},
+  ].map(k=>`<div class="kpi-card ${k.c||''}"><div class="kpi-label">${k.l}</div><div class="kpi-value">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('');
+
+  const lines = FIN_LINES.filter(l=> FIN_STATE.groups[l.g]);
+  const head = `<tr><th class="fin-lab">항목</th>${periods.map(p=>`<th class="fin-col ${FIN_STATE.sel===p.key?'sel':''} ${p.future?'future':''}" data-fsel="${p.key}" title="눌러서 이 기간 계약 보기">${p.label}${p.sub?`<small>${p.sub}</small>`:''}${p.future?'<small>예정</small>':(p.partial?'<small>진행 중</small>':'')}</th>`).join('')}<th class="fin-col fin-total">합계</th></tr>`;
+  const body = lines.map(l=>{
+    if(l.head) return `<tr class="fin-head"><td colspan="${periods.length+2}">${l.head}</td></tr>`;
+    const cls = [l.strong?'fin-strong':'', l.sub?'fin-sub':'', l.key?'fin-key':'', l.muted?'fin-muted':'', l.warn?'fin-warn':''].join(' ');
+    const cell = (p, extra)=>{ const v = finVal(p, l); const negProfit = l.profit && v<0; return `<td class="mono ${extra||''} ${FIN_STATE.sel===p.key?'sel':''} ${negProfit?'neg':''}">${finFmt(v, l)}</td>`; };
+    return `<tr class="${cls}"><td class="fin-lab">${l.label}</td>${periods.map(p=> cell(p)).join('')}${cell(Object.assign({key:'__total'}, total), 'fin-total')}</tr>`;
+  }).join('');
+  document.getElementById('finTable').innerHTML = `<thead>${head}</thead><tbody>${body}</tbody>`;
+  document.querySelectorAll('#finTable th[data-fsel]').forEach(th=> th.addEventListener('click', ()=>{ FIN_STATE.sel = FIN_STATE.sel===th.dataset.fsel ? null : th.dataset.fsel; renderFinance(); }));
+
+  // 기간 상세: 선택한 기간(없으면 전체)의 계약별 내역
+  const selP = periods.find(p=> p.key===FIN_STATE.sel);
+  const rows = (selP ? selP.rows : total.rows).slice().sort((a,b)=> String(a.rec.weddingDate).localeCompare(String(b.rec.weddingDate)));
+  document.getElementById('finDetailTitle').textContent = selP ? `${FIN_STATE.view==='year'?'':FIN_STATE.year+'년 '}${selP.label} 계약별 내역 (${rows.length}건)` : `${scope} 계약별 내역 (${rows.length}건) · 위 표의 기간 제목을 누르면 그 기간만 볼 수 있어요`;
+  document.getElementById('finDetail').innerHTML = rows.length ? `<thead><tr><th>예식일</th><th>계약자</th><th>상품</th><th>총매출</th><th>할인</th><th>페이백</th><th>실매출</th><th>인건비</th><th>영업이익</th><th>정산</th></tr></thead><tbody>${rows.map(x=>`<tr data-id="${x.rec.id}">
+      <td>${fmtDate(x.rec.weddingDate)}${x.done?'':' <span class="badge badge-normal">예정</span>'}</td><td>${esc(x.rec.clientName)}</td><td>${esc(x.rec.productType||'-')}</td>
+      <td class="mono">${fmtMoney(x.gross)}</td><td class="mono">${x.discounts?'−'+fmtMoney(x.discounts):'-'}</td><td class="mono">${x.payback?'−'+fmtMoney(x.payback):'-'}</td>
+      <td class="mono"><b>${fmtMoney(x.real)}</b></td><td class="mono">${x.labor?'−'+fmtMoney(x.labor):'-'}</td><td class="mono ${x.profit<0?'neg':''}"><b>${fmtMoney(x.profit)}</b></td>
+      <td>${x.rec.settlementDone?'<span class="badge badge-done">완료</span>':(x.done?'<span class="badge badge-pending">대기</span>':'-')}</td></tr>`).join('')}</tbody>`
+    : '<tbody><tr><td style="padding:24px;text-align:center;color:var(--slate);">이 기간에 예식이 없습니다</td></tr></tbody>';
+  document.querySelectorAll('#finDetail tr[data-id]').forEach(tr=> tr.addEventListener('click', ()=> openModal(tr.dataset.id)));
+  FIN_STATE._last = {periods, total, lines};
+}
+function finCsv(){
+  const d = FIN_STATE._last; if(!d) return;
+  const rows = [['항목', ...d.periods.map(p=> p.label), '합계']];
+  d.lines.forEach(l=>{ if(l.head){ rows.push(['['+l.head+']']); return; }
+    const val = p=>{ const v = finVal(p, l); if(v===null||v===undefined) return ''; if(l.fmt==='pct') return (Math.round(v*1000)/10)+'%'; return (l.neg && v ? -v : v); };
+    rows.push([l.label, ...d.periods.map(val), val(d.total)]); });
+  const csv = '﻿' + rows.map(r=> r.map(c=> '"'+String(c===undefined?'':c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const name = FIN_STATE.view==='year' ? '연도별' : `${FIN_STATE.year}_${FIN_STATE.view==='quarter'?'분기별':'월별'}`;
+  downloadFile(`모먼트웍스_재무제표_${name}.csv`, csv, 'text/csv;charset=utf-8');
+}
+(function bindFinance(){
+  const on = (id, ev, fn)=>{ const el = document.getElementById(id); if(el) el.addEventListener(ev, fn); };
+  on('finView', 'click', e=>{ const b = e.target.closest('button[data-v]'); if(!b) return; FIN_STATE.view = b.dataset.v; FIN_STATE.sel = null; renderFinance(); });
+  on('finYear', 'change', e=>{ FIN_STATE.year = Number(e.target.value); FIN_STATE.sel = null; renderFinance(); });
+  on('finFuture', 'change', e=>{ FIN_STATE.includeFuture = e.target.checked; renderFinance(); });
+  on('finGroups', 'change', e=>{ const c = e.target.closest('input[data-g]'); if(!c) return; FIN_STATE.groups[c.dataset.g] = c.checked; renderFinance(); });
+  on('finCsvBtn', 'click', finCsv);
+  on('finPrintBtn', 'click', ()=>{ document.body.classList.add('fin-printing'); setTimeout(()=>{ window.print(); document.body.classList.remove('fin-printing'); }, 50); });
+})();
 
 /* ---------- 로그인 ---------- */
 const LOGIN_ID_STORAGE = 'mw_saved_login_id';
