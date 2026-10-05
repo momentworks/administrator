@@ -1084,12 +1084,93 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
 .fin-detail tbody tr{cursor:pointer;}
 @media (max-width:1000px){.fin-kpi{grid-template-columns:repeat(2,1fr) !important;}.fin-groups{margin-left:0;}}
 @media print{
+  body.fin-printing *{visibility:visible !important;}
+  body.fin-printing #printStatement,body.fin-printing .overlay,body.fin-printing #loginOverlay,body.fin-printing #partnerPortalRoot{display:none !important;}
   body.fin-printing .topbar,body.fin-printing .tabnav,body.fin-printing .fin-actions,body.fin-printing .fin-controls,body.fin-printing .mw-footer,body.fin-printing .toast,body.fin-printing #syncStatus{display:none !important;}
   body.fin-printing .section{display:none !important;} body.fin-printing #tab-finance{display:block !important;padding-top:0;}
-  body.fin-printing .fin-table{font-size:10px;} body.fin-printing .fin-table td,body.fin-printing .fin-table th{padding:4px 5px;}
+  body.fin-printing #tab-finance{page:finpage;}
+  body.fin-printing .fin-kpi{grid-template-columns:repeat(5,1fr) !important;gap:6px;}
+  body.fin-printing .fin-kpi .kpi-card{padding:8px 10px;}
+  body.fin-printing .fin-kpi .kpi-value{font-size:15px;}
+  body.fin-printing .table-wrap, body.fin-printing .table-wrap > div{overflow:visible !important;box-shadow:none;}
+  body.fin-printing .fin-table{font-size:8.5px;width:100%;} body.fin-printing .fin-table td,body.fin-printing .fin-table th{padding:3px 4px;}
+  body.fin-printing .fin-table td.fin-lab,body.fin-printing .fin-table th.fin-lab{min-width:0;position:static;}
+  body.fin-printing .fin-detail{font-size:9px;}
   body.fin-printing{background:#fff;}
 }
 #finView button{white-space:nowrap;padding:7px 14px;}
+
+/* ---------- 정산서 ---------- */
+.settle-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-left:4px solid var(--ink);border-radius:4px;padding:10px 14px;margin:12px 0 14px;font-size:13px;}
+.settle-bar select{flex:1;min-width:240px;max-width:460px;padding:7px 10px;border:1px solid var(--line-strong);border-radius:2px;font:inherit;background:#fff;}
+.settle-bar span{font-size:11.5px;color:var(--slate);}
+.settle-modal{max-width:1080px;}
+.settle-body{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;padding:18px;background:#E9E3D8;border-radius:0 0 6px 6px;}
+@media (max-width:900px){.settle-body{grid-template-columns:1fr;}}
+.sd-paper{background:#fff;padding:36px 40px;box-shadow:0 4px 18px rgba(23,19,21,.12);color:#1C1719;font-size:13px;}
+.sd-head{display:flex;align-items:center;gap:16px;border-bottom:2px solid #1C1719;padding-bottom:14px;margin-bottom:16px;}
+.sd-head img{height:46px;}
+.sd-brand{font-size:10px;letter-spacing:.34em;color:var(--gold-deep);font-weight:700;}
+.sd-head h1{font-family:'Noto Serif KR',serif;font-size:24px;margin:2px 0 0;letter-spacing:.2em;}
+.sd-meta{margin-left:auto;text-align:right;font-size:11.5px;color:var(--ink-soft);line-height:1.6;}
+.sd-paper h2{font-size:12px;letter-spacing:.14em;color:var(--gold-deep);margin:18px 0 6px;font-weight:700;}
+.sd-paper table{width:100%;border-collapse:collapse;}
+.sd-paper table tr th,.sd-paper table tr td{background:none !important;color:inherit !important;border-bottom:1px solid #E6DFD2;padding:7px 8px;text-align:left;font-weight:500;letter-spacing:0;}
+.sd-info th{width:80px;color:var(--ink-soft) !important;font-weight:700;font-size:12px;}
+.sd-paper .sd-guest tr th{font-size:11.5px;color:var(--ink-soft) !important;text-align:center;font-weight:700;background:#F7F3EC !important;}
+.sd-guest td{text-align:center;font-size:14px;}
+.sd-guest td.over{color:var(--coral) !important;font-weight:700;}
+.sd-lines td.amt{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.sd-lines td small{display:block;font-size:10.5px;color:var(--slate);}
+.sd-lines tr.add td{color:var(--coral) !important;font-weight:700;}
+.sd-lines tr.removed td{color:var(--slate) !important;}
+.sd-lines tr.sub-total td{border-top:1px solid #1C1719;font-weight:700;}
+.sd-paper .sd-lines tr.total td{border-top:2px solid #1C1719;border-bottom:2px solid #1C1719;font-size:16px;font-weight:800;background:#FBF3DF !important;}
+.sd-foot-note{font-size:11.5px;color:var(--ink-soft);margin:10px 0 0;}
+.sd-note{margin-top:14px;border:1px solid #E6DFD2;padding:10px 12px;font-size:12px;} .sd-note p{margin:4px 0 0;}
+.sd-account{margin-top:10px;font-size:12.5px;} .sd-account b{margin-right:8px;}
+.sd-sign{display:flex;justify-content:space-between;align-items:flex-end;margin-top:30px;font-size:12.5px;color:var(--ink-soft);}
+.sd-sign b{font-family:'Noto Serif KR',serif;font-size:16px;color:#1C1719;letter-spacing:.2em;}
+.sd-form{background:#fff;border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:10px;align-self:start;position:sticky;top:0;}
+.sd-form h3{margin:0;font-size:14px;}
+.sd-form label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--ink-soft);}
+.sd-form input,.sd-form textarea{padding:8px 10px;border:1px solid var(--line-strong);border-radius:2px;font:inherit;font-weight:500;}
+.sd-form label.sd-check{flex-direction:row;align-items:center;gap:6px;color:var(--coral);}
+.sd-hint{font-size:11px;color:var(--slate);line-height:1.5;}
+.sd-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.sd-policy{border-top:1px solid var(--line);padding-top:8px;font-size:12px;}
+.sd-policy summary{cursor:pointer;font-weight:700;}
+.sd-policy>*:not(summary){margin-top:8px;}
+.sd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.sd-grid label{font-size:11px;} .sd-grid input{padding:6px;}
+@media print{
+  body.settle-printing > *:not(#settleOverlay){display:none !important;}
+  body.settle-printing *{visibility:visible !important;}
+  body.settle-printing #settleOverlay{position:static;display:block !important;padding:0;background:none;overflow:visible;backdrop-filter:none;}
+  body.settle-printing .settle-modal{box-shadow:none;max-width:none;background:none;}
+  body.settle-printing .settle-modal .modal-head, body.settle-printing #settleFormWrap{display:none !important;}
+  body.settle-printing .settle-body{display:block;padding:0;background:none;}
+  body.settle-printing #settleDoc{box-shadow:none;padding:4mm 6mm;}
+  body.settle-printing{background:#fff;}
+  @page{size:A4;margin:10mm;}
+  @page finpage{size:A4 landscape;margin:8mm;}
+}
+/* 배정 관리: 월 구분 */
+.p-month-head{margin:14px 0 6px;padding:6px 10px;background:#2A2426;color:#F3EDE2;font-size:12.5px;font-weight:700;border-radius:3px;display:flex;justify-content:space-between;}
+.p-month-head:first-child{margin-top:0;}
+.p-month-head span{color:#E3CF9E;font-weight:600;}
+.p-assign-sum{font-size:12.5px;color:var(--ink-soft);} .p-assign-sum b.bad{color:var(--coral);}
+.p-note-strip{font-size:12px;color:var(--ink-soft);background:#FBF3DF;border:1px solid #E3CF9E;border-radius:3px;padding:7px 12px;margin-bottom:10px;}
+.p-roster-all{max-height:720px;overflow-y:auto;padding-right:4px;}
+/* 구글시트 연동 상태 */
+.sheet-link{display:inline-block;margin-top:6px;border:1px solid var(--line-strong);background:#fff;border-radius:999px;padding:4px 11px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;color:var(--ink);}
+.sheet-link.ok{border-color:#A9C9AC;background:#EEF6EE;color:var(--sage);}
+.sheet-link.busy{border-color:#E3CF9E;background:#FBF3DF;color:var(--gold-deep);}
+.sheet-link.err,.sheet-link.off{border-color:#E5B2A6;background:var(--coral-soft);color:var(--coral);}
+.sheet-link.old{border-color:#E3CF9E;background:#FBF3DF;color:#8A5A12;}
+.sheet-banner{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;background:var(--coral);color:#fff;font-size:12.5px;font-weight:600;padding:9px 16px;text-align:center;}
+.sheet-banner .btn{background:#fff;color:var(--coral);border-color:#fff;}
+.rv-pol{font-size:10.5px;color:var(--slate);margin-top:2px;white-space:nowrap;} .rv-pol.new{color:var(--gold-deep);font-weight:700;}
 </style>
 </head>
 <body>
@@ -1130,6 +1211,7 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
     <div class="topbar-right">
       <div class="today" id="todayLabel">-</div>
       <div id="headerSummary">불러오는 중…</div>
+      <button id="sheetLink" class="sheet-link none" type="button">⚪ 연결 확인 중…</button>
       <div id="syncStatus" class="sync-status"></div>
       <div style="margin-top:4px;display:flex;gap:6px;justify-content:flex-end;">
         <button id="syncNowBtn" style="background:none;border:1px solid rgba(245,239,230,0.35);color:#F5EFE6;font-size:11px;padding:3px 9px;border-radius:999px;cursor:pointer;font-family:'Pretendard';">🔄 지금 동기화</button>
@@ -1152,6 +1234,7 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
   <button data-tab="finance">📊 재무제표</button>
 </div>
 
+<div id="sheetBanner" class="sheet-banner" style="display:none;"></div>
 <div class="app">
 
   <!-- DASHBOARD -->
@@ -1326,7 +1409,8 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
         <p class="section-desc">예식이 끝났지만 정산이 완료되지 않은 건을 관리합니다</p>
       </div>
     </div>
-    <div class="note-box">정산액 = 잔금 − 본식후기 할인. 예식일이 지난 건 중 정산 미완료 건이 우선 표시됩니다.</div>
+    <div class="note-box">정산액 = 잔금 − 본식후기 할인 · 잔금에는 <b>하객 기준인원 초과 추가금</b>(+)과 <b>하객규모할인</b>(−, 제외 시 0)이 반영돼요. 예식일이 지난 건 중 정산 미완료 건이 우선 표시됩니다.</div>
+    <div class="settle-bar"><b>📄 정산서 출력</b><select id="settlePick"></select><button class="btn btn-primary btn-sm" id="settlePickBtn">정산서 열기</button><span>정산 완료 건도 다시 출력할 수 있어요</span></div>
     <div id="settlementList"></div>
   </section>
 
@@ -1365,7 +1449,7 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
     <div class="section-head">
       <div>
         <h2 class="section-title">리뷰관리</h2>
-        <p class="section-desc">계약자별 계약후기·본식후기 작성여부와 URL을 관리합니다 · 후기는 각 유형당 최대 3개, 최대 30,000원까지 할인 반영돼요 · 예식완료 건은 "예식완료" 탭에서 관리해요</p>
+        <p class="section-desc">계약자별 계약후기·본식후기 작성여부와 URL을 관리합니다 · 후기 할인은 <b>2026년 9월 1일 이후 계약</b>은 유형별 최대 2개 · 1개당 20,000원, 이전 계약은 최대 3개 · 1개당 10,000원으로 반영돼요 (계약일 기준) · 예식완료 건은 "예식완료" 탭에서 관리해요</p>
       </div>
     </div>
     <div class="table-wrap">
@@ -1459,7 +1543,7 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
     </div>
     <div class="kpi-grid fin-kpi" id="finKpi"></div>
     <div class="table-wrap fin-wrap"><div style="overflow-x:auto;"><table id="finTable" class="fin-table"></table></div></div>
-    <div class="note-box" style="margin:14px 0 22px;">총매출 = 기준금액 + 출장비 · 순매출 = 총매출 − 할인(얼리버드·짝꿍코드·추천·계약후기) · <b>실매출 = 순매출 − 페이백(추천·본식후기)</b> · 영업이익 = 실매출 − 인건비(파트너스 배정 기준, 배정이 없으면 시트 인건비). 페이백은 본식이 끝난 계약만 확정돼요.</div>
+    <div class="note-box" style="margin:14px 0 22px;">총매출 = 기준금액 + 출장비 + 하객 초과 추가금 · 순매출 = 총매출 − 할인(얼리버드·짝꿍코드·추천·계약후기·하객규모) · <b>실매출 = 순매출 − 페이백(추천·본식후기)</b> · 영업이익 = 실매출 − 인건비(파트너스 배정 기준, 배정이 없으면 시트 인건비). 페이백은 본식이 끝난 계약만 확정돼요.</div>
     <div class="section-head" style="margin-bottom:10px;"><div><h3 class="fin-sub-title" id="finDetailTitle"></h3></div></div>
     <div class="table-wrap"><div style="overflow-x:auto;"><table id="finDetail" class="fin-detail"></table></div></div>
   </section>
@@ -1514,6 +1598,12 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
 <footer class="mw-footer"><img src="data:image/png;base64,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" alt=""><p>MOMENT WORKS</p><span>Managing Meaningful Moments</span><i></i></footer>
 
 <!-- MODAL -->
+<div class="overlay" id="settleOverlay">
+  <div class="modal settle-modal">
+    <div class="modal-head"><h3 id="settleTitle">정산서</h3><button class="modal-close" id="settleClose">✕</button></div>
+    <div class="settle-body"><div id="settleDocWrap"></div><div id="settleFormWrap"></div></div>
+  </div>
+</div>
 <div class="overlay" id="overlay">
   <div class="modal">
     <div class="modal-head">
@@ -1828,10 +1918,12 @@ function computeFinancials(r){
   const revC = Number(r.reviewDiscountContract)||0;
   const deposit = Number(r.deposit)||0;
   const travel = Number(r.travelFee)||0;
-  const balance = base - eb - pd - rd - revC - deposit + travel;
+  const gx = (typeof guestCalc==='function' && r.type!=='lead') ? guestCalc(r) : {gsd:0, surcharge:0};
+  const gsd = gx.gsd||0, sur = gx.surcharge||0;   // 하객규모할인(제외 시 0) · 하객 기준인원 초과 추가금
+  const balance = base - eb - pd - rd - revC - gsd - deposit + travel + sur;
   const revD = Number(r.reviewDiscountDay)||0;
   const finalSettlement = balance - revD;
-  return {base, eb, pd, rd, revC, deposit, travel, balance, revD, finalSettlement};
+  return {base, eb, pd, rd, revC, gsd, sur, deposit, travel, balance, revD, finalSettlement};
 }
 
 function recordStage(r){
@@ -2337,13 +2429,15 @@ function renderSettlement(){
       </div>
       <div class="lb-count">
         <div class="n">${fmtMoney(fin.finalSettlement)}</div>
-        <div class="l">잔금${(fin.revC+fin.revD)? ' − 후기할인 '+fmtMoney(fin.revC+fin.revD).replace('원',''):''}</div>
+        <div class="l">잔금${(fin.revC+fin.revD)? ' − 후기할인 '+fmtMoney(fin.revC+fin.revD).replace('원',''):''}${fin.sur? ' · 초과 +'+fmtMoney(fin.sur).replace('원',''):''}${fin.gsd? ' · 규모할인 −'+fmtMoney(fin.gsd).replace('원',''):''}</div>
       </div>
       <button class="map-btn" data-map-id="${r.id}" style="margin-left:14px;">📍 길찾기</button>
+      <button class="btn btn-sm" data-settle-doc="${r.id}" style="margin-left:8px;">📄 정산서</button>
       <button class="btn btn-primary btn-sm" data-id="${r.id}" style="margin-left:8px;">정산 완료 처리</button>
     </div>`;
   }).join('');
   attachMapButtons(el);
+  el.querySelectorAll('button[data-settle-doc]').forEach(b=> b.addEventListener('click', (e)=>{ e.stopPropagation(); openSettleDoc(b.dataset.settleDoc); }));
   el.querySelectorAll('button[data-id]').forEach(b=> b.addEventListener('click', async (e)=>{
     e.stopPropagation();
     const rec = RECORDS.find(r=>r.id===b.dataset.id);
@@ -2414,7 +2508,10 @@ function renderReferralLegacy(){
 }
 
 /* ---------- 리뷰관리 ---------- */
-function reviewDiscountFor(count){ return Math.min((Number(count)||0) * 10000, 30000); }
+const REVIEW_POLICY_FROM = '2026-09-01';
+function isNewReviewPolicy(rec){ return !!(rec && String(rec.contractDate||'') >= REVIEW_POLICY_FROM); }
+function reviewPolicyOf(rec){ return isNewReviewPolicy(rec) ? {max:2, unit:20000, label:'9/1 이후 계약 · 최대 2개 · 개당 2만원'} : {max:3, unit:10000, label:'최대 3개 · 개당 1만원'}; }
+function reviewDiscountFor(count, rec){ const p = reviewPolicyOf(rec); return Math.min(Number(count)||0, p.max) * p.unit; }
 function renderReview(){
   const contracts = activeContracts().filter(r=>{
     const dd = ddayInfo(r.weddingDate);
@@ -2423,17 +2520,18 @@ function renderReview(){
   const body = document.getElementById('reviewBody');
   document.getElementById('reviewEmpty').style.display = contracts.length ? 'none':'block';
   body.innerHTML = contracts.map(r=>{
-    const countOptions = (val)=> [0,1,2,3].map(n=>`<option value="${n}" ${Number(val)===n?'selected':''}>${n}개</option>`).join('');
+    const pol = reviewPolicyOf(r);
+    const countOptions = (val)=> Array.from({length: pol.max+1}, (_,n)=> n).map(n=>`<option value="${n}" ${Math.min(Number(val)||0, pol.max)===n?'selected':''}>${n}개</option>`).join('');
     return `<tr>
       <td>${fmtDate(r.weddingDate)}</td>
       <td>${esc(r.clientName)}</td>
-      <td class="mono">${esc(r.contractCode||'-')}</td>
+      <td class="mono">${esc(r.contractCode||'-')}<div class="rv-pol ${isNewReviewPolicy(r)?'new':''}">${pol.label}</div></td>
       <td><select data-review-id="${r.id}" data-review-kind="contract" data-review-field="count">${countOptions(r.reviewCountContract)}</select></td>
       <td><textarea data-review-id="${r.id}" data-review-kind="contract" data-review-field="urls" rows="2" style="width:220px;font-size:11.5px;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-family:'Pretendard';" placeholder="URL을 한 줄에 하나씩">${esc(r.reviewContractUrls||'')}</textarea></td>
-      <td class="mono">${fmtMoney(reviewDiscountFor(r.reviewCountContract))}</td>
+      <td class="mono">${fmtMoney(reviewDiscountFor(r.reviewCountContract, r))}</td>
       <td><select data-review-id="${r.id}" data-review-kind="day" data-review-field="count">${countOptions(r.reviewCountDay)}</select></td>
       <td><textarea data-review-id="${r.id}" data-review-kind="day" data-review-field="urls" rows="2" style="width:220px;font-size:11.5px;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-family:'Pretendard';" placeholder="URL을 한 줄에 하나씩">${esc(r.reviewDayUrls||'')}</textarea></td>
-      <td class="mono">${fmtMoney(reviewDiscountFor(r.reviewCountDay))}</td>
+      <td class="mono">${fmtMoney(reviewDiscountFor(r.reviewCountDay, r))}</td>
     </tr>`;
   }).join('');
 
@@ -2441,13 +2539,13 @@ function renderReview(){
     sel.addEventListener('change', async ()=>{
       const rec = RECORDS.find(r=>r.id===sel.dataset.reviewId);
       if(!rec) return;
-      const count = Number(sel.value)||0;
+      const count = Math.min(Number(sel.value)||0, reviewPolicyOf(rec).max);
       if(sel.dataset.reviewKind==='contract'){
         rec.reviewCountContract = count;
-        rec.reviewDiscountContract = reviewDiscountFor(count);
+        rec.reviewDiscountContract = reviewDiscountFor(count, rec);
       } else {
         rec.reviewCountDay = count;
-        rec.reviewDiscountDay = reviewDiscountFor(count);
+        rec.reviewDiscountDay = reviewDiscountFor(count, rec);
       }
       markDirty(rec);
       await persist();
@@ -2802,6 +2900,7 @@ function renderAll(){
   renderPartnersTab();
   if(typeof renderPaybackAlerts==='function') renderPaybackAlerts();
   if(typeof renderFinance==='function') renderFinance();
+  if(typeof renderSettlePicker==='function') renderSettlePicker();
 }
 
 function esc(s){ if(s===undefined||s===null) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -3305,17 +3404,19 @@ function renderFormInner(rec){
   const recalc = ()=>{
     const draft = collectFormValues(rec.type);
     const fin = computeFinancials(draft);
-    const totalDiscount = fin.eb + fin.pd + fin.rd + fin.revC + fin.revD;
+    const totalDiscount = fin.eb + fin.pd + fin.rd + fin.revC + fin.revD + (fin.gsd||0);
     document.getElementById('calcBox').innerHTML = `
       <div class="calc-row"><span class="lbl">기준금액</span><span>${fmtMoney(fin.base)}</span></div>
       <div class="calc-row"><span class="lbl">− 얼리버드 할인</span><span>${fmtMoney(fin.eb)}</span></div>
       <div class="calc-row"><span class="lbl">− 짝꿍코드 할인</span><span>${fmtMoney(fin.pd)}</span></div>
       <div class="calc-row"><span class="lbl">− 추천 할인(짝꿍코드 현황 기준, 확정 1건당 1만원)</span><span>${fmtMoney(fin.rd)}</span></div>
       <div class="calc-row"><span class="lbl">− 계약후기 할인</span><span>${fmtMoney(fin.revC)}</span></div>
+      ${fin.gsd? `<div class="calc-row"><span class="lbl">− 하객규모할인</span><span>${fmtMoney(fin.gsd)}</span></div>`:''}
       <div class="calc-row"><span class="lbl">− 본식후기 할인</span><span>${fmtMoney(fin.revD)}</span></div>
       <div class="calc-row" style="border-top:1px dashed #C3D2C4;margin-top:4px;padding-top:6px;font-weight:700;"><span class="lbl">총 할인 금액</span><span>${fmtMoney(totalDiscount)}</span></div>
       <div class="calc-row"><span class="lbl">− 계약금</span><span>${fmtMoney(fin.deposit)}</span></div>
       <div class="calc-row"><span class="lbl">+ 출장비</span><span>${fmtMoney(fin.travel)}</span></div>
+      ${fin.sur? `<div class="calc-row"><span class="lbl">+ 하객 기준인원 초과 추가금 (정산서)</span><span>${fmtMoney(fin.sur)}</span></div>`:''}
       <div class="calc-row total"><span class="lbl">잔금(예식 당일 수금액)</span><span>${fmtMoney(fin.balance)}</span></div>
       <div class="calc-row total"><span class="lbl">최종 정산액</span><span>${fmtMoney(fin.finalSettlement)}</span></div>
     `;
@@ -3325,7 +3426,7 @@ function renderFormInner(rec){
   document.getElementById('calcPdfBtn').addEventListener('click', ()=>{
     const draft = collectFormValues(rec.type);
     const fin = computeFinancials(draft);
-    const totalDiscount = fin.eb + fin.pd + fin.rd + fin.revC + fin.revD;
+    const totalDiscount = fin.eb + fin.pd + fin.rd + fin.revC + fin.revD + (fin.gsd||0);
     const afterDiscount = fin.base - totalDiscount;
     const issueDate = new Date();
     const issueDateStr = `${issueDate.getFullYear()}.${String(issueDate.getMonth()+1).padStart(2,'0')}.${String(issueDate.getDate()).padStart(2,'0')}`;
@@ -3356,10 +3457,12 @@ function renderFormInner(rec){
         <tr><td class="k">짝꿍코드 할인</td><td class="v">− ${fmtMoney(fin.pd)}</td></tr>
         <tr><td class="k">추천 할인(짝꿍코드 현황 기준)</td><td class="v">− ${fmtMoney(fin.rd)}</td></tr>
         <tr><td class="k">계약후기 할인</td><td class="v">− ${fmtMoney(fin.revC)}</td></tr>
+        ${fin.gsd? `<tr><td class="k">하객규모할인</td><td class="v">− ${fmtMoney(fin.gsd)}</td></tr>`:''}
         <tr><td class="k">본식후기 할인</td><td class="v">− ${fmtMoney(fin.revD)}</td></tr>
         <tr class="subtotal"><td class="k">할인 적용 후 금액</td><td class="v">${fmtMoney(afterDiscount)}</td></tr>
         <tr><td class="k">계약금(기납부)</td><td class="v">− ${fmtMoney(fin.deposit)}</td></tr>
         <tr><td class="k">출장비</td><td class="v">+ ${fmtMoney(fin.travel)}</td></tr>
+        ${fin.sur? `<tr><td class="k">하객 기준인원 초과 추가금</td><td class="v">+ ${fmtMoney(fin.sur)}</td></tr>`:''}
         <tr class="total"><td class="k">최종 정산액</td><td class="v">${fmtMoney(fin.finalSettlement)}</td></tr>
       </table>
 
@@ -3385,6 +3488,17 @@ function renderFormInner(rec){
       document.getElementById('f_partnerDiscount').value = 10000;
     }
     recalc();
+  });
+  // 후기 작성수 → 할인금액 자동 계산 (계약일 기준 정책)
+  ['Contract','Day'].forEach(k=>{
+    const cnt = document.getElementById('f_reviewCount'+k), dis = document.getElementById('f_reviewDiscount'+k);
+    if(!cnt || !dis) return;
+    const apply = ()=>{ const draft = {contractDate: (document.getElementById('f_contractDate')||{}).value||''}; const p = reviewPolicyOf(draft);
+      cnt.max = p.max; if((Number(cnt.value)||0) > p.max) cnt.value = p.max; dis.value = reviewDiscountFor(cnt.value, draft);
+      const lb = cnt.closest('.form-field') && cnt.closest('.form-field').querySelector('label'); if(lb) lb.innerHTML = (k==='Contract'?'계약후기':'본식후기')+` 작성수 <span class="hint">${p.label}</span>`; };
+    cnt.addEventListener('input', apply);
+    const cd = document.getElementById('f_contractDate'); if(cd) cd.addEventListener('change', apply);
+    const lb = cnt.closest('.form-field') && cnt.closest('.form-field').querySelector('label'); const p0 = reviewPolicyOf({contractDate:(document.getElementById('f_contractDate')||{}).value||''}); if(lb) lb.innerHTML = (k==='Contract'?'계약후기':'본식후기')+` 작성수 <span class="hint">${p0.label}</span>`; cnt.max = p0.max;
   });
   inner.querySelectorAll('input, select').forEach(el=> el.addEventListener('input', recalc));
   recalc();
@@ -3993,7 +4107,7 @@ let partnerSub = 'overview';
 let boardStart = null;       // 스케줄 보드 시작일
 let boardWeekdays = true;    // 예식 있는 평일 포함
 let boardWeeks = 6;
-let assignFilter = 'need';
+let assignFilter = 'all'; // 배정 관리: 기본으로 예정된 전체 일정 표시
 let payMonthSel = null;
 let pEditor = null;          // 배정 편집 상태
 let portalMode = null;       // 파트너 로그인 세션
@@ -4082,6 +4196,9 @@ function normalizePdb(db){
     db.settings.roleModel = 3; pdbMigrated = true;
   }
   db.members.forEach(m=>{ if(m && m.title==='보조') m.title = '파트너'; });
+  if(Number(db.settings.slotModel||1) < 3){
+    db.settings.slotsByProduct = Object.assign({}, db.settings.slotsByProduct, {'양측':4, '한측':2}); db.settings.slotModel = 3; pdbMigrated = true;
+  }
   if(Number(db.settings.slotModel||1) < 2){
     db.settings.slotsByProduct = pvDefaultSettings().slotsByProduct; db.settings.slotModel = 2; pdbMigrated = true;
   }
@@ -4282,12 +4399,13 @@ var dirtyIdSet = dirtyIdSet || new Set();
 let _recSaveChain = Promise.resolve(true);
 async function persist(){
   await persistLocalCache();
-  if(!SERVER_URL) return;
+  if(!SERVER_URL){ updateLinkChip(); return; }
+  updateLinkChip();
   if(SERVER_VER>=6){
     _recSaveChain = _recSaveChain.then(()=> _persistPatchOnce(0), ()=> _persistPatchOnce(0));
     return _recSaveChain;
   }
-  return persistLegacy();
+  const r = await persistLegacy(); if(SERVER_MODE!=='offline') LINK.lastSave = Date.now(); updateLinkChip(); return r;
 }
 async function _persistPatchOnce(attempt){
   if(!dirtyKeys.size && !deletedKeys.size && !dirtyIdSet.size) return true;
@@ -4299,16 +4417,54 @@ async function _persistPatchOnce(attempt){
     if(!res.ok) throw new Error('서버 응답 오류 ' + res.status);
     const j = await res.json();
     if(!j || j.ok!==true) throw new Error((j && j.error) || '서버가 저장 실패를 반환했습니다');
+    LINK.lastSave = Date.now(); LINK.error = ''; updateLinkChip();
     return true;
   }catch(e){
     // 실패한 항목은 다시 대기열로 → 한 번 자동 재시도, 그래도 실패하면 다음 저장/동기화 때 함께 전송
     keys.forEach(k=>dirtyKeys.add(k)); ids.forEach(k=>dirtyIdSet.add(k)); dels.forEach(k=>{ if(!RECORDS.some(r=>recordKey(r)===k)) deletedKeys.add(k); });
     console.error('서버 저장 실패', e);
     if(attempt<1){ await new Promise(r=>setTimeout(r,1200)); return _persistPatchOnce(attempt+1); }
+    LINK.error = e.message || '알 수 없는 오류'; updateLinkChip();
     showToast(`⚠️ 서버 저장에 실패했어요 (${e.message||''}). 이 기기에는 저장됐고, 다음 저장이나 "지금 동기화" 때 다시 보내요.`);
     return false;
   }
 }
+/* ---------- 구글시트 연동 상태 표시 (헤더 칩 + 문제 있을 때 안내 띠) ---------- */
+const LINK = {lastSave:0, error:'', checked:0};
+function linkState(){
+  if(!SERVER_URL || SERVER_MODE==='none') return {k:'none', chip:'⚪ 서버 미연결 · 이 기기에만 저장', banner:'구글시트 서버(웹 앱) 주소가 설정되지 않아 수정 내용이 이 기기에만 저장돼요. "서버 연결"에서 웹 앱 주소를 입력해주세요.'};
+  if(SERVER_MODE==='offline') return {k:'off', chip:'🔴 구글시트 서버 연결 안 됨', banner:'구글시트 서버에 연결하지 못했어요. 인터넷 연결 또는 "서버 연결"의 웹 앱 주소를 확인해주세요. 이 기기에서 수정한 내용은 보관했다가 연결되면 자동으로 시트에 저장해요.'};
+  if(SERVER_VER<6) return {k:'old', chip:'🟠 서버 스크립트 업데이트 필요', banner:'연결된 서버 스크립트가 최신(v6)이 아니라 일부 항목(파트너1~4·페이백·정산서 등)이 시트에 저장되지 않을 수 있어요. 최신 서버 스크립트로 교체 후 "배포 관리 → 수정 → 새 버전"으로 배포해주세요.'};
+  const pending = (typeof dirtyKeys!=='undefined' && (dirtyKeys.size || dirtyIdSet.size || deletedKeys.size));
+  if(LINK.error) return {k:'err', chip:'🔴 시트 저장 실패 · 눌러서 다시 시도', banner:`구글시트 저장에 실패했어요 (${LINK.error}). 수정 내용은 이 기기에 보관 중이며, 자동으로 다시 시도해요.`};
+  if(pending) return {k:'busy', chip:'⏳ 구글시트에 저장 중…'};
+  const hm = d=> String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  return {k:'ok', chip:`🟢 구글시트 양방향 연동 중${LINK.lastSave? ' · '+hm(new Date(LINK.lastSave))+' 저장' : ''}`};
+}
+function updateLinkChip(){
+  const st = linkState();
+  const chip = document.getElementById('sheetLink');
+  if(chip){ chip.textContent = st.chip; chip.className = 'sheet-link '+st.k; chip.title = st.k==='ok' ? '웹에서 수정하면 바로 구글시트에 저장되고, 시트에서 수정한 내용은 1분 안에 웹에 반영돼요' : (st.banner||''); }
+  const bn = document.getElementById('sheetBanner');
+  if(bn){
+    const show = st.banner && st.k!=='busy';
+    bn.style.display = show ? 'flex' : 'none';
+    if(show) bn.innerHTML = `<span>${esc(st.banner)}</span>${st.k==='err' ? '<button class="btn btn-sm" data-link="retry">지금 다시 저장</button>' : '<button class="btn btn-sm" data-link="settings">서버 연결</button>'}`;
+  }
+}
+async function retrySave(){ LINK.error=''; updateLinkChip(); await persist(); await savePartnerDb(); updateLinkChip(); }
+document.addEventListener('click', e=>{
+  const b = e.target.closest('#sheetLink, [data-link]'); if(!b) return;
+  const st = linkState();
+  if((b.dataset.link==='retry') || (b.id==='sheetLink' && st.k==='err')) return retrySave();
+  if(b.dataset.link==='settings' || (b.id==='sheetLink' && (st.k==='none' || st.k==='off' || st.k==='old'))){ const sb = document.getElementById('serverSettingsBtn'); if(sb) sb.click(); return; }
+  if(b.id==='sheetLink') quietSync(true);
+});
+window.addEventListener('online', ()=>{ if(SERVER_URL){ retrySave().then(()=> quietSync(true)); } });
+setInterval(()=>{ // 저장 대기분이 남아 있으면 30초마다 다시 보냄
+  if(SERVER_VER>=6 && (dirtyKeys.size || dirtyIdSet.size || deletedKeys.size) && !document.querySelector('.overlay.active')) persist().then(updateLinkChip);
+}, 30*1000);
+
 function setSyncStatus(text){ const el=document.getElementById('syncStatus'); if(el){ el.textContent = text||''; el.classList.toggle('on', !!text); } }
 /* 저장 대기 중인 이 기기의 수정분을 서버 데이터 위에 다시 얹기 */
 function applyPendingLocal(serverRecs){
@@ -4321,6 +4477,7 @@ function applyPendingLocal(serverRecs){
 async function afterPartnerLoad(){
   if(pdbMigrated){ pdbMigrated=false; pDirty.settings=true; markAllPartnerDirty(); await savePartnerDb(true); }
   if(remapAssignmentKeys()) await savePartnerDb(true);
+  if(fitAllSlots()) await savePartnerDb(true);
   await runSheetPartnerMatch(false);
   await runReferralSync();
 }
@@ -4394,6 +4551,7 @@ async function loadRecords(){
     if(dirtyKeys.size || deletedKeys.size) await persist();
     renderAll();
     setSyncStatus('');
+    LINK.checked = Date.now(); updateLinkChip();
     return;
   }
   // ③ 이전 버전 서버: 기존 방식 그대로
@@ -4403,6 +4561,8 @@ async function loadRecords(){
   await afterPartnerLoad();
   renderAll();
   setSyncStatus('');
+  if(SERVER_URL && SERVER_MODE!=='v2' && SERVER_MODE!=='v1') SERVER_MODE = 'offline';
+  LINK.checked = Date.now(); updateLinkChip();
 }
 
 /* ---------- 도메인 헬퍼 ---------- */
@@ -4420,9 +4580,26 @@ function defaultSlots(rec){
   const n = Math.max(1, slotLimitFor(rec));
   return Array.from({length:n}, (_,i)=>({id:uid('s'), pos:i+1, role:roleForPos(rec,i+1), memberId:'', pay:0, paid:false}));
 }
+/* 상품별 배정 인원 맞추기: 양측 4인 · 한측 2인 · 통합 2인 (빈 자리 추가 / 남는 빈 자리 정리 · 배정된 인원은 지우지 않음) */
+function fitSlots(rec, a){
+  if(!a || !Array.isArray(a.slots)) return false;
+  const need = Math.max(1, slotLimitFor(rec));
+  let changed = ensureSlotPos(a);
+  const before = a.slots.length;
+  a.slots = a.slots.filter(s=> s.memberId || s.pos<=need);
+  for(let p=1; p<=need; p++){ if(!a.slots.some(s=> s.pos===p)){ a.slots.push({id:uid('s'), pos:p, role:roleForPos(rec,p), memberId:'', pay:0, paid:false}); changed = true; } }
+  if(a.slots.length!==before) changed = true;
+  a.slots.sort((x,y)=> x.pos-y.pos);
+  return changed;
+}
+function fitAllSlots(){
+  let n = 0; const db = ensurePdb();
+  RECORDS.forEach(r=>{ const a = db.assignments[r.id]; if(a && r.type!=='lead' && fitSlots(r, a)){ pDirty.assignments.add(r.id); n++; } });
+  return n;
+}
 function getAssignment(rec){
   const a = ensurePdb().assignments[rec.id];
-  if(a) return a;
+  if(a){ if(fitSlots(rec, a)) pDirty.assignments.add(rec.id); return a; }
   return {slots: defaultSlots(rec), callOffset:null, workMinutes:null, note:'', virtual:true};
 }
 function eventWindow(rec, a){
@@ -4747,7 +4924,8 @@ function slotChipsHTML(rec, a){
     const m = memberById(s.memberId) || {name:'(삭제됨)', color:'#999'};
     const r = resp[s.memberId] || {};
     const issues = memberIssues(s.memberId, rec, a);
-    return `<span class="p-slot" ${issues.length?`title="${esc(issues.join(' / '))}" style="border-color:#E3B1A5;"`:(s.fromSheet?'title="구글시트 파트너 항목에서 자동 배정"':'')}>${s.pos<=4?`<b class="p-pos">P${s.pos}</b>`:''}<i style="background:${esc(m.color)}"></i>${esc(m.name)}${s.fromSheet?'<span class="p-sheet">시트</span>':''} ${isOwner(m)?'':`<span class="st ${r.confirmed?'ok':''}">${r.confirmed?'✓확인':'⏳'}</span>`}${issues.length?' ⚠':''}</span>`;
+    if(s.pos > slotLimitFor(rec)) issues.push(`${rec.productType||''} 예식 기준 ${slotLimitFor(rec)}인 초과 배정`);
+    return `<span class="p-slot" ${issues.length?`title="${esc(issues.join(' / '))}" style="border-color:#E3B1A5;"`:(s.fromSheet?'title="구글시트 파트너 항목에서 자동 배정"':'')}>${s.pos<=4?`<b class="p-pos">P${s.pos}</b>`:''}<i style="background:${esc(m.color)}"></i>${esc(m.name)}${s.fromSheet?'<span class="p-sheet">파트너</span>':''} ${isOwner(m)?'':`<span class="st ${r.confirmed?'ok':''}">${r.confirmed?'✓확인':'⏳'}</span>`}${issues.length?' ⚠':''}</span>`;
   }).join('');
 }
 function eventRowHTML(rec, opts){
@@ -4797,10 +4975,16 @@ function pOverviewHTML(){
   const need = up.filter(r=> staffing(r).empty>0);
   // 이번 주말
   let d = t; const wk=[]; for(let i=0;i<8 && wk.length<2;i++){ const dw=dowOf(d); if(dw===6||dw===0) wk.push(d); if(dw===0 && wk.length) break; d=addDaysStr(d,1); }
-  const weekendHTML = wk.map(ds=>{
-    const evs = staffableContracts().filter(r=>r.weddingDate===ds).sort((a,b)=>dateTimeSortKey(a).localeCompare(dateTimeSortKey(b)));
-    return `<div style="margin-bottom:10px;"><div style="font-weight:700;font-size:12.5px;color:${dowOf(ds)===0?'var(--wine)':'var(--ink)'};margin-bottom:4px;">${fmtDate(ds)}</div>
-      ${evs.length? evs.map(r=>{ const a=getAssignment(r), w=eventWindow(r,a); return `<div class="p-row" style="padding:6px 0;"><div class="p-when" style="min-width:90px;"><b>출근 ${w.call||'-'}</b><small>예식 ${esc(r.weddingTime||'')}</small></div><div class="p-what" style="min-width:120px;"><b>${esc(shortVenue(r.venueName))}</b><small>${esc(r.clientName)}</small></div><div class="p-slots">${slotChipsHTML(r,a)}</div><div class="p-actions"><button class="btn btn-sm" data-act="editAssign" data-rid="${r.id}">편집</button></div></div>`; }).join('') : '<div style="font-size:12px;color:var(--slate);">예식 없음</div>'}
+  // 예정된 전체 출근표: 오늘 이후 예식이 있는 날짜를 모두 (월별 구분)
+  const upAll = upcomingStaffable();
+  const upDates = [...new Set(upAll.map(r=> r.weddingDate))];
+  let wkMonth = '';
+  const weekendHTML = upDates.map(ds=>{
+    const evs = upAll.filter(r=>r.weddingDate===ds);
+    const m = ds.slice(0,7); let head = '';
+    if(m!==wkMonth){ wkMonth = m; head = `<div class="p-month-head">${m.slice(0,4)}년 ${Number(m.slice(5,7))}월 <span>${upAll.filter(r=> r.weddingDate.slice(0,7)===m).length}건</span></div>`; }
+    return head + `<div style="margin-bottom:10px;"><div style="font-weight:700;font-size:12.5px;color:${dowOf(ds)===0?'var(--wine)':'var(--ink)'};margin-bottom:4px;">${fmtDate(ds)}${ds===t?' <span class="badge badge-urgent">오늘</span>':''}</div>
+      ${evs.map(r=>{ const a=getAssignment(r), w=eventWindow(r,a); return `<div class="p-row" style="padding:6px 0;"><div class="p-when" style="min-width:90px;"><b>출근 ${w.call||'-'}</b><small>예식 ${esc(r.weddingTime||'')}</small></div><div class="p-what" style="min-width:120px;"><b>${esc(shortVenue(r.venueName))}</b><small>${esc(r.clientName)}</small></div><div class="p-slots">${slotChipsHTML(r,a)}</div><div class="p-actions"><button class="btn btn-sm" data-act="editAssign" data-rid="${r.id}">편집</button></div></div>`; }).join('')}
     </div>`;
   }).join('');
   // 활동 피드
@@ -4838,7 +5022,7 @@ function pOverviewHTML(){
         </div>
       </div>
       <div>
-        <div class="p-panel"><h3>이번 주말 출근표</h3><div class="sub">누가 몇 시에 어디로 가는지 한눈에</div>${weekendHTML || '<div class="empty-state" style="padding:18px;">-</div>'}</div>
+        <div class="p-panel"><h3>예정된 출근표</h3><div class="sub">누가 몇 시에 어디로 가는지 한눈에 · 예정된 일정 전체 ${upAll.length}건</div><div class="p-roster-all">${weekendHTML || '<div class="empty-state" style="padding:18px;">예정된 예식이 없어요</div>'}</div></div>
         <div class="p-panel"><h3>파트너 활동</h3><div class="sub">배정 확인 · 체크인 · 휴무 신청 소식</div>
           <div class="p-feed">${feed.length? feed.slice(0,12).map(f=>`<div><time>${fmtAt(f.at)}</time><span>${f.text}</span></div>`).join('') : '<div style="color:var(--slate);">아직 활동이 없어요</div>'}</div>
         </div>
@@ -4912,18 +5096,26 @@ function pAssignHTML(){
     if(assignFilter==='month') list = list.filter(r=> r.weddingDate.slice(0,7)===mk);
   }
   const needCount = upcomingStaffable().filter(r=>staffing(r).empty>0).length;
+  const sum = list.reduce((o,r)=>{ const st = staffing(r); o.req += st.required; o.fil += st.filled; if(st.empty) o.empty++; if(st.unconfirmed) o.unconf++; return o; }, {req:0, fil:0, empty:0, unconf:0});
+  let lastMonth = '';
+  const rowsHTML = list.map(r=>{
+    const m = String(r.weddingDate).slice(0,7); let head = '';
+    if(m!==lastMonth){ lastMonth = m; const cnt = list.filter(x=> String(x.weddingDate).slice(0,7)===m).length; head = `<div class="p-month-head">${m.slice(0,4)}년 ${Number(m.slice(5,7))}월 <span>${cnt}건</span></div>`; }
+    return head + eventRowHTML(r, {noAuto: assignFilter==='past'});
+  }).join('');
   return `
     <div class="toolbar">
       <select data-act="assignFilter">
         <option value="need" ${assignFilter==='need'?'selected':''}>빈 자리 · 미확인만</option>
-        <option value="all" ${assignFilter==='all'?'selected':''}>향후 전체</option>
+        <option value="all" ${assignFilter==='all'?'selected':''}>예정된 전체 일정</option>
         <option value="month" ${assignFilter==='month'?'selected':''}>이번달 예식</option>
         <option value="past" ${assignFilter==='past'?'selected':''}>지난 예식 (최근 60일)</option>
       </select>
-      <span style="font-size:12.5px;color:var(--ink-soft);">${list.length}건</span>
+      <span class="p-assign-sum">${list.length}건 · 배정 ${sum.fil}/${sum.req}명${sum.empty?` · <b class="bad">빈 자리 ${sum.empty}건</b>`:''}${sum.unconf?` · 미확인 ${sum.unconf}건`:''}</span>
       ${needCount? `<button class="btn btn-primary btn-sm" data-act="autoAll" style="margin-left:auto;">빈 자리 ${needCount}건 일괄 자동배정</button>`:''}
     </div>
-    <div class="p-panel">${list.length? list.map(r=>eventRowHTML(r, {noAuto: assignFilter==='past'})).join('') : '<div class="empty-state" style="padding:26px;">해당하는 예식이 없어요</div>'}</div>`;
+    <div class="p-note-strip">양측 4인(P1~P4) · 한측 2인(P1·P2) · 통합 2인(P1·P2)으로 배정해요</div>
+    <div class="p-panel">${list.length? rowsHTML : '<div class="empty-state" style="padding:26px;">해당하는 예식이 없어요</div>'}</div>`;
 }
 
 /* ---------- 파트너 명부 ---------- */
@@ -5207,7 +5399,7 @@ function renderAssignEditor(){
         ${slot.memberId && !cands.some(c=>c.m.id===slot.memberId) ? `<option value="${slot.memberId}" selected>${esc((memberById(slot.memberId)||{name:'(삭제된 인원)'}).name)}</option>`:''}
       </select>
       <input type="number" step="1000" value="${Number(slot.pay)||0}" data-ed="pay" data-i="${idx}" title="기본 인건비">
-      <label><input type="checkbox" data-ed="paid" data-i="${idx}" ${slot.paid?'checked':''}>지급${slot.fromSheet?' <span class="p-sheet" title="구글시트 파트너 항목에서 자동 배정 · 시트에서 이름을 빼면 다음 동기화 때 해제돼요">시트</span>':''}</label>
+      <label><input type="checkbox" data-ed="paid" data-i="${idx}" ${slot.paid?'checked':''}>지급${slot.fromSheet?' <span class="p-sheet" title="구글시트 파트너 항목에서 자동 배정 · 시트에서 이름을 빼면 다음 동기화 때 해제돼요">파트너</span>':''}</label>
       <button class="btn btn-sm btn-ghost btn-danger" data-ed="remove" data-i="${idx}" title="자리 삭제">✕</button>
       ${slot.memberId ? `<div class="p-pay-extra">
           <span>추가수당</span><input type="number" step="1000" value="${Number(slot.allowance)||0}" data-ed="allowance" data-i="${idx}" style="width:96px;">
@@ -5274,7 +5466,7 @@ function onEditorClick(ev){
   const {a, rec} = pEditor; const k = el.dataset.ed;
   if(k==='remove'){ a.slots.splice(Number(el.dataset.i),1); }
   if(k==='applyRate'){ const sl=a.slots[Number(el.dataset.i)]; sl.pay = defaultPayFor(memberById(sl.memberId), rec); }
-  if(k==='addSlot'){ ensureSlotPos(a); const used=new Set(a.slots.map(s=>s.pos)); let p=1; while(used.has(p)) p++; a.slots.push({id:uid('s'), pos:p, role:roleForPos(rec,p), memberId:'', pay:0, paid:false}); a.slots.sort((x,y)=>x.pos-y.pos); }
+  if(k==='addSlot'){ ensureSlotPos(a); if(a.slots.length >= slotLimitFor(rec)){ showToast(`${rec.productType||''} 예식은 ${slotLimitFor(rec)}인까지 배정할 수 있어요`); return; } const used=new Set(a.slots.map(s=>s.pos)); let p=1; while(used.has(p)) p++; a.slots.push({id:uid('s'), pos:p, role:roleForPos(rec,p), memberId:'', pay:0, paid:false}); a.slots.sort((x,y)=>x.pos-y.pos); }
   if(k==='auto'){ const n=autoFillAssignment(rec, a); showToast(n? `${n}자리를 추천 인원으로 채웠어요` : '조건에 맞는 추천 인원이 없어요'); }
   if(k==='resetSlots'){ if(!confirm('자리 구성을 상품 기준으로 초기화할까요? (배정 인원이 비워져요)')) return; a.slots = defaultSlots(rec); }
   renderAssignEditor();
@@ -5775,6 +5967,10 @@ var SHEET_FIELD_HEADERS = {
   referralDiscount: '추천할인금액',        // 앱 계산값 (수식 칸이면 기록 안 함)
   balanceDue: '잔금',                      // 앱 계산값 (수식 칸이면 기록 안 함)
   weddingDone: '예식완료',                 // 예식일 경과 여부 O/X (수식 칸이면 기록 안 함)
+  actualGuests: '실제하객수',              // 정산서: 실제 하객 수 (열이 있을 때만)
+  guestScaleDiscount: '하객규모할인금액',   // 정산서: 하객규모할인 금액
+  guestScaleRemoved: '하객규모할인제외',    // 정산서: 하객규모할인 제외 O/X
+  guestSurcharge: '하객초과추가금',         // 정산서: 하객 기준인원 초과 추가금 (빈칸이면 자동 계산)
   settingsSentNotified: '설정서 발송여부',
   settingsSubmitted: '설정서 제출여부',
   reviewCountContract: '계약후기 갯수',
@@ -5787,8 +5983,8 @@ var SHEET_FIELD_KEYS = Object.keys(SHEET_FIELD_HEADERS);
 var DATE_FIELDS = { contractDate: true, weddingDate: true, cancelDate: true };
 var TIME_FIELDS = { weddingTime: true };
 var OX_STRING_FIELDS = { earlyBird: true };
-var PAY_SLOT_FIELDS = { laborCost1: true, laborCost2: true, laborCost3: true, laborCost4: true, referralPayback: true, reviewPayback: true }; // 빈칸('')과 0을 구분하는 금액
-var OX_BOOL_FIELDS = { settlementDone: true, settingsSentNotified: true, settingsSubmitted: true, cancelled: true, weddingDone: true };
+var PAY_SLOT_FIELDS = { laborCost1: true, laborCost2: true, laborCost3: true, laborCost4: true, referralPayback: true, reviewPayback: true, actualGuests: true, guestScaleDiscount: true, guestSurcharge: true }; // 빈칸('')과 0을 구분하는 금액
+var OX_BOOL_FIELDS = { settlementDone: true, settingsSentNotified: true, settingsSubmitted: true, cancelled: true, weddingDone: true, guestScaleRemoved: true };
 var NUM_FIELDS = {
   groomGuests: true, brideGuests: true, baseAmount: true,
   earlyBirdDiscount: true, partnerDiscount: true, travelFee: true, deposit: true,
@@ -5814,9 +6010,12 @@ function cellOr_(row, ci, fallback) {
   var v = row[ci];
   return (v === '' || v === null || v === undefined || toStr_(v) === '') ? fallback : toNum_(v);
 }
-function reviewDiscountFor_(count) {
+/* 후기 할인: 2026-09-01 이후 계약 = 유형별 최대 2개 · 1개당 20,000원 / 이전 계약 = 최대 3개 · 1개당 10,000원 */
+var REVIEW_POLICY_FROM = '2026-09-01';
+function reviewDiscountFor_(count, contractDate) {
   var n = Number(count) || 0;
-  return Math.min(n * 10000, 30000);
+  var isNew = String(contractDate || '') >= REVIEW_POLICY_FROM;
+  return Math.min(n, isNew ? 2 : 3) * (isNew ? 20000 : 10000);
 }
 
 /* ================= 진입점 ================= */
@@ -6260,10 +6459,10 @@ function contractsFromContext_(ctx) {
       referralCountTotal: IDX.referralCountTotal >= 0 ? toNum_(row[IDX.referralCountTotal]) : 0,
       referralCountUnder60: IDX.referralCountUnder60 >= 0 ? toNum_(row[IDX.referralCountUnder60]) : 0,
       reviewCountContract: reviewCountContract,
-      reviewDiscountContract: cellOr_(row, IDX.reviewDiscountContract, reviewDiscountFor_(reviewCountContract)),
+      reviewDiscountContract: cellOr_(row, IDX.reviewDiscountContract, reviewDiscountFor_(reviewCountContract, contractDateStr)),
       reviewContractUrls: IDX.reviewContractUrls >= 0 ? toStr_(row[IDX.reviewContractUrls]) : '',
       reviewCountDay: reviewCountDay,
-      reviewDiscountDay: cellOr_(row, IDX.reviewDiscountDay, reviewDiscountFor_(reviewCountDay)),
+      reviewDiscountDay: cellOr_(row, IDX.reviewDiscountDay, reviewDiscountFor_(reviewCountDay, contractDateStr)),
       reviewDayUrls: IDX.reviewDayUrls >= 0 ? toStr_(row[IDX.reviewDayUrls]) : '',
       settlementDone: IDX.settlementDone >= 0 ? (toStr_(row[IDX.settlementDone]) === 'O') : false,
       settingsSentNotified: IDX.settingsSentNotified >= 0 ? (toStr_(row[IDX.settingsSentNotified]) === 'O') : false,
@@ -6277,13 +6476,14 @@ function contractsFromContext_(ctx) {
       createdAt: contractDateStr ? (contractDateStr + 'T09:00:00') : '',
     };
     // 이미 지급한 페이백 (빈칸은 null · 열이 있을 때만)
-    ['referralPayback', 'reviewPayback'].forEach(function (f) {
+    ['referralPayback', 'reviewPayback', 'actualGuests', 'guestScaleDiscount', 'guestSurcharge'].forEach(function (f) {
       if (IDX[f] >= 0) { var pv = row[IDX[f]]; rec[f] = (pv === '' || pv === null || pv === undefined || toStr_(pv) === '') ? null : toNum_(pv); }
     });
     // 앱 계산값 열 (비교용으로 현재 칸 값을 전달)
     if (IDX.referralDiscount >= 0) rec.referralDiscount = toNum_(row[IDX.referralDiscount]);
     if (IDX.balanceDue >= 0) rec.balanceDue = toNum_(row[IDX.balanceDue]);
     if (IDX.weddingDone >= 0) rec.weddingDone = toStr_(row[IDX.weddingDone]) === 'O';
+    if (IDX.guestScaleRemoved >= 0) rec.guestScaleRemoved = toStr_(row[IDX.guestScaleRemoved]) === 'O';
     // 파트너1~4 (자리별 이름)
     var hasSlotCols = IDX.partner1 >= 0 || IDX.partner2 >= 0 || IDX.partner3 >= 0 || IDX.partner4 >= 0;
     if (hasSlotCols) {
@@ -6625,6 +6825,14 @@ function syncDerivedFields(){
     set('referralDiscount', fin.rd);
     set('balanceDue', fin.balance);
     set('weddingDone', !!(dd && dd.diff<0));
+    // 2026-09-01 이후 계약: 후기 할인 1개당 20,000원 · 최대 2개로 맞춤
+    if(isNewReviewPolicy(r)){
+      ['Contract','Day'].forEach(k=>{
+        const want = reviewDiscountFor(r['reviewCount'+k], r);
+        const f = 'reviewDiscount'+k;
+        if(!FORMULA_FIELDS.has(f) && (Number(r[f])||0)!==want){ r[f] = want; markDirty(r); changed = true; }
+      });
+    }
   });
   return changed;
 }
@@ -6840,15 +7048,15 @@ function finRowOf(rec){
   const done = !!(dd && dd.diff < 0);
   const ref = paybackOf('referral', rec), rev = paybackOf('review', rec);
   const lab = finLaborOf(rec);
-  const gross = f.base + f.travel;
-  const discounts = f.eb + f.pd + f.rd + f.revC;
+  const gross = f.base + f.travel + (f.sur||0);
+  const discounts = f.eb + f.pd + f.rd + f.revC + (f.gsd||0);
   const net = gross - discounts;
   const payback = ref.owed + rev.owed;
   const real = net - payback;
   const labor = lab.partner + lab.owner;
   return {
-    rec, done, count:1, base:f.base, travel:f.travel, gross,
-    eb:f.eb, pd:f.pd, rd:f.rd, revC:f.revC, discounts, net,
+    rec, done, count:1, base:f.base, travel:f.travel, sur:f.sur||0, gross,
+    eb:f.eb, pd:f.pd, rd:f.rd, revC:f.revC, gsd:f.gsd||0, discounts, net,
     refPb:ref.owed, revPb:rev.owed, payback, real,
     laborPartner:lab.partner, laborOwner:lab.owner, laborBase:lab.base, allowance:lab.allowance, labor,
     profit: real - labor,
@@ -6859,7 +7067,7 @@ function finRowOf(rec){
     pbDue: ref.remaining + rev.remaining
   };
 }
-const FIN_SUM_KEYS = ['count','base','travel','gross','eb','pd','rd','revC','discounts','net','refPb','revPb','payback','real','laborPartner','laborOwner','laborBase','allowance','labor','profit','deposit','balance','settled','unsettled','pbPaid','pbDue'];
+const FIN_SUM_KEYS = ['count','base','travel','sur','gross','eb','pd','rd','revC','gsd','discounts','net','refPb','revPb','payback','real','laborPartner','laborOwner','laborBase','allowance','labor','profit','deposit','balance','settled','unsettled','pbPaid','pbDue'];
 function finSum(rows){ const o = {}; FIN_SUM_KEYS.forEach(k=> o[k] = rows.reduce((t,r)=> t + (Number(r[k])||0), 0)); o.rows = rows; o.doneCount = rows.filter(r=>r.done).length; return o; }
 
 function finYears(){
@@ -6887,11 +7095,13 @@ const FIN_LINES = [
   {g:'sales', k:'count', label:'예식 건수', fmt:'cnt'},
   {g:'sales', k:'base', label:'기준금액', sub:true},
   {g:'sales', k:'travel', label:'출장비', sub:true},
+  {g:'sales', k:'sur', label:'하객 초과 추가금', sub:true},
   {g:'sales', k:'gross', label:'총매출', strong:true},
   {g:'sales', k:'eb', label:'(−) 얼리버드 할인', sub:true, neg:true},
   {g:'sales', k:'pd', label:'(−) 짝꿍코드 할인', sub:true, neg:true},
   {g:'sales', k:'rd', label:'(−) 추천 할인', sub:true, neg:true},
   {g:'sales', k:'revC', label:'(−) 계약후기 할인', sub:true, neg:true},
+  {g:'sales', k:'gsd', label:'(−) 하객규모할인', sub:true, neg:true},
   {g:'sales', k:'net', label:'순매출', strong:true},
   {g:'payback', head:'페이백'},
   {g:'payback', k:'refPb', label:'(−) 짝꿍코드 추천 페이백', sub:true, neg:true},
@@ -6991,6 +7201,193 @@ function finCsv(){
   on('finCsvBtn', 'click', finCsv);
   on('finPrintBtn', 'click', ()=>{ document.body.classList.add('fin-printing'); setTimeout(()=>{ window.print(); document.body.classList.remove('fin-printing'); }, 50); });
 })();
+
+/* =========================================================
+   정산서 (정산 관리 → 📄 정산서)
+   · 하객 기준인원 초과 추가금(자동 계산 · 직접 입력 가능) / 하객규모할인 적용·제외
+   · 시트 열(실제하객수 · 하객규모할인금액 · 하객규모할인제외 · 하객초과추가금)이 있으면 양방향 저장,
+     없으면 서버의 파트너 데이터에 함께 보관
+   · 인쇄 / PDF 저장 (브라우저 인쇄 → PDF로 저장)
+========================================================= */
+const SETTLE_FIELDS = {actualGuests:'num', guestScaleDiscount:'num', guestScaleRemoved:'bool', guestSurcharge:'num'};
+function guestPolicyDefaults(){ return {base:{'한측':250,'양측':400,'통합':150}, unit:50, price:50000, account:'', note:''}; }
+function guestPolicy(){
+  const s = (typeof PDB!=='undefined' && PDB && PDB.settings) ? (PDB.settings.guestPolicy||{}) : {};
+  const d = guestPolicyDefaults();
+  return {base:Object.assign({}, d.base, s.base||{}), unit: Number(s.unit)||d.unit, price: (s.price===undefined||s.price===null||s.price==='') ? d.price : Number(s.price)||0, account: s.account||'', note: s.note||''};
+}
+function settleFallback(rec){ const db = (typeof PDB!=='undefined' && PDB) ? PDB : null; return db && db.referralPay ? (db.referralPay['settle:'+recordKey(rec)]||null) : null; }
+function settleGet(rec){
+  const fb = settleFallback(rec) || {};
+  // 계약 편집 화면의 임시 값(draft)처럼 정산 항목이 없는 객체는 저장된 계약에서 찾아옴
+  const saved = (rec && typeof RECORDS!=='undefined' && !Object.keys(SETTLE_FIELDS).some(f=> rec[f]!==undefined))
+    ? RECORDS.find(r=> r!==rec && ((rec.id && r.id===rec.id) || (rec.contractCode && r.contractCode===rec.contractCode))) : null;
+  const out = {};
+  Object.keys(SETTLE_FIELDS).forEach(f=>{
+    const v = rec[f]!==undefined ? rec[f] : (saved && saved[f]!==undefined ? saved[f] : fb[f]);
+    out[f] = SETTLE_FIELDS[f]==='bool' ? !!v : ((v===''||v===null||v===undefined) ? null : Number(v)||0);
+  });
+  out.note = fb.note || '';
+  out.issuedAt = fb.issuedAt || '';
+  return out;
+}
+/* 하객 기준인원 · 초과 인원 · 추가금 계산 */
+function guestCalc(rec, st){
+  st = st || settleGet(rec);
+  const pol = guestPolicy();
+  const base = Number(pol.base[rec.productType]) || 0;
+  const expected = (Number(rec.groomGuests)||0) + (Number(rec.brideGuests)||0);
+  const actual = st.actualGuests;
+  const over = (actual!==null && base) ? Math.max(0, actual - base) : 0;
+  const auto = over ? Math.ceil(over / pol.unit) * pol.price : 0;
+  const surcharge = st.guestSurcharge!==null ? st.guestSurcharge : auto;
+  const gsd = st.guestScaleRemoved ? 0 : (Number(st.guestScaleDiscount)||0);
+  return {base, expected, actual, over, auto, surcharge, manual: st.guestSurcharge!==null, gsd, gsAmount: Number(st.guestScaleDiscount)||0, removed: st.guestScaleRemoved, pol};
+}
+async function settleSave(rec, patch){
+  let toSheet = false, toPdb = false;
+  const db = ensurePdb(); db.referralPay = db.referralPay || {};
+  const k = 'settle:'+recordKey(rec);
+  const fb = Object.assign({}, db.referralPay[k]||{});
+  Object.keys(patch).forEach(f=>{
+    const v = patch[f];
+    if(SETTLE_FIELDS[f] && rec[f]!==undefined){ rec[f] = SETTLE_FIELDS[f]==='bool' ? !!v : (v===null||v==='' ? null : Number(v)||0); toSheet = true; }
+    else { fb[f] = v; toPdb = true; }
+  });
+  if(toSheet){ markDirty(rec); }
+  if(toPdb){ fb.updatedAt = new Date().toISOString(); db.referralPay[k] = fb; pDirty.referral.add(k); }
+  renderAll();
+  if(toSheet) await persist();
+  if(toPdb) await savePartnerDb();
+}
+
+/* ---------- 정산서 화면 ---------- */
+let SETTLE_ID = null;
+function settleDocHTML(rec, ov){
+  const st = Object.assign(settleGet(rec), ov||{}), g = guestCalc(rec, st), f = computeFinancials(rec);
+  const ref = paybackOf('referral', rec);
+  const pol = g.pol;
+  const today = todayStr();
+  const line = (label, amt, opt)=>{ opt = opt||{}; if(!amt && !opt.always) return ''; return `<tr class="${opt.cls||''}"><td>${label}${opt.sub?`<small>${opt.sub}</small>`:''}</td><td class="amt">${opt.text!==undefined ? opt.text : ((opt.minus && amt ? '− ' : (opt.plus && amt ? '+ ' : '')) + fmtMoney(Math.abs(amt)))}</td></tr>`; };
+  return `<div class="sd-paper" id="settleDoc">
+    <div class="sd-head">
+      <img src="${MW_LOGO_MARK}" alt="Moment Works">
+      <div><div class="sd-brand">MOMENT WORKS</div><h1>정 산 서</h1></div>
+      <div class="sd-meta">발행일 ${fmtDate(today)}<br>계약코드 ${esc(rec.contractCode||'-')}</div>
+    </div>
+    <table class="sd-info">
+      <tr><th>계약자</th><td>${esc(rec.clientName||'')}</td><th>연락처</th><td>${esc(rec.phone||'-')}</td></tr>
+      <tr><th>예식일시</th><td>${fmtDate(rec.weddingDate)} ${esc(rec.weddingTime||'')}</td><th>상품</th><td>${esc(rec.productType||'-')}</td></tr>
+      <tr><th>예식장</th><td colspan="3">${esc(rec.venueName||'')} ${esc(rec.hallName||'')}</td></tr>
+    </table>
+    <h2>하객 현황</h2>
+    <table class="sd-guest">
+      <tr><th>기준 인원</th><th>예상 하객</th><th>실제 하객</th><th>초과 인원</th></tr>
+      <tr><td>${g.base? g.base+'명':'-'}</td><td>${g.expected? g.expected+'명':'-'}</td><td><b>${g.actual!==null? g.actual+'명':'미입력'}</b></td><td class="${g.over?'over':''}">${g.actual===null?'-':(g.over? g.over+'명':'없음')}</td></tr>
+    </table>
+    <h2>정산 내역</h2>
+    <table class="sd-lines">
+      ${line('기준금액', f.base, {always:true})}
+      ${line('출장비', f.travel, {plus:true})}
+      ${line('하객 기준인원 초과 추가금', g.surcharge, {plus:true, cls:'add', sub: g.over ? `초과 ${g.over}명 · ${pol.unit}명당 ${fmtMoney(pol.price)}${g.manual?' (조정 금액)':''}` : (g.manual?'조정 금액':'')})}
+      ${line('얼리버드 할인', f.eb, {minus:true})}
+      ${line('짝꿍코드 할인', f.pd, {minus:true})}
+      ${line('추천 할인', f.rd, {minus:true})}
+      ${line('계약후기 할인', f.revC, {minus:true})}
+      ${g.gsAmount ? (g.removed
+          ? `<tr class="removed"><td>하객규모할인<small>정산 시 할인 제외</small></td><td class="amt"><s>− ${fmtMoney(g.gsAmount)}</s> 제외</td></tr>`
+          : line('하객규모할인', g.gsd, {minus:true})) : ''}
+      ${line('계약금 (기수령)', f.deposit, {minus:true})}
+      <tr class="sub-total"><td>잔금</td><td class="amt">${fmtMoney(f.balance)}</td></tr>
+      ${line('본식후기 할인', f.revD, {minus:true})}
+      <tr class="total"><td>최종 정산금액</td><td class="amt">${fmtMoney(f.finalSettlement)}</td></tr>
+    </table>
+    ${ref.owed ? `<p class="sd-foot-note">※ 짝꿍코드 추천 페이백 ${fmtMoney(ref.owed)}은 정산금과 별도로 지급됩니다${ref.paid?` (지급 완료 ${fmtMoney(Math.min(ref.paid, ref.owed))})`:''}.</p>`:''}
+    ${st.note ? `<div class="sd-note"><b>비고</b><p>${esc(st.note).replace(/\n/g,'<br>')}</p></div>`:''}
+    ${pol.account ? `<div class="sd-account"><b>입금 계좌</b> ${esc(pol.account)}</div>`:''}
+    <div class="sd-sign"><span>${rec.settlementDone?'정산 완료':'위와 같이 정산합니다.'}</span><b>모먼트웍스</b></div>
+  </div>`;
+}
+function settleFormHTML(rec){
+  const st = settleGet(rec), g = guestCalc(rec, st), pol = g.pol;
+  const colNote = Object.keys(SETTLE_FIELDS).every(f=> rec[f]!==undefined) ? '구글시트 열과 연동돼요' : '시트에 열이 없는 항목은 서버(파트너 데이터)에 저장돼요';
+  return `<div class="sd-form">
+    <h3>정산 조정</h3>
+    <label>실제 하객 수<input type="number" min="0" step="1" id="sdActual" value="${st.actualGuests===null?'':st.actualGuests}" placeholder="예상 ${g.expected||0}명"></label>
+    <div class="sd-hint">기준 ${g.base||'-'}명 · ${pol.unit}명당 ${fmtMoney(pol.price)} 추가 → 자동 계산 <b id="sdAuto">${fmtMoney(g.auto)}</b></div>
+    <label>하객 초과 추가금<input type="number" min="0" step="1000" id="sdSurcharge" value="${st.guestSurcharge===null?'':st.guestSurcharge}" placeholder="비워두면 자동 ${fmtMoney(g.auto)}"></label>
+    <label>하객규모할인 금액<input type="number" min="0" step="1000" id="sdGsd" value="${st.guestScaleDiscount===null?'':st.guestScaleDiscount}" placeholder="0"></label>
+    <label class="sd-check"><input type="checkbox" id="sdGsRemoved" ${st.guestScaleRemoved?'checked':''}> 하객규모할인 제외 (정산 시 할인 삭제)</label>
+    <label>비고 (정산서에 표시)<textarea id="sdNote" rows="3" placeholder="예: 실제 하객 520명으로 초과 추가금 부과">${esc(st.note)}</textarea></label>
+    <div class="sd-actions">
+      <button class="btn btn-primary" id="sdSave">저장</button>
+      <button class="btn" id="sdPrint">🖨 인쇄 · PDF</button>
+      ${rec.settlementDone ? '<span class="badge badge-done">정산 완료</span>' : '<button class="btn" id="sdDone">정산 완료 처리</button>'}
+    </div>
+    <div class="sd-hint">${colNote}</div>
+    <details class="sd-policy"><summary>정산 기준 설정</summary>
+      <div class="sd-grid">${['한측','양측','통합'].map(p=>`<label>${p} 기준인원<input type="number" min="0" data-pb="${p}" value="${pol.base[p]}"></label>`).join('')}</div>
+      <div class="sd-grid"><label>초과 단위(명)<input type="number" min="1" id="sdUnit" value="${pol.unit}"></label><label>단위당 추가금<input type="number" min="0" step="1000" id="sdPrice" value="${pol.price}"></label></div>
+      <label>입금 계좌 (정산서 표시)<input id="sdAccount" value="${esc(pol.account)}" placeholder="예: 국민 000-000-000000 모먼트웍스"></label>
+      <button class="btn btn-sm" id="sdPolicySave">기준 저장</button>
+    </details>
+  </div>`;
+}
+function openSettleDoc(id){
+  const rec = RECORDS.find(r=> r.id===id); if(!rec) return;
+  SETTLE_ID = id;
+  const ov = document.getElementById('settleOverlay');
+  document.getElementById('settleTitle').textContent = `정산서 · ${rec.clientName}`;
+  document.getElementById('settleDocWrap').innerHTML = settleDocHTML(rec);
+  document.getElementById('settleFormWrap').innerHTML = settleFormHTML(rec);
+  ov.classList.add('active');
+  const val = id=>{ const v = document.getElementById(id).value; return v==='' ? null : Number(v); };
+  const preview = ()=>{ // 저장 전 미리보기 (저장하지 않음)
+    const fields = {actualGuests:val('sdActual'), guestSurcharge:val('sdSurcharge'), guestScaleDiscount:val('sdGsd'), guestScaleRemoved:document.getElementById('sdGsRemoved').checked};
+    const tmp = Object.assign({}, rec, fields);
+    document.getElementById('settleDocWrap').innerHTML = settleDocHTML(tmp, {note: document.getElementById('sdNote').value});
+    document.getElementById('sdAuto').textContent = fmtMoney(guestCalc(tmp).auto);
+  };
+  ['sdActual','sdSurcharge','sdGsd','sdGsRemoved','sdNote'].forEach(x=> document.getElementById(x).addEventListener('input', preview));
+  document.getElementById('sdGsRemoved').addEventListener('change', preview);
+  document.getElementById('sdSave').addEventListener('click', async ()=>{
+    await settleSave(rec, {actualGuests:val('sdActual'), guestSurcharge:val('sdSurcharge'), guestScaleDiscount:val('sdGsd'), guestScaleRemoved:document.getElementById('sdGsRemoved').checked, note:document.getElementById('sdNote').value});
+    showToast(`${rec.clientName}님 정산서를 저장했어요`); openSettleDoc(id);
+  });
+  document.getElementById('sdPrint').addEventListener('click', ()=>{
+    document.body.classList.add('settle-printing');
+    const old = document.title; document.title = `[모먼트웍스] 정산서_${rec.clientName}_${rec.weddingDate||''}`;
+    setTimeout(()=>{ window.print(); document.body.classList.remove('settle-printing'); document.title = old; }, 60);
+  });
+  const done = document.getElementById('sdDone');
+  if(done) done.addEventListener('click', async ()=>{
+    if(!confirm(`${rec.clientName}님 정산을 완료 처리할까요? (최종 정산금액 ${fmtMoney(computeFinancials(rec).finalSettlement)})`)) return;
+    rec.settlementDone = true; markDirty(rec); renderAll(); await persist(); showToast(`${rec.clientName}님 정산 처리 완료`); openSettleDoc(id);
+  });
+  document.getElementById('sdPolicySave').addEventListener('click', async ()=>{
+    const db = ensurePdb(); const pol = guestPolicy();
+    document.querySelectorAll('[data-pb]').forEach(i=> pol.base[i.dataset.pb] = Number(i.value)||0);
+    pol.unit = Math.max(1, Number(document.getElementById('sdUnit').value)||1);
+    pol.price = Number(document.getElementById('sdPrice').value)||0;
+    pol.account = document.getElementById('sdAccount').value.trim();
+    db.settings.guestPolicy = pol; pDirty.settings = true;
+    renderAll(); await savePartnerDb(); showToast('정산 기준을 저장했어요'); openSettleDoc(id);
+  });
+}
+function closeSettleDoc(){ document.getElementById('settleOverlay').classList.remove('active'); SETTLE_ID = null; }
+(function bindSettle(){
+  const ov = document.getElementById('settleOverlay'); if(!ov) return;
+  document.getElementById('settleClose').addEventListener('click', closeSettleDoc);
+  ov.addEventListener('click', e=>{ if(e.target===ov) closeSettleDoc(); });
+  const pick = document.getElementById('settlePick');
+  document.getElementById('settlePickBtn').addEventListener('click', ()=>{ if(pick.value) openSettleDoc(pick.value); else showToast('정산서를 출력할 계약을 선택해주세요'); });
+})();
+function renderSettlePicker(){
+  const pick = document.getElementById('settlePick'); if(!pick) return;
+  const cur = pick.value;
+  const list = activeContracts().filter(r=> r.weddingDate).slice().sort((a,b)=> String(b.weddingDate).localeCompare(String(a.weddingDate)));
+  pick.innerHTML = '<option value="">계약 선택 (예식일 최신순)</option>' + list.map(r=>`<option value="${r.id}" ${r.id===cur?'selected':''}>${fmtDate(r.weddingDate)} · ${esc(r.clientName)} · ${esc(r.productType||'')}${r.settlementDone?' · 정산완료':''}</option>`).join('');
+}
 
 /* ---------- 로그인 ---------- */
 const LOGIN_ID_STORAGE = 'mw_saved_login_id';
