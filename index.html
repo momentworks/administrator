@@ -1296,6 +1296,109 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
 .p-wf-line.small label{flex:0 0 auto !important;display:inline-flex !important;width:auto !important;gap:4px;white-space:nowrap;} .p-wf-line.small input[type=checkbox]{width:auto !important;margin:0 !important;flex:0 0 auto;} .p-wf-line.small select{margin-left:auto;}
 .p-msg-to{font-size:12px;font-weight:700;color:var(--sage);background:#EEF6EE;border:1px solid #A9C9AC;border-radius:2px;padding:5px 8px;white-space:nowrap;}
 #adminLogoutBtn{font-size:11px;cursor:pointer;font-family:inherit;}
+/* 고객 전용 페이지 관리 */
+.cp-admin{margin-top:16px;border:1px solid #E3CF9E;background:#FBF6EA;border-left:4px solid var(--gold);border-radius:4px;padding:12px 14px;}
+.cp-admin-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.cp-admin-h span{font-size:11.5px;color:var(--slate);}
+.cp-admin-code{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.cp-admin-code span{font-size:12px;color:var(--ink-soft);}
+.cp-admin-code b{font-size:18px;letter-spacing:.08em;margin-right:6px;}
+.cp-admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.cp-admin-grid label{display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:700;color:var(--ink-soft);}
+.cp-admin-grid input,.cp-admin-grid textarea{padding:7px 9px;border:1px solid var(--line-strong);border-radius:2px;font:inherit;font-size:12.5px;font-weight:500;background:#fff;}
+.cp-admin-foot{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+.cp-admin-warn{font-size:11px;color:var(--coral);}
+@media (max-width:720px){.cp-admin-grid{grid-template-columns:1fr;}}
+#customerPreviewRoot{display:none;position:fixed;inset:0;z-index:600;overflow-y:auto;background:#E9E4DA;}
+#customerPreviewRoot.active{display:block;}
+body.cp-preview-open{overflow:hidden;}
+/* 💍 고객페이지 메뉴 */
+.cu-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:16px 0 10px;}
+.cu-bar select,.cu-bar input{padding:8px 10px;border:1px solid var(--line-strong);border-radius:2px;font:inherit;font-size:13px;background:#fff;}
+.cu-bar input{flex:1;min-width:200px;max-width:340px;}
+.cu-count{font-size:12.5px;color:var(--ink-soft);}
+.cu-bar .btn-primary{margin-left:auto;}
+.cu-table td{vertical-align:middle;font-size:13px;}
+.cu-sub{font-size:11px;color:var(--slate);margin-top:2px;}
+.cu-code{letter-spacing:.06em;font-size:13.5px;} .cu-code.off{color:var(--slate);text-decoration:line-through;}
+.cu-ok{color:var(--sage);font-weight:800;} .cu-no{color:#C9C1B3;}
+.cu-acts{white-space:nowrap;} .cu-acts .btn{margin-right:4px;}
+.cu-table tr.open td{background:#FBF3DF !important;}
+.cu-table tr.cu-edit td{background:#FFFDF8 !important;padding:6px 10px 14px;}
+.cu-table tr.cu-edit .cp-admin{margin-top:4px;}
+/* ===== 고객 전용 페이지 ===== */
+.cp{--cp-ink:#1F1A1C;--cp-soft:#5E5750;--cp-paper:#F4F1EA;--cp-card:#FFFFFF;--cp-line:#E2DBCD;--cp-wine:#5C1F29;--cp-gold:#A9823C;--cp-gold-s:#F2E7CF;--cp-sage:#4F6F52;--cp-coral:#B0432E;
+  font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--cp-ink);background:var(--cp-paper);min-height:100vh;font-variant-numeric:tabular-nums;max-width:640px;margin:0 auto;position:relative;}
+.cp *{box-sizing:border-box;}
+.cp-busy{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cp-gold),var(--cp-wine));z-index:60;animation:cpBusy 1s linear infinite;}
+@keyframes cpBusy{0%{opacity:.4}50%{opacity:1}100%{opacity:.4}}
+.cp-preview{background:var(--cp-gold);color:#fff;font-size:12.5px;font-weight:700;padding:9px 16px;display:flex;justify-content:center;align-items:center;gap:12px;position:sticky;top:0;z-index:20;}
+.cp-preview button{border:1px solid #fff;background:none;color:#fff;border-radius:999px;padding:3px 10px;font:inherit;cursor:pointer;}
+.cp-top{display:flex;align-items:center;gap:10px;padding:14px 18px;background:#FBF9F4;border-bottom:1px solid var(--cp-line);}
+.cp-top img{height:30px;}
+.cp-brand{font-size:11px;font-weight:800;letter-spacing:.32em;color:var(--cp-ink);}
+.cp-brand small{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;letter-spacing:.06em;font-size:12px;color:var(--cp-gold);}
+.cp-top-acts{margin-left:auto;display:flex;gap:6px;}
+.cp-top-acts button{border:1px solid var(--cp-line);background:#fff;border-radius:999px;padding:6px 11px;font:inherit;font-size:12px;cursor:pointer;color:var(--cp-ink);}
+.cp-nav{display:flex;gap:6px;overflow-x:auto;padding:10px 14px;background:var(--cp-paper);position:sticky;top:0;z-index:10;scrollbar-width:none;border-bottom:1px solid var(--cp-line);}
+.cp-nav::-webkit-scrollbar{display:none;}
+.cp-nav button{flex:0 0 auto;border:1px solid var(--cp-line);background:#fff;border-radius:999px;padding:7px 14px;font:inherit;font-size:12.5px;font-weight:700;color:var(--cp-soft);cursor:pointer;}
+.cp-main{padding:14px 14px 10px;display:flex;flex-direction:column;gap:12px;}
+.cp-hero{background:linear-gradient(160deg,var(--cp-wine) 0%,#3B1219 100%);color:#F7F0E6;border-radius:18px;padding:26px 20px 20px;text-align:center;box-shadow:0 10px 26px rgba(92,31,41,.25);}
+.cp-hello{font-size:13px;letter-spacing:.08em;color:var(--cp-gold-s);font-weight:700;}
+.cp-dday{font-family:'Cormorant Garamond','Noto Serif KR',serif;font-size:56px;font-weight:600;line-height:1.1;margin:6px 0 2px;}
+.cp-dsub{font-size:12.5px;color:#E7D9C2;}
+.cp-when{margin:14px auto 16px;font-size:14px;line-height:1.7;border-top:1px solid rgba(255,255,255,.18);border-bottom:1px solid rgba(255,255,255,.18);padding:10px 0;}
+.cp-hero-acts{display:flex;gap:8px;}
+.cp-hero-acts .cp-btn{flex:1;}
+.cp-card{background:var(--cp-card);border:1px solid var(--cp-line);border-radius:16px;padding:18px 16px;scroll-margin-top:62px;}
+.cp-card h2{font-size:16px;margin:0 0 12px;font-weight:800;}
+.cp-desc{font-size:13px;line-height:1.7;color:var(--cp-soft);margin:0 0 12px;}
+.cp-note{font-size:11.5px;color:var(--cp-soft);margin:10px 0;line-height:1.6;}
+.cp-empty{font-size:13px;color:var(--cp-soft);background:#FAF7F1;border:1px dashed var(--cp-line);border-radius:12px;padding:16px;text-align:center;}
+.cp-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--cp-line);background:#fff;color:var(--cp-ink);border-radius:12px;padding:12px 14px;font:inherit;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;}
+.cp-btn.primary{background:var(--cp-wine);border-color:var(--cp-wine);color:#fff;}
+.cp-btn.gold{background:var(--cp-gold);border-color:var(--cp-gold);color:#fff;}
+.cp-hero .cp-btn.ghost{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35);color:#fff;}
+.cp-btn.kakao{background:#FEE500;border-color:#FEE500;color:#191600;}
+.cp-btn.wide{width:100%;margin-top:6px;}
+.cp-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.cp-dl{margin:0 0 6px;}
+.cp-dl div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #F0EBE1;font-size:13.5px;}
+.cp-dl div:last-child{border-bottom:none;}
+.cp-dl dt{color:var(--cp-soft);flex:0 0 auto;}
+.cp-dl dd{margin:0;text-align:right;font-weight:600;}
+.cp-dl b.ok{color:var(--cp-sage);} .cp-dl b.wait{color:var(--cp-coral);}
+.cp-money{background:#FAF7F1;border-radius:12px;padding:8px 12px;margin-top:6px;}
+.cp-money div{display:flex;justify-content:space-between;padding:7px 0;font-size:13.5px;border-bottom:1px dashed #E8E1D3;}
+.cp-money div:last-child{border-bottom:none;}
+.cp-money div.minus b{color:var(--cp-coral);}
+.cp-money div.sum{border-top:2px solid var(--cp-ink);border-bottom:2px solid var(--cp-ink);font-size:15.5px;margin:4px 0;}
+.cp-money div.sum b{color:var(--cp-wine);font-size:17px;}
+.cp-video{position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000;margin-bottom:10px;}
+.cp-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+.cp-frame{margin-top:10px;border:1px solid var(--cp-line);border-radius:12px;overflow:hidden;height:560px;}
+.cp-frame iframe{width:100%;height:100%;border:0;}
+.cp-code{text-align:center;background:var(--cp-gold-s);border-radius:14px;padding:14px;margin-bottom:12px;}
+.cp-code span{font-size:12px;color:var(--cp-soft);font-weight:700;}
+.cp-code b{display:block;font-size:26px;letter-spacing:.08em;margin:2px 0 10px;color:var(--cp-wine);}
+.cp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.cp-stats div{background:#FAF7F1;border-radius:12px;padding:10px;text-align:center;}
+.cp-stats span{display:block;font-size:11.5px;color:var(--cp-soft);}
+.cp-stats b{font-size:15px;}
+.cp-stats small{display:block;font-size:10.5px;color:var(--cp-sage);font-weight:700;}
+.cp-list div{display:flex;justify-content:space-between;align-items:center;padding:10px 2px;border-bottom:1px solid #F0EBE1;font-size:13.5px;}
+.cp-list small{display:block;font-size:11px;color:var(--cp-soft);}
+.cp-list em{font-style:normal;font-size:11.5px;font-weight:800;padding:4px 9px;border-radius:999px;background:#EEE9DE;color:var(--cp-soft);}
+.cp-list em.discount{background:#E6EFE6;color:var(--cp-sage);} .cp-list em.payback{background:var(--cp-gold-s);color:#7E5E22;}
+.cp-notice p{font-size:13.5px;line-height:1.8;margin:0 0 8px;}
+.cp-memo{background:#FAF7F1;border-radius:10px;padding:10px 12px;}
+.cp-install{border:1px solid var(--cp-line);background:#fff;border-radius:999px;padding:10px 18px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;}
+.cp-foot{text-align:center;padding:26px 0 40px;font-size:11px;color:var(--cp-soft);line-height:1.7;}
+.cp-foot img{height:26px;display:block;margin:0 auto 6px;opacity:.85;}
+.cp-foot b{display:block;letter-spacing:.32em;font-size:10.5px;color:var(--cp-ink);}
+.cp-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#1F1A1C;color:#fff;padding:11px 18px;border-radius:999px;font-size:13px;opacity:0;transition:all .25s;z-index:200;pointer-events:none;max-width:90vw;text-align:center;}
+.cp-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
@@ -1358,6 +1461,7 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
   <button data-tab="cancelled">계약취소관리</button>
   <button data-tab="held">예식완료</button>
   <button data-tab="both">양측계약</button>
+  <button data-tab="customers">💍 고객페이지</button>
   <button data-tab="finance">📊 재무제표</button>
 </div>
 
@@ -1647,6 +1751,13 @@ table.p-board tr.p-unassigned td{background:#FBEAE5 !important;}
   </section>
 
   <!-- BOTH (양측계약) -->
+  <!-- CUSTOMERS (고객 전용 페이지 관리) -->
+  <section class="section" id="tab-customers">
+    <div class="section-head"><div><h2 class="section-title">고객 전용 페이지 관리</h2>
+      <p class="section-desc">계약자별 접속코드 발급 · 계약서 · 유튜브 라이브 · 실시간 축의 현황 링크를 한 곳에서 관리하고, 고객 화면을 미리 볼 수 있어요</p></div></div>
+    <div id="custTabRoot"></div>
+  </section>
+
   <!-- FINANCE (재무제표) -->
   <section class="section" id="tab-finance">
     <div class="section-head fin-top">
@@ -3028,6 +3139,7 @@ function renderAll(){
   if(typeof renderPaybackAlerts==='function') renderPaybackAlerts();
   if(typeof renderFinance==='function') renderFinance();
   if(typeof renderSettlePicker==='function') renderSettlePicker();
+  if(typeof renderCustomerTab==='function') renderCustomerTab();
 }
 
 function esc(s){ if(s===undefined||s===null) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -3919,6 +4031,81 @@ function applyPartnerUpdate(db, records, code, op, todayStr){
     return {ok:true, db:db};
   }
   return {ok:false, error:'알 수 없는 요청입니다'};
+}
+
+/* =========================================================
+   고객 전용 페이지 (계약자별 접속코드)
+   - 고객 설정은 파트너 데이터의 referralPay['client:'+계약id]에 보관 {code, youtube, giftUrl, contractUrl, memo}
+   - 서버(Apps Script)와 관리 페이지 미리보기가 똑같이 사용 → 자기완결형
+========================================================= */
+function buildCustomerView(records, db, code, todayStr){
+  function norm(c){ return String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,''); }
+  function mask(name){ name=String(name||''); if(name.length<2) return name; if(name.length===2) return name[0]+'*'; return name[0]+new Array(name.length-1).join('*')+name[name.length-1]; }
+  function n(v){ return Number(v)||0; }
+  db = db || {};
+  var target = norm(code);
+  if(!target) return {ok:false, error:'접속코드를 입력해주세요'};
+  var rp = db.referralPay || {};
+  var recordId = null, client = null;
+  Object.keys(rp).forEach(function(k){ if(k.indexOf('client:')===0 && rp[k] && norm(rp[k].code)===target && rp[k].active!==false){ recordId = k.slice(7); client = rp[k]; } });
+  if(!recordId) return {ok:false, error:'접속코드가 올바르지 않아요. 모먼트웍스에서 받은 코드를 확인해주세요'};
+  var all = (records||[]).filter(function(r){ return r && r.type==='contract'; });
+  var r = null;
+  for(var i=0;i<all.length;i++){ if(all[i].id===recordId){ r = all[i]; break; } }
+  if(!r && client.key){ for(var j=0;j<all.length;j++){ var c0=String(all[j].contractCode||'').trim(); if((c0 && 'C:'+c0===client.key)){ r = all[j]; break; } } }
+  if(!r) return {ok:false, error:'계약 정보를 찾지 못했어요. 모먼트웍스로 문의해주세요'};
+  if(r.cancelled) return {ok:false, error:'취소된 계약이에요. 모먼트웍스로 문의해주세요'};
+  var today = todayStr || '';
+  var s = db.settings || {};
+
+  // 짝꿍코드: 내 코드로 계약한 분들 (본식 종료 건만 확정 · 내 예식 전 확정분은 잔금 할인, 이후는 페이백)
+  var myCode = String(r.contractCode||'').trim();
+  var referred = myCode ? all.filter(function(x){ return x!==r && !x.cancelled && String(x.partnerCode||'').trim()===myCode; }) : [];
+  referred.sort(function(a,b){ return String(a.weddingDate||'').localeCompare(String(b.weddingDate||'')); });
+  var refRows = referred.map(function(x){
+    var done = !!(x.weddingDate && today && x.weddingDate < today);
+    var kind = !done ? 'pending' : (r.weddingDate && x.weddingDate < r.weddingDate ? 'discount' : 'payback');
+    return {name: mask(x.clientName), contractDate: x.contractDate||'', weddingDate: x.weddingDate||'', status: kind};
+  });
+  var UNIT = 10000;
+  var discountCnt = refRows.filter(function(x){ return x.status==='discount'; }).length;
+  var paybackCnt = refRows.filter(function(x){ return x.status==='payback'; }).length;
+  var rkey = 'C:'+myCode;
+  var paidFb = rp['referral:'+rkey] ? n(rp['referral:'+rkey].paid) : 0;
+  var paybackPaid = (r.referralPayback!==undefined && r.referralPayback!==null && r.referralPayback!=='') ? n(r.referralPayback) : paidFb;
+
+  // 정산 금액 (통합관리시스템과 같은 계산)
+  var settle = rp['settle:'+(myCode ? rkey : ('N:'+String(r.clientName||'').trim()+'|'+String(r.weddingDate||'').trim()))] || {};
+  function pick(f){ return r[f]!==undefined ? r[f] : settle[f]; }
+  var pol = s.guestPolicy || {}; var baseMap = Object.assign({'한측':250,'양측':400,'통합':150}, pol.base||{});
+  var unitN = n(pol.unit)||50, price = (pol.price===undefined||pol.price===null||pol.price==='') ? 50000 : n(pol.price);
+  var actual = pick('actualGuests'); actual = (actual===null||actual===undefined||actual==='') ? null : n(actual);
+  var gBase = n(baseMap[r.productType]);
+  var over = (actual!==null && gBase) ? Math.max(0, actual-gBase) : 0;
+  var surOverride = pick('guestSurcharge'); surOverride = (surOverride===null||surOverride===undefined||surOverride==='') ? null : n(surOverride);
+  var sur = surOverride!==null ? surOverride : (over ? Math.ceil(over/unitN)*price : 0);
+  var gsd = pick('guestScaleRemoved') ? 0 : n(pick('guestScaleDiscount'));
+  var base = n(r.baseAmount), eb = r.earlyBird==='O' ? (n(r.earlyBirdDiscount)||20000) : 0;
+  var pd = (r.partnerCode && String(r.partnerCode).trim() && String(r.partnerCode).trim()!=='-') ? n(r.partnerDiscount) : 0;
+  var rd = discountCnt * UNIT, revC = n(r.reviewDiscountContract), deposit = n(r.deposit), travel = n(r.travelFee);
+  var balance = base - eb - pd - rd - revC - gsd - deposit + travel + sur;
+  var revD = n(r.reviewDiscountDay);
+
+  return {
+    ok: true, v: 1,
+    today: today,
+    client: {name: r.clientName||'', code: myCode},
+    wedding: {date: r.weddingDate||'', time: r.weddingTime||'', venue: r.venueName||'', hall: r.hallName||'', region: r.region||'',
+      product: r.productType||'', groomGuests: n(r.groomGuests), brideGuests: n(r.brideGuests), settingsSubmitted: !!r.settingsSubmitted},
+    contract: {date: r.contractDate||'', code: myCode, url: client.contractUrl||'',
+      amounts: {base: base, earlyBird: eb, partnerDiscount: pd, referralDiscount: rd, reviewContract: revC, guestScaleDiscount: gsd, surcharge: sur, deposit: deposit, travel: travel, balance: balance, reviewDay: revD, final: balance - revD},
+      settled: !!r.settlementDone},
+    live: {youtube: client.youtube||'', giftUrl: client.giftUrl||''},
+    referral: {code: myCode, unit: UNIT, rows: refRows, total: refRows.length, discountCount: discountCnt, paybackCount: paybackCnt,
+      discountAmount: discountCnt*UNIT, paybackAmount: paybackCnt*UNIT, paybackPaid: Math.min(paybackPaid, paybackCnt*UNIT)},
+    info: {notice: s.customerNotice || '', settingsFormUrl: s.settingsFormUrl || '', kakao: s.customerKakaoUrl || 'https://pf.kakao.com/_FbIfX/chat', phone: s.reportPhone || '010-5730-0614', memo: client.memo || ''},
+    generatedAt: new Date().toISOString()
+  };
 }
 
 /* ================= 파트너 포털 (통합관리시스템 내장 + 파트너스오피스 공용) =================
@@ -6576,6 +6763,12 @@ function doGet(e) {
       if (!view.ok) addFail_();
       return json_(view);
     }
+    if (p.action === 'customerView') { // 고객 전용 페이지 (계약자별 접속코드)
+      if (tooManyFails_()) return json_({ ok: false, error: '시도가 너무 많아요. 10분 뒤 다시 시도해주세요' });
+      var cview = buildCustomerView(contractRecordsCached_(), readJson_(PARTNER_SHEET, {}), p.code, today_());
+      if (!cview.ok) addFail_();
+      return json_(cview);
+    }
     if (!authorized_(p)) return json_({ ok: false, error: '관리자 키가 올바르지 않습니다' });
     if (p.sheet === 'partners') return json_(readJson_(PARTNER_SHEET, {}));
     if (p.action === 'bootstrap') return bootstrap_();
@@ -7300,7 +7493,7 @@ function toEarlyBird_(v) {
 `;
 function buildAppsScriptV2(){
   const core = MW_GAS_CORE;;
-  return core + [pvDefaultSettings, pvDefaultWorkflow, pvDefaultMessages, buildPartnerView, applyPartnerUpdate].map(f=> f.toString()).join('\n\n') + '\n';
+  return core + [pvDefaultSettings, pvDefaultWorkflow, pvDefaultMessages, buildPartnerView, applyPartnerUpdate, buildCustomerView].map(f=> f.toString()).join('\n\n') + '\n';
 }
 (function initServerScriptBox(){
   const ta = document.getElementById('appsScriptCode');
@@ -7987,6 +8180,416 @@ function renderSettlePicker(){
   el.addEventListener('click', go);
   el.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); go(); } });
 })();
+
+/* ================= 고객 전용 페이지 (고객페이지 단독 + 통합관리시스템 미리보기 공용) =================
+   CustomerPortal.mount(rootEl, view, handlers)
+   handlers = { onRefresh() -> Promise<view>, onLogout(), preview:boolean, onClosePreview() }
+================================================================================================ */
+const CustomerPortal = (function(){
+  const WD = ['일','월','화','수','목','금','토'];
+  let root=null, view=null, H={}, busy=false, giftOpen=false;
+  const pd = n => String(n).padStart(2,'0');
+  const e = s => (s===undefined||s===null) ? '' : String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const won = n => (Number(n)||0).toLocaleString('ko-KR')+'원';
+  const parseD = s => { const p=String(s||'').split('-').map(Number); return new Date(p[0],p[1]-1,p[2]); };
+  function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+pd(d.getMonth()+1)+'-'+pd(d.getDate()); }
+  function fdate(s, long){ if(!s) return '-'; const d=parseD(s); return long ? `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${WD[d.getDay()]})` : `${pd(d.getMonth()+1)}.${pd(d.getDate())}(${WD[d.getDay()]})`; }
+  function dday(s){ if(!s) return null; const n = Math.round((parseD(s) - parseD(todayStr()))/86400000); return n; }
+  function toast(msg){
+    let t=document.getElementById('cpToast');
+    if(!t){ t=document.createElement('div'); t.id='cpToast'; t.className='cp-toast'; document.body.appendChild(t); }
+    t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2400);
+  }
+  async function copyText(t){ try{ await navigator.clipboard.writeText(t); return true; }catch(err){ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); let ok=false; try{ ok=document.execCommand('copy'); }catch(_){} ta.remove(); return ok; } }
+
+  /* ---------- 캘린더 알림 (.ics) ---------- */
+  function icsEsc(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
+  function buildIcs(){
+    const w = view.wedding; if(!w.date) return '';
+    const t = /^\d{1,2}:\d{2}/.test(w.time||'') ? w.time : '12:00';
+    const [hh,mm] = t.split(':').map(Number);
+    const end = new Date(2000,0,1,hh,mm+120);
+    const dt = (d, h, m)=> d.replace(/-/g,'')+'T'+pd(h)+pd(m)+'00';
+    const stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+    const desc = `모먼트웍스 축의대 · ${w.venue} ${w.hall}\n고객 전용 페이지: ${location.href.split('#')[0]}`;
+    const L = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//MomentWorks//Customer//KO','CALSCALE:GREGORIAN','METHOD:PUBLISH',
+      'BEGIN:VEVENT','UID:wedding-'+(view.client.code||'mw')+'@momentworks','DTSTAMP:'+stamp,
+      'DTSTART;TZID=Asia/Seoul:'+dt(w.date,hh,mm),'DTEND;TZID=Asia/Seoul:'+dt(w.date,end.getHours(),end.getMinutes()),
+      'SUMMARY:'+icsEsc(`💍 ${view.client.name}님 예식`),'LOCATION:'+icsEsc((w.venue+' '+w.hall).trim()),'DESCRIPTION:'+icsEsc(desc),
+      'BEGIN:VALARM','TRIGGER:-P7D','ACTION:DISPLAY','DESCRIPTION:'+icsEsc('예식 일주일 전이에요 · 축의대 운영 설정서를 확인해주세요'),'END:VALARM',
+      'BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:'+icsEsc('내일 예식이에요 · 모먼트웍스가 함께할게요'),'END:VALARM',
+      'BEGIN:VALARM','TRIGGER:-PT3H','ACTION:DISPLAY','DESCRIPTION:'+icsEsc('오늘 예식이에요 · 축하드려요 💐'),'END:VALARM',
+      'END:VEVENT','END:VCALENDAR'];
+    return L.join('\r\n');
+  }
+  function downloadIcs(){
+    const s = buildIcs(); if(!s){ toast('예식 일정이 아직 없어요'); return; }
+    const blob = new Blob([s], {type:'text/calendar;charset=utf-8'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'momentworks-wedding.ics';
+    document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    toast('캘린더에 추가하면 7일 전 · 1일 전 · 당일에 알림이 와요');
+  }
+  function googleCalUrl(){
+    const w = view.wedding; if(!w.date) return '';
+    const t = /^\d{1,2}:\d{2}/.test(w.time||'') ? w.time : '12:00'; const [hh,mm] = t.split(':').map(Number);
+    const end = new Date(2000,0,1,hh,mm+120);
+    const d = w.date.replace(/-/g,'');
+    const q = new URLSearchParams({action:'TEMPLATE', text:`💍 ${view.client.name}님 예식`, dates:`${d}T${pd(hh)}${pd(mm)}00/${d}T${pd(end.getHours())}${pd(end.getMinutes())}00`, ctz:'Asia/Seoul', location:(w.venue+' '+w.hall).trim(), details:'모먼트웍스 축의대 · '+location.href.split('#')[0]});
+    return 'https://calendar.google.com/calendar/render?'+q.toString();
+  }
+  function ytEmbed(url){
+    const u = String(url||'').trim(); if(!u) return '';
+    const m = u.match(/(?:youtu\.be\/|v=|\/live\/|\/embed\/|\/shorts\/)([A-Za-z0-9_-]{6,})/);
+    return m ? 'https://www.youtube.com/embed/'+m[1]+'?rel=0&playsinline=1' : '';
+  }
+
+  /* ---------- 화면 ---------- */
+  function heroHTML(){
+    const w = view.wedding, n = dday(w.date);
+    const big = n===null ? '' : n>0 ? 'D-'+n : n===0 ? 'D-DAY' : '예식 완료';
+    const sub = n===null ? '예식 일정이 정해지면 여기에 표시돼요' : n>0 ? '예식까지 남은 날' : n===0 ? '오늘 예식을 진심으로 축하드려요 💐' : '소중한 날을 함께해 주셔서 감사합니다';
+    return `<section class="cp-hero">
+      <div class="cp-hello">${e(view.client.name)}님의 예식</div>
+      <div class="cp-dday">${big}</div>
+      <div class="cp-dsub">${sub}</div>
+      <div class="cp-when"><b>${fdate(w.date, true)}</b>${w.time? ` · ${e(w.time)}` : ''}<br>${e(w.venue)} ${e(w.hall)}</div>
+      <div class="cp-hero-acts">
+        <button class="cp-btn gold" data-cp="ics">🔔 예식 알림 받기</button>
+        <a class="cp-btn ghost" href="https://map.naver.com/v5/search/${encodeURIComponent(w.venue||'')}" target="_blank" rel="noopener">📍 길찾기</a>
+      </div>
+    </section>`;
+  }
+  function alarmHTML(){
+    const g = googleCalUrl();
+    return `<section class="cp-card" id="cp-alarm"><h2>🔔 예식 일정 알림</h2>
+      <p class="cp-desc">휴대폰 캘린더에 추가하면 <b>예식 7일 전 · 1일 전 · 당일 3시간 전</b>에 알림을 받으실 수 있어요.</p>
+      <div class="cp-row2"><button class="cp-btn" data-cp="ics">📅 휴대폰 캘린더에 추가</button>${g? `<a class="cp-btn ghost" href="${e(g)}" target="_blank" rel="noopener">Google 캘린더</a>`:''}</div>
+    </section>`;
+  }
+  function weddingHTML(){
+    const w = view.wedding, i = view.info;
+    return `<section class="cp-card" id="cp-wedding"><h2>💍 예식 정보</h2>
+      <dl class="cp-dl">
+        <div><dt>예식 일시</dt><dd>${fdate(w.date, true)} ${e(w.time)}</dd></div>
+        <div><dt>예식장</dt><dd>${e(w.venue)||'-'} ${e(w.hall)}</dd></div>
+        ${w.region? `<div><dt>지역</dt><dd>${e(w.region)}</dd></div>`:''}
+        <div><dt>이용 상품</dt><dd>축의대 ${e(w.product)||'-'}</dd></div>
+        <div><dt>예상 하객</dt><dd>신랑측 ${w.groomGuests}명 · 신부측 ${w.brideGuests}명</dd></div>
+        <div><dt>운영 설정서</dt><dd>${w.settingsSubmitted? '<b class="ok">제출 완료 ✓</b>' : '<b class="wait">제출 전</b>'}</dd></div>
+      </dl>
+      ${!w.settingsSubmitted && i.settingsFormUrl ? `<a class="cp-btn primary wide" href="${e(i.settingsFormUrl)}" target="_blank" rel="noopener">📝 축의대 운영 설정서 작성하기</a>`:''}
+    </section>`;
+  }
+  function contractHTML(){
+    const c = view.contract, a = c.amounts;
+    const row = (l, v, cls, sign)=> v ? `<div class="${cls||''}"><span>${l}</span><b>${sign||''}${won(v)}</b></div>` : '';
+    return `<section class="cp-card" id="cp-contract"><h2>📄 계약 정보</h2>
+      <dl class="cp-dl"><div><dt>계약일</dt><dd>${c.date? fdate(c.date, true) : '-'}</dd></div><div><dt>계약 코드 · 짝꿍코드</dt><dd><b>${e(c.code)||'-'}</b></dd></div></dl>
+      <div class="cp-money">
+        ${row('기준 금액', a.base)}
+        ${row('출장비', a.travel, '', '+ ')}
+        ${row('하객 기준인원 초과 추가금', a.surcharge, '', '+ ')}
+        ${row('얼리버드 할인', a.earlyBird, 'minus', '− ')}
+        ${row('짝꿍코드 할인', a.partnerDiscount, 'minus', '− ')}
+        ${row('추천 할인 (짝꿍코드)', a.referralDiscount, 'minus', '− ')}
+        ${row('계약후기 할인', a.reviewContract, 'minus', '− ')}
+        ${row('하객규모 할인', a.guestScaleDiscount, 'minus', '− ')}
+        ${row('계약금 (납부 완료)', a.deposit, 'minus', '− ')}
+        <div class="sum"><span>잔금 (예식 당일)</span><b>${won(a.balance)}</b></div>
+        ${a.reviewDay? `<div class="minus"><span>본식후기 할인 (예식 후 페이백)</span><b>− ${won(a.reviewDay)}</b></div>`:''}
+      </div>
+      <p class="cp-note">${c.settled? '✓ 정산이 완료됐어요' : '금액은 예식 전 확정 내용에 따라 달라질 수 있어요. 궁금한 점은 언제든 문의해주세요.'}</p>
+      ${c.url? `<a class="cp-btn primary wide" href="${e(c.url)}" target="_blank" rel="noopener">📄 계약서 보기 (PDF)</a>` : '<div class="cp-empty">계약서 파일이 준비되면 여기서 바로 볼 수 있어요</div>'}
+    </section>`;
+  }
+  function liveHTML(){
+    const l = view.live, emb = ytEmbed(l.youtube), n = dday(view.wedding.date);
+    return `<section class="cp-card" id="cp-live"><h2>🎥 유튜브 실시간 라이브</h2>
+      ${emb ? `<div class="cp-video"><iframe src="${e(emb)}" title="예식 라이브" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+        <div class="cp-row2"><a class="cp-btn ghost" href="${e(l.youtube)}" target="_blank" rel="noopener">유튜브에서 보기</a><button class="cp-btn ghost" data-cp="shareLive">🔗 라이브 링크 공유</button></div>
+        <p class="cp-note">라이브 링크를 공유하면 오시지 못하는 분들도 예식을 함께 보실 수 있어요.</p>`
+        : `<div class="cp-empty">${n!==null && n<0 ? '라이브 영상이 등록되지 않았어요' : '예식 당일 라이브 링크가 여기에 열려요'}</div>`}
+    </section>`;
+  }
+  function giftHTML(){
+    const u = view.live.giftUrl;
+    return `<section class="cp-card" id="cp-gift"><h2>💌 실시간 축의 현황</h2>
+      ${u ? `<p class="cp-desc">예식 당일 축의대에서 접수되는 축의 내역을 실시간으로 확인하실 수 있어요.</p>
+        <div class="cp-row2"><a class="cp-btn primary" href="${e(u)}" target="_blank" rel="noopener">실시간 축의 현황 열기</a><button class="cp-btn ghost" data-cp="giftToggle">${giftOpen? '접기' : '여기서 보기'}</button></div>
+        ${giftOpen? `<div class="cp-frame"><iframe src="${e(u)}" title="실시간 축의 현황" loading="lazy"></iframe></div>`:''}`
+        : '<div class="cp-empty">예식 당일 축의 현황 링크가 여기에 열려요</div>'}
+    </section>`;
+  }
+  function referralHTML(){
+    const r = view.referral;
+    const lab = {pending:'예식 전', discount:'잔금 할인 확정', payback:'페이백 확정'};
+    return `<section class="cp-card" id="cp-ref"><h2>💝 짝꿍코드 추천 현황</h2>
+      <div class="cp-code"><span>나의 짝꿍코드</span><b>${e(r.code)||'-'}</b><div class="cp-row2"><button class="cp-btn gold" data-cp="shareCode">짝꿍코드 공유하기</button><button class="cp-btn ghost" data-cp="copyCode">복사</button></div></div>
+      <p class="cp-desc">지인분이 모먼트웍스 계약 시 짝꿍코드를 입력하면 지인분은 할인을 받고, 소개해주신 분께는 <b>건당 ${won(r.unit)}</b>이 적립돼요. 추천받은 분의 본식이 끝나면 확정되며, ${e(view.client.name)}님 예식 <b>전</b>에 확정된 금액은 잔금에서 할인, <b>이후</b> 확정분은 페이백으로 드려요.</p>
+      <div class="cp-stats">
+        <div><span>추천 계약</span><b>${r.total}건</b></div>
+        <div><span>잔금 할인</span><b>${won(r.discountAmount)}</b></div>
+        <div><span>페이백</span><b>${won(r.paybackAmount)}</b>${r.paybackAmount? `<small>${r.paybackPaid>=r.paybackAmount? '지급 완료':'지급 '+won(r.paybackPaid)}</small>`:''}</div>
+      </div>
+      ${r.rows.length? `<div class="cp-list">${r.rows.map(x=>`<div><span><b>${e(x.name)}</b>님<small>예식 ${x.weddingDate? fdate(x.weddingDate) : '미정'}</small></span><em class="${x.status}">${lab[x.status]}</em></div>`).join('')}</div>` : '<div class="cp-empty">아직 짝꿍코드로 계약한 분이 없어요. 코드를 공유해보세요!</div>'}
+    </section>`;
+  }
+  function infoHTML(){
+    const i = view.info;
+    return `${i.notice || i.memo ? `<section class="cp-card cp-notice"><h2>📌 안내</h2>${i.notice? `<p>${e(i.notice).replace(/\n/g,'<br>')}</p>`:''}${i.memo? `<p class="cp-memo">${e(i.memo).replace(/\n/g,'<br>')}</p>`:''}</section>`:''}
+      <section class="cp-card cp-contact"><h2>💬 문의하기</h2>
+        <div class="cp-row2"><a class="cp-btn kakao" href="${e(i.kakao)}" target="_blank" rel="noopener">카카오톡 상담</a><a class="cp-btn ghost" href="tel:${e(i.phone)}">📞 전화 문의</a></div>
+      </section>`;
+  }
+  function render(){
+    if(!root || !view) return;
+    const nav = [['cp-wedding','예식'],['cp-contract','계약'],['cp-live','라이브'],['cp-gift','축의현황'],['cp-ref','짝꿍코드']];
+    const up = view.generatedAt ? new Date(view.generatedAt) : new Date();
+    root.innerHTML = `<div class="cp">
+      ${busy? '<div class="cp-busy"></div>':''}
+      ${H.preview? `<div class="cp-preview">관리자 미리보기 · 고객에게 보이는 화면이에요 <button data-cp="closePreview">닫기</button></div>`:''}
+      <header class="cp-top">
+        ${typeof MW_LOGO_MARK!=='undefined' ? `<img src="${MW_LOGO_MARK}" alt="Moment Works">` : ''}
+        <div class="cp-brand">MOMENT WORKS<small>Wedding Guest Desk</small></div>
+        <div class="cp-top-acts"><button data-cp="refresh" title="새로고침">↻</button>${H.preview? '' : '<button data-cp="logout">로그아웃</button>'}</div>
+      </header>
+      <nav class="cp-nav">${nav.map(([id,l])=>`<button data-cp="go" data-v="${id}">${l}</button>`).join('')}</nav>
+      <main class="cp-main">
+        ${heroHTML()}
+        ${alarmHTML()}
+        ${weddingHTML()}
+        ${contractHTML()}
+        ${liveHTML()}
+        ${giftHTML()}
+        ${referralHTML()}
+        ${infoHTML()}
+        ${H.onInstall && !(H.isInstalled && H.isInstalled()) ? '<div style="text-align:center;margin:6px 0 4px;"><button class="cp-install" data-cp="install">📲 홈 화면에 바로가기 추가</button></div>' : ''}
+      </main>
+      <footer class="cp-foot">${typeof MW_LOGO_MARK!=='undefined' ? `<img src="${MW_LOGO_MARK}" alt="">` : ''}<b>MOMENT WORKS</b>Managing Meaningful Moments<br>마지막 업데이트 ${pd(up.getMonth()+1)}.${pd(up.getDate())} ${pd(up.getHours())}:${pd(up.getMinutes())}</footer>
+    </div>`;
+  }
+  async function onClick(ev){
+    const el = ev.target.closest('[data-cp]'); if(!el) return;
+    const a = el.dataset.cp;
+    if(a==='ics'){ downloadIcs(); return; }
+    if(a==='go'){ const t = document.getElementById(el.dataset.v); if(t) t.scrollIntoView({behavior:'smooth', block:'start'}); return; }
+    if(a==='giftToggle'){ giftOpen = !giftOpen; render(); const t=document.getElementById('cp-gift'); if(t) t.scrollIntoView({block:'start'}); return; }
+    if(a==='copyCode'){ if(await copyText(view.referral.code)) toast('짝꿍코드를 복사했어요'); return; }
+    if(a==='shareCode'){
+      const text = `💍 모먼트웍스 축의대 대행 서비스\n계약할 때 짝꿍코드 [${view.referral.code}] 를 입력하면 할인을 받을 수 있어요!\n상담: ${view.info.kakao}`;
+      if(navigator.share){ try{ await navigator.share({text}); }catch(_){} } else if(await copyText(text)) toast('공유 문구를 복사했어요');
+      return;
+    }
+    if(a==='shareLive'){
+      const text = `💍 ${view.client.name}님 예식 라이브\n${fdate(view.wedding.date, true)} ${view.wedding.time}\n${view.live.youtube}`;
+      if(navigator.share){ try{ await navigator.share({text}); }catch(_){} } else if(await copyText(text)) toast('라이브 링크를 복사했어요');
+      return;
+    }
+    if(a==='refresh'){
+      if(busy || !H.onRefresh) return; busy=true; render();
+      try{ const nv = await H.onRefresh(); if(nv) view = nv; toast('최신 정보로 업데이트했어요'); }catch(err){ toast(err.message||'불러오지 못했어요'); }
+      finally{ busy=false; render(); }
+      return;
+    }
+    if(a==='logout'){ if(H.onLogout) H.onLogout(); return; }
+    if(a==='closePreview'){ if(H.onClosePreview) H.onClosePreview(); return; }
+    if(a==='install'){ if(H.onInstall) H.onInstall(); return; }
+  }
+  function mount(el, v, handlers){ unmount(); root=el; view=v; H=handlers||{}; busy=false; giftOpen=false; root.addEventListener('click', onClick); render(); }
+  function update(v){ view=v; render(); }
+  function unmount(){ if(root){ root.removeEventListener('click', onClick); root.innerHTML=''; } root=null; view=null; }
+  return {mount, update, unmount, toast, buildIcs:()=>buildIcs()};
+})();
+
+/* =========================================================
+   고객 전용 페이지 관리 (통합관리시스템)
+   - 계약 상세 창: 고객 접속코드 발급 · 초대 문구 복사 · 계약서/유튜브/축의현황 링크 · 미리보기
+   - 분리 운영 · 설정 탭: 고객 페이지 주소 · 공통 안내문 · 운영 설정서 링크
+   - 저장 위치: 파트너 데이터 referralPay['client:'+계약id] (서버와 자동 동기화)
+========================================================= */
+function clientKey(rec){ return 'client:'+rec.id; }
+function clientOf(rec){ const db = ensurePdb(); return (db.referralPay||{})[clientKey(rec)] || null; }
+function allClientCodes(){ const rp = ensurePdb().referralPay||{}; return Object.keys(rp).filter(k=> k.indexOf('client:')===0 && rp[k] && rp[k].code).map(k=> String(rp[k].code).replace(/[^A-Z0-9]/gi,'').toUpperCase()); }
+function genClientCode(){
+  const used = new Set(allClientCodes().concat(ensurePdb().members.map(m=> String(m.code||'').replace(/[^A-Z0-9]/gi,'').toUpperCase())));
+  let c; do{ c = genAccessCode(); }while(used.has(String(c).replace(/[^A-Z0-9]/gi,'').toUpperCase()));
+  return c;
+}
+async function saveClient(rec, patch, msg){
+  const db = ensurePdb(); db.referralPay = db.referralPay || {};
+  const k = clientKey(rec);
+  db.referralPay[k] = Object.assign({}, db.referralPay[k]||{}, patch, {key: recordKey(rec), updatedAt: new Date().toISOString()});
+  pDirty.referral.add(k);
+  if(msg) showToast(msg);
+  await savePartnerDb();
+}
+function customerUrlFor(code){
+  const base = String(pSet().customerUrl||'').trim();
+  if(!base) return '';
+  const hash = []; if(SERVER_URL) hash.push('api='+encodeURIComponent(SERVER_URL)); if(code) hash.push('code='+encodeURIComponent(code));
+  return base.replace(/#.*$/,'') + (hash.length? '#'+hash.join('&') : '');
+}
+function customerInviteText(rec, c){
+  const url = customerUrlFor(c.code);
+  return `[모먼트웍스] ${rec.clientName}님 전용 예식 페이지 💐\n예식 정보 · 계약서 · 유튜브 라이브 · 실시간 축의 현황 · 짝꿍코드 추천 현황을 한 곳에서 확인하실 수 있어요.\n\n접속코드: ${c.code}\n${url ? url : '(고객 페이지 주소는 모먼트웍스에서 안내드려요)'}\n\n※ 휴대폰 캘린더에 예식 알림도 추가하실 수 있어요.`;
+}
+
+/* ---------- 계약 상세 창에 고객 페이지 박스 ---------- */
+function injectClientBox(){
+  if(typeof editingId==='undefined' || !editingId || currentType!=='contract' || !PDB) return;
+  const rec = recordById(editingId); if(!rec) return;
+  const inner = document.getElementById('formInner'); if(!inner || inner.querySelector('#cpAdminBox')) return;
+  const box = document.createElement('div'); box.id = 'cpAdminBox'; box.className = 'cp-admin';
+  inner.appendChild(box);
+  renderClientBox(rec);
+}
+function custTabRefresh(){ const sec = document.getElementById('tab-customers'); if(sec && sec.classList.contains('active') && typeof renderCustomerTab==='function'){ const a = document.activeElement; if(a && a.blur) a.blur(); renderCustomerTab(); } }
+function renderClientBox(rec, boxEl){
+  const box = boxEl || document.getElementById('cpAdminBox'); if(!box) return;
+  const c = clientOf(rec);
+  if(!c || !c.code){
+    box.innerHTML = `<div class="cp-admin-h"><b>💍 고객 전용 페이지</b><span>예식 정보 · 계약서 · 라이브 · 축의현황 · 짝꿍코드 현황</span></div>
+      <button type="button" class="btn btn-primary btn-sm" data-cpa="create">고객 접속코드 만들기</button>`;
+  } else {
+    const off = c.active===false;
+    box.innerHTML = `<div class="cp-admin-h"><b>💍 고객 전용 페이지</b>${off? '<span class="badge badge-cancelled">사용 중지</span>' : '<span class="badge badge-done">사용 중</span>'}</div>
+      <div class="cp-admin-code"><span>접속코드</span><b>${esc(c.code)}</b>
+        <button type="button" class="btn btn-sm btn-primary" data-cpa="invite">초대 문구 복사</button>
+        <button type="button" class="btn btn-sm" data-cpa="preview">고객 화면 미리보기</button></div>
+      <div class="cp-admin-grid">
+        <label>계약서 PDF 링크<input data-cpf="contractUrl" value="${esc(c.contractUrl||'')}" placeholder="구글드라이브 공유 링크 (링크가 있는 모든 사용자 보기)"></label>
+        <label>유튜브 실시간 라이브 링크<input data-cpf="youtube" value="${esc(c.youtube||'')}" placeholder="https://youtube.com/live/..."></label>
+        <label>실시간 축의 현황 (열람용 링크)<input data-cpf="giftUrl" value="${esc(c.giftUrl||'')}" placeholder="축의금 관리 시스템 열람(viewer) 링크"></label>
+        <label>이 고객에게만 보이는 안내<textarea data-cpf="memo" rows="2" placeholder="예: 예식 당일 12시까지 축의대 앞에서 뵐게요">${esc(c.memo||'')}</textarea></label>
+      </div>
+      <div class="cp-admin-foot"><button type="button" class="btn btn-sm btn-ghost" data-cpa="regen">코드 재발급</button><button type="button" class="btn btn-sm btn-ghost ${off?'':'btn-danger'}" data-cpa="toggle">${off? '다시 사용' : '사용 중지'}</button>
+        ${String(pSet().customerUrl||'').trim()? '' : '<span class="cp-admin-warn">파트너스 → 분리 운영 · 설정에서 고객 페이지 주소를 넣으면 초대 문구에 링크가 함께 들어가요</span>'}</div>`;
+  }
+  box.querySelectorAll('[data-cpa]').forEach(b=> b.addEventListener('click', async ()=>{
+    const a = b.dataset.cpa, cur = clientOf(rec)||{};
+    if(a==='create'){ await saveClient(rec, {code: genClientCode(), active:true, createdAt: new Date().toISOString()}, '고객 접속코드를 만들었어요'); renderClientBox(rec, box); custTabRefresh(); return; }
+    if(a==='invite'){ copyText(customerInviteText(rec, cur), '초대 문구를 복사했어요 · 고객님께 카톡으로 보내주세요'); return; }
+    if(a==='preview'){ openCustomerPreview(cur.code); return; }
+    if(a==='regen'){ if(!confirm('코드를 새로 만들까요? 기존 코드로는 더 이상 접속할 수 없어요.')) return; await saveClient(rec, {code: genClientCode()}, '새 코드를 발급했어요'); renderClientBox(rec, box); custTabRefresh(); return; }
+    if(a==='toggle'){ await saveClient(rec, {active: cur.active===false}, cur.active===false? '고객 페이지를 다시 열었어요' : '고객 페이지 접속을 중지했어요'); renderClientBox(rec, box); custTabRefresh(); return; }
+  }));
+  box.querySelectorAll('[data-cpf]').forEach(inp=> inp.addEventListener('change', async ()=>{ await saveClient(rec, {[inp.dataset.cpf]: inp.value.trim()}, '고객 페이지에 반영했어요'); custTabRefresh(); }));
+}
+new MutationObserver(injectClientBox).observe(document.getElementById('modalBody'), {childList:true, subtree:true});
+
+/* ---------- 고객 화면 미리보기 ---------- */
+function openCustomerPreview(code){
+  let el = document.getElementById('customerPreviewRoot');
+  if(!el){ el = document.createElement('div'); el.id = 'customerPreviewRoot'; document.body.appendChild(el); }
+  const view = buildCustomerView(RECORDS, ensurePdb(), code, todayStr());
+  if(!view.ok){ showToast(view.error); return; }
+  el.classList.add('active'); document.body.classList.add('cp-preview-open');
+  CustomerPortal.mount(el, view, {preview:true, onRefresh: async ()=> buildCustomerView(RECORDS, ensurePdb(), code, todayStr()),
+    onClosePreview: ()=>{ CustomerPortal.unmount(); el.classList.remove('active'); document.body.classList.remove('cp-preview-open'); }});
+}
+
+/* ---------- 분리 운영 · 설정: 고객 페이지 ---------- */
+function customerSettingsHTML(){
+  const s = pSet();
+  const n = allClientCodes().length;
+  return `<div class="p-panel" style="margin-top:18px;">
+    <h3>💍 고객 전용 페이지</h3>
+    <div class="sub">함께 드린 <b>모먼트웍스_고객페이지.html</b>을 GitHub Pages 등에 올리고 주소를 넣으세요 · 고객 코드는 각 계약 상세 창에서 만들어요 (현재 ${n}명 발급)</div>
+    <div class="form-grid" style="grid-template-columns:1fr;gap:8px;">
+      <div class="form-field"><label>고객 페이지 주소</label><input data-act="setText" data-key="customerUrl" value="${esc(s.customerUrl||'')}" placeholder="https://아이디.github.io/customer/"></div>
+      <div class="form-field"><label>축의대 운영 설정서 작성 링크 <span class="hint">설정서 제출 전 고객에게 버튼으로 보여요</span></label><input data-act="setText" data-key="settingsFormUrl" value="${esc(s.settingsFormUrl||'')}" placeholder="운영 설정서 페이지 주소"></div>
+      <div class="form-field"><label>고객 문의 카카오톡 <span class="hint">비우면 모먼트웍스 공식 채널</span></label><input data-act="setText" data-key="customerKakaoUrl" value="${esc(s.customerKakaoUrl||'')}" placeholder="https://pf.kakao.com/_FbIfX/chat"></div>
+      <div class="form-field"><label>모든 고객에게 보이는 안내문</label><textarea data-act="setText" data-key="customerNotice" rows="3" placeholder="예: 예식 1주일 전까지 운영 설정서를 제출해주세요.">${esc(s.customerNotice||'')}</textarea></div>
+    </div>
+  </div>`;
+}
+
+/* =========================================================
+   💍 고객페이지 메뉴 (통합관리시스템 상단 메뉴)
+========================================================= */
+const CUST_STATE = {filter:'upcoming', q:'', open:null};
+function custRows(){
+  const t = todayStr();
+  let list = activeContracts().filter(r=> r.weddingDate).slice();
+  if(CUST_STATE.filter==='upcoming') list = list.filter(r=> r.weddingDate >= t);
+  if(CUST_STATE.filter==='past') list = list.filter(r=> r.weddingDate < t);
+  if(CUST_STATE.filter==='none') list = list.filter(r=>{ const c = clientOf(r); return !(c && c.code); });
+  if(CUST_STATE.filter==='missing') list = list.filter(r=>{ const c = clientOf(r); return c && c.code && (!c.contractUrl || !c.youtube || !c.giftUrl); });
+  const q = CUST_STATE.q.trim();
+  if(q) list = list.filter(r=> [r.clientName, r.contractCode, r.venueName, r.phone].some(v=> String(v||'').includes(q)));
+  list.sort((a,b)=> CUST_STATE.filter==='past' ? String(b.weddingDate).localeCompare(String(a.weddingDate)) : String(a.weddingDate).localeCompare(String(b.weddingDate)));
+  return list;
+}
+function renderCustomerTab(){
+  const sec = document.getElementById('tab-customers'); const root = document.getElementById('custTabRoot');
+  if(!sec || !root || !sec.classList.contains('active') || !PDB) return;
+  if(root.contains(document.activeElement) && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return; // 입력 중에는 다시 그리지 않음
+  const t = todayStr();
+  const upc = activeContracts().filter(r=> r.weddingDate && r.weddingDate >= t);
+  const issued = activeContracts().filter(r=>{ const c = clientOf(r); return c && c.code; });
+  const upIssued = upc.filter(r=>{ const c = clientOf(r); return c && c.code; });
+  const linkCnt = f=> issued.filter(r=> (clientOf(r)||{})[f]).length;
+  const rows = custRows();
+  const yes = v=> v ? '<span class="cu-ok">✓</span>' : '<span class="cu-no">–</span>';
+  root.innerHTML = `
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi-card accent"><div class="kpi-label">예정 예식 코드 발급</div><div class="kpi-value">${upIssued.length} / ${upc.length}</div><div class="kpi-sub">미발급 ${upc.length-upIssued.length}건</div></div>
+      <div class="kpi-card"><div class="kpi-label">계약서 링크</div><div class="kpi-value">${linkCnt('contractUrl')}건</div><div class="kpi-sub">발급 ${issued.length}건 중</div></div>
+      <div class="kpi-card"><div class="kpi-label">유튜브 라이브</div><div class="kpi-value">${linkCnt('youtube')}건</div><div class="kpi-sub">발급 ${issued.length}건 중</div></div>
+      <div class="kpi-card"><div class="kpi-label">축의 현황 링크</div><div class="kpi-value">${linkCnt('giftUrl')}건</div><div class="kpi-sub">발급 ${issued.length}건 중</div></div>
+    </div>
+    <div class="cu-bar">
+      <select data-cu="filter">
+        ${[['upcoming','예정 예식'],['none','코드 미발급'],['missing','링크 미등록'],['past','지난 예식'],['all','전체']].map(([k,l])=>`<option value="${k}" ${CUST_STATE.filter===k?'selected':''}>${l}</option>`).join('')}
+      </select>
+      <input data-cu="q" value="${esc(CUST_STATE.q)}" placeholder="계약자 · 계약코드 · 예식장 검색">
+      <span class="cu-count">${rows.length}건</span>
+      ${upc.length-upIssued.length ? `<button class="btn btn-primary btn-sm" data-cu="bulk">예정 예식 ${upc.length-upIssued.length}건 코드 일괄 발급</button>`:''}
+    </div>
+    <div class="table-wrap"><div style="overflow-x:auto;"><table class="cu-table">
+      <thead><tr><th>예식일</th><th>계약자</th><th>상품 · 예식장</th><th>접속코드</th><th>계약서</th><th>라이브</th><th>축의현황</th><th>관리</th></tr></thead>
+      <tbody>${rows.length? rows.map(r=>{
+        const c = clientOf(r) || {}, has = !!c.code, off = c.active===false, open = CUST_STATE.open===r.id;
+        const dd = ddayInfo(r.weddingDate);
+        return `<tr class="${open?'open':''}">
+          <td>${fmtDate(r.weddingDate)}${dd && dd.diff>=0 ? ` <span class="badge ${dd.diff<=7?'badge-urgent':'badge-normal'}">${dd.label}</span>`:''}</td>
+          <td><b>${esc(r.clientName)}</b><div class="cu-sub">${esc(r.contractCode||'')}</div></td>
+          <td>${esc(r.productType||'-')}<div class="cu-sub">${esc(r.venueName||'')}</div></td>
+          <td>${has? `<b class="cu-code ${off?'off':''}">${esc(c.code)}</b>${off?'<div class="cu-sub">사용 중지</div>':''}` : `<button class="btn btn-sm btn-primary" data-cu="create" data-id="${r.id}">코드 발급</button>`}</td>
+          <td>${yes(c.contractUrl)}</td><td>${yes(c.youtube)}</td><td>${yes(c.giftUrl)}</td>
+          <td class="cu-acts">${has? `<button class="btn btn-sm" data-cu="invite" data-id="${r.id}">초대 문구</button><button class="btn btn-sm" data-cu="preview" data-id="${r.id}">미리보기</button>`:''}<button class="btn btn-sm ${open?'btn-primary':''}" data-cu="edit" data-id="${r.id}">${open?'닫기':'편집'}</button></td>
+        </tr>${open? `<tr class="cu-edit"><td colspan="8"><div id="cpTabBox" class="cp-admin" data-rid="${r.id}"></div></td></tr>`:''}`;
+      }).join('') : '<tr><td colspan="8" style="padding:26px;text-align:center;color:var(--slate);">해당하는 계약이 없어요</td></tr>'}</tbody>
+    </table></div></div>
+    ${customerSettingsHTML()}`;
+  if(CUST_STATE.open){ const rec = recordById(CUST_STATE.open); if(rec) renderClientBox(rec, document.getElementById('cpTabBox')); }
+}
+document.addEventListener('click', async (ev)=>{
+  const el = ev.target.closest('#custTabRoot [data-cu]'); if(!el || el.tagName==='SELECT' || el.tagName==='INPUT') return;
+  const a = el.dataset.cu, rec = el.dataset.id ? recordById(el.dataset.id) : null;
+  if(a==='create' && rec){ await saveClient(rec, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}, `${rec.clientName}님 코드를 발급했어요`); CUST_STATE.open = rec.id; renderCustomerTab(); return; }
+  if(a==='invite' && rec){ copyText(customerInviteText(rec, clientOf(rec)), `${rec.clientName}님 초대 문구를 복사했어요`); return; }
+  if(a==='preview' && rec){ openCustomerPreview(clientOf(rec).code); return; }
+  if(a==='edit' && rec){ CUST_STATE.open = CUST_STATE.open===rec.id ? null : rec.id; renderCustomerTab(); return; }
+  if(a==='bulk'){
+    const t = todayStr(); const list = activeContracts().filter(r=> r.weddingDate && r.weddingDate>=t && !((clientOf(r)||{}).code));
+    if(!list.length || !confirm(`예정 예식 ${list.length}건에 고객 코드를 한 번에 발급할까요?`)) return;
+    const db = ensurePdb(); db.referralPay = db.referralPay || {};
+    list.forEach(r=>{ const k = clientKey(r); db.referralPay[k] = Object.assign({}, db.referralPay[k]||{}, {code: genClientCode(), active:true, key: recordKey(r), createdAt:new Date().toISOString(), updatedAt:new Date().toISOString()}); pDirty.referral.add(k); });
+    renderCustomerTab(); showToast(`${list.length}건 코드를 발급했어요`); await savePartnerDb(); return;
+  }
+});
+document.addEventListener('change', async (ev)=>{
+  const st = ev.target.closest('#custTabRoot [data-act="setText"]');
+  if(st){ pSet()[st.dataset.key] = st.value.trim(); pDirty.settings = true; showToast('고객 페이지 설정을 저장했어요'); await savePartnerDb(); return; }
+  const el = ev.target.closest('#custTabRoot [data-cu]'); if(!el) return;
+  if(el.dataset.cu==='filter'){ CUST_STATE.filter = el.value; CUST_STATE.open = null; renderCustomerTab(); }
+});
+document.addEventListener('input', (ev)=>{
+  const el = ev.target.closest('#custTabRoot [data-cu="q"]'); if(!el) return;
+  CUST_STATE.q = el.value; clearTimeout(renderCustomerTab._t);
+  renderCustomerTab._t = setTimeout(()=>{ const pos = el.selectionStart; el.blur(); renderCustomerTab(); const n = document.querySelector('#custTabRoot [data-cu="q"]'); if(n){ n.focus(); try{ n.setSelectionRange(pos,pos); }catch(_){} } }, 250);
+});
 
 /* ---------- 로그인 ---------- */
 const LOGIN_ID_STORAGE = 'mw_saved_login_id';
