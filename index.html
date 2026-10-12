@@ -1340,6 +1340,11 @@ body.cp-preview-open{overflow:hidden;}
 @media (max-width:820px){.cp-sides-grid{grid-template-columns:1fr;}}
 
 .cp-admin-hint{font-weight:500;color:var(--slate,#7a7a7a);font-size:10.5px;}
+.cu-copy{border:1px solid var(--line,#ddd);background:#fff;border-radius:6px;padding:1px 6px;margin-left:5px;font-size:11px;line-height:1.5;cursor:pointer;vertical-align:middle;}
+.cu-copy:hover{background:#F6F1E6;}
+.cp-admin-code .btn{margin-left:2px;}
+.cu-check{display:flex !important;align-items:center;gap:8px;font-weight:700;cursor:pointer;}
+.cu-check input{width:16px;height:16px;}
 /* ===== 고객 전용 페이지 ===== */
 .cp{--cp-ink:#1F1A1C;--cp-soft:#5E5750;--cp-paper:#F4F1EA;--cp-card:#FFFFFF;--cp-line:#E2DBCD;--cp-wine:#5C1F29;--cp-gold:#A9823C;--cp-gold-s:#F2E7CF;--cp-sage:#4F6F52;--cp-coral:#B0432E;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--cp-ink);background:var(--cp-paper);min-height:100vh;font-variant-numeric:tabular-nums;max-width:640px;margin:0 auto;position:relative;}
@@ -5243,6 +5248,7 @@ async function loadRecords(){
     }
     await afterPartnerLoad();
     if(dirtyKeys.size || deletedKeys.size) await persist();
+    if(typeof autoIssueClientCodes==='function') autoIssueClientCodes();
     renderAll();
     setSyncStatus('');
     LINK.checked = Date.now(); updateLinkChip();
@@ -6795,8 +6801,10 @@ function driveFileId_(u) {
   u = String(u || '').trim();
   var m = u.match(/docs\.google\.com\/(document|spreadsheets|presentation)\/(?:u\/\d+\/)?d\/([\w-]{15,})/);
   if (m) return { id: m[2], kind: m[1] };
+  if (/\/folders\//.test(u)) return { id: '', kind: 'folder' };
+  var rk = (u.match(/[?&]resourcekey=([\w-]+)/i) || [])[1] || '';
   m = u.match(/\/d\/([\w-]{15,})/) || u.match(/[?&]id=([\w-]{15,})/);
-  if (m) return { id: m[1], kind: 'file' };
+  if (m) return { id: m[1], kind: 'file', rk: rk };
   if (/^[\w-]{25,}$/.test(u)) return { id: u, kind: 'file' }; // 파일 ID만 붙여넣은 경우
   return null;
 }
@@ -6806,17 +6814,23 @@ function customerFile_(view) {
   var info = driveFileId_(url), blob = null, name = '', reason = '';
   var base = '모먼트웍스_계약서_' + String(view.client.contractName || view.client.name || '').replace(/[\\\/:*?"<>|\s]+/g, '');
   if (!info) reason = '링크에서 드라이브 파일 ID를 찾지 못했어요 (파일 공유 링크를 넣어주세요)';
+  else if (info.kind === 'folder') reason = '폴더 링크예요 — 폴더 안의 계약서 파일을 열고 그 파일의 링크를 넣어주세요';
   else {
     try { // 대표 드라이브에서 바로 읽기 (파일은 비공개여도 됨)
-      var f = DriveApp.getFileById(info.id);
+      var f = info.rk ? DriveApp.getFileByIdAndResourceKey(info.id, info.rk) : DriveApp.getFileById(info.id);
       var mt = f.getMimeType();
       if (mt && mt.indexOf('application/vnd.google-apps.') === 0) { blob = f.getAs('application/pdf'); name = f.getName() + '.pdf'; }
       else { blob = f.getBlob(); name = f.getName(); }
     } catch (err) {
       var msg = String(err && err.message || err);
-      reason = /permission|권한|authoriz|승인|scope/i.test(msg)
-        ? '서버 스크립트에 드라이브 권한이 승인되지 않았어요 — 편집기에서 authorizeDrive 를 한 번 실행해 승인해주세요 (' + msg + ')'
-        : '드라이브에서 파일을 열지 못했어요 — 스크립트 계정이 이 파일에 접근할 수 있는지 확인해주세요 (' + msg + ')';
+      var who = '';
+      try { who = Session.getEffectiveUser().getEmail(); } catch (e2) {}
+      if (/No item with the given ID|not found|찾을 수 없/i.test(msg))
+        reason = '서버 계정' + (who ? '(' + who + ')' : '') + '이 이 파일을 열 수 없어요 — 파일이 다른 구글 계정 드라이브에 있거나 링크가 잘못됐어요. '
+          + '해결: 드라이브에서 파일 → 공유 → ' + (who || '서버 계정') + ' 을(를) 뷰어로 추가 (일반 액세스는 "제한됨" 그대로) · 파일 ID ' + info.id;
+      else if (/authoriz|scope|승인/i.test(msg))
+        reason = '서버 스크립트에 드라이브 권한이 승인되지 않았어요 — 편집기에서 authorizeDrive 를 실행해 승인해주세요 (' + msg + ')';
+      else reason = '드라이브에서 파일을 열지 못했어요 (' + msg + ') · 파일 ID ' + info.id;
     }
   }
   if (!blob) return { ok: false, error: '계약서 파일을 불러오지 못했어요. 모먼트웍스로 문의해주세요', reason: reason };
@@ -6830,6 +6844,7 @@ function customerFile_(view) {
 /** ▶ 편집기에서 한 번 실행: 드라이브 권한 승인 + 등록된 계약서 파일 점검 (보기 → 실행 로그) */
 function authorizeDrive() {
   DriveApp.getRootFolder(); // 권한 승인 창을 띄우기 위한 호출
+  Logger.log('서버 계정: ' + Session.getEffectiveUser().getEmail() + ' — 계약서 파일은 이 계정이 열 수 있어야 해요');
   var db = readJson_(PARTNER_SHEET, {}), rp = db.referralPay || {}, n = 0, bad = 0;
   Object.keys(rp).forEach(function (k) {
     var c = rp[k];
@@ -8571,7 +8586,7 @@ function sidesHTML(rec, c){
   const card = sk=>{
     const sd = sides[sk] || {}, has = !!sd.code, off = sd.active===false;
     return `<div class="cp-side-card ${sk}">
-      <div class="cp-side-h"><b>${SIDE_LABEL[sk]}측</b>${has? `<span class="cp-side-code ${off?'off':''}">${esc(sd.code)}</span>${off?'<span class="badge badge-cancelled">사용 중지</span>':''}` : ''}</div>
+      <div class="cp-side-h"><b>${SIDE_LABEL[sk]}측</b>${has? `<span class="cp-side-code ${off?'off':''}">${esc(sd.code)}</span><button type="button" class="btn btn-sm btn-ghost cu-copy" data-cpsa="copy" data-sk="${sk}" title="접속코드 복사">📋</button>${off?'<span class="badge badge-cancelled">사용 중지</span>':''}` : ''}</div>
       <div class="cp-admin-grid">
         <label>${SIDE_LABEL[sk]} 이름<input data-cps="${sk}" data-f="name" value="${esc(sd.name||'')}" placeholder="${SIDE_LABEL[sk]} 이름"></label>
         <label>${SIDE_LABEL[sk]} 연락처<input data-cps="${sk}" data-f="phone" value="${esc(sd.phone||'')}" placeholder="010-0000-0000"></label>
@@ -8590,6 +8605,19 @@ function genClientCode(){
   const used = new Set(allClientCodes().concat(ensurePdb().members.map(m=> String(m.code||'').replace(/[^A-Z0-9]/gi,'').toUpperCase())));
   let c; do{ c = genAccessCode(); }while(used.has(String(c).replace(/[^A-Z0-9]/gi,'').toUpperCase()));
   return c;
+}
+/* 신규 계약 → 고객 접속코드 자동 발급 (서버 동기화 직후 실행 · 예정/미정 예식만) */
+function autoIssueClientCodes(){
+  if(!PDB || !Array.isArray(RECORDS) || pSet().autoClientCode===false || window.MW_NO_AUTO_CODE) return 0;
+  const t = todayStr();
+  const list = activeContracts().filter(r=> r.id && (!r.weddingDate || r.weddingDate >= t) && !clientOf(r));
+  if(!list.length) return 0;
+  const db = ensurePdb(); db.referralPay = db.referralPay || {};
+  const now = new Date().toISOString();
+  list.forEach(r=>{ const k = clientKey(r); db.referralPay[k] = {code: genClientCode(), active:true, key: recordKey(r), createdAt: now, updatedAt: now, auto: true}; pDirty.referral.add(k); });
+  showToast(list.length===1 ? `${list[0].clientName||'신규'}님 고객 접속코드를 자동 발급했어요` : `신규 계약 ${list.length}건 고객 접속코드를 자동 발급했어요`);
+  savePartnerDb();
+  return list.length;
 }
 async function saveClient(rec, patch, msg){
   const db = ensurePdb(); db.referralPay = db.referralPay || {};
@@ -8643,7 +8671,7 @@ function renderClientBox(rec, boxEl){
   } else {
     const off = c.active===false;
     box.innerHTML = `<div class="cp-admin-h"><b>💍 고객 전용 페이지</b>${off? '<span class="badge badge-cancelled">사용 중지</span>' : '<span class="badge badge-done">사용 중</span>'}</div>
-      <div class="cp-admin-code"><span>접속코드</span><b>${esc(c.code)}</b>
+      <div class="cp-admin-code"><span>접속코드</span><b>${esc(c.code)}</b><button type="button" class="btn btn-sm" data-cpa="copycode" title="접속코드 복사">📋 복사</button>
         <button type="button" class="btn btn-sm btn-primary" data-cpa="invite">초대 문구 복사</button>
         <button type="button" class="btn btn-sm" data-cpa="preview">고객 화면 미리보기</button></div>
       <div class="cp-admin-grid">
@@ -8662,6 +8690,7 @@ function renderClientBox(rec, boxEl){
     if(a==='invite'){ copyText(customerInviteText(rec, cur), '초대 문구를 복사했어요 · 고객님께 카톡으로 보내주세요'); return; }
     if(a==='preview'){ openCustomerPreview(cur.code); return; }
     if(a==='filecheck'){ checkContractFile(cur.code, b); return; }
+    if(a==='copycode'){ copyText(cur.code, `접속코드 ${cur.code} 를 복사했어요`); return; }
     if(a==='regen'){ if(!confirm('코드를 새로 만들까요? 기존 코드로는 더 이상 접속할 수 없어요.')) return; await saveClient(rec, {code: genClientCode()}, '새 코드를 발급했어요'); renderClientBox(rec, box); custTabRefresh(); return; }
     if(a==='toggle'){ await saveClient(rec, {active: cur.active===false}, cur.active===false? '고객 페이지를 다시 열었어요' : '고객 페이지 접속을 중지했어요'); renderClientBox(rec, box); custTabRefresh(); return; }
   }));
@@ -8670,6 +8699,7 @@ function renderClientBox(rec, boxEl){
     if(a==='both'){ const sides = Object.assign({}, cur.sides||{}); ['groom','bride'].forEach(k=>{ sides[k] = Object.assign({}, sides[k]||{}, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}); }); await saveClient(rec, {sides}, '신랑 · 신부 코드를 발급했어요'); }
     if(a==='create'){ await saveSide(rec, sk, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}, `${SIDE_LABEL[sk]} 코드를 발급했어요`); }
     if(a==='invite'){ copyText(sideInviteText(rec, sk, sd), `${SIDE_LABEL[sk]} 초대 문구를 복사했어요`); return; }
+    if(a==='copy'){ copyText(sd.code, `${SIDE_LABEL[sk]} 접속코드 ${sd.code} 를 복사했어요`); return; }
     if(a==='preview'){ openCustomerPreview(sd.code); return; }
     if(a==='regen'){ if(!confirm(`${SIDE_LABEL[sk]} 코드를 새로 만들까요? 기존 코드로는 접속할 수 없어요.`)) return; await saveSide(rec, sk, {code: genClientCode()}, '새 코드를 발급했어요'); }
     if(a==='toggle'){ await saveSide(rec, sk, {active: sd.active===false}, sd.active===false? '다시 사용해요' : '접속을 중지했어요'); }
@@ -8699,6 +8729,7 @@ function customerSettingsHTML(){
     <h3>💍 고객 전용 페이지</h3>
     <div class="sub">함께 드린 <b>모먼트웍스_고객페이지.html</b>을 GitHub Pages 등에 올리고 주소를 넣으세요 · 고객 코드는 각 계약 상세 창에서 만들어요 (현재 ${n}명 발급)</div>
     <div class="form-grid" style="grid-template-columns:1fr;gap:8px;">
+      <div class="form-field"><label class="cu-check"><input type="checkbox" data-act="autoCode" ${s.autoClientCode===false?'':'checked'}> 신규 계약이 등록되면 고객 접속코드 자동 발급 <span class="hint">예식 예정 · 일정 미정 계약만</span></label></div>
       <div class="form-field"><label>고객 페이지 주소</label><input data-act="setText" data-key="customerUrl" value="${esc(s.customerUrl||'')}" placeholder="https://아이디.github.io/customer/"></div>
       <div class="form-field"><label>실시간 축의 현황 기본 주소 <span class="hint">고객별 현황판 코드가 이 주소 뒤에 붙어 자동 로그인돼요</span></label><input data-act="setText" data-key="giftBaseUrl" value="${esc(s.giftBaseUrl||'')}" placeholder="https://momentworks.github.io/arrange/"></div>
       <div class="form-field"><label>축의대 운영 설정서 작성 링크 <span class="hint">설정서 제출 전 고객에게 버튼으로 보여요</span></label><input data-act="setText" data-key="settingsFormUrl" value="${esc(s.settingsFormUrl||'')}" placeholder="운영 설정서 페이지 주소"></div>
@@ -8759,7 +8790,7 @@ function renderCustomerTab(){
           <td>${fmtDate(r.weddingDate)}${dd && dd.diff>=0 ? ` <span class="badge ${dd.diff<=7?'badge-urgent':'badge-normal'}">${dd.label}</span>`:''}</td>
           <td><b>${esc(r.clientName)}</b><div class="cu-sub">${esc(r.contractCode||'')}</div></td>
           <td>${esc(r.productType||'-')}<div class="cu-sub">${esc(r.venueName||'')}</div></td>
-          <td>${has? `<b class="cu-code ${off?'off':''}">${esc(c.code)}</b>${off?'<div class="cu-sub">사용 중지</div>':''}${sideEligible(r)? ['groom','bride'].map(sk=>{ const sd=(c.sides||{})[sk]; return sd&&sd.code? `<div class="cu-sub">${SIDE_LABEL[sk]} <b class="cu-code ${sd.active===false?'off':''}">${esc(sd.code)}</b></div>` : ''; }).join('') + (!((c.sides||{}).groom||{}).code || !((c.sides||{}).bride||{}).code ? `<div class="cu-sub"><a href="#" data-cu="edit" data-id="${r.id}">+ 신랑·신부 코드</a></div>` : '') : ''}` : `<button class="btn btn-sm btn-primary" data-cu="create" data-id="${r.id}">코드 발급</button>`}</td>
+          <td>${has? `<b class="cu-code ${off?'off':''}">${esc(c.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(c.code)}" title="접속코드 복사">📋</button>${off?'<div class="cu-sub">사용 중지</div>':''}${sideEligible(r)? ['groom','bride'].map(sk=>{ const sd=(c.sides||{})[sk]; return sd&&sd.code? `<div class="cu-sub">${SIDE_LABEL[sk]} <b class="cu-code ${sd.active===false?'off':''}">${esc(sd.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(sd.code)}" title="${SIDE_LABEL[sk]} 접속코드 복사">📋</button></div>` : ''; }).join('') + (!((c.sides||{}).groom||{}).code || !((c.sides||{}).bride||{}).code ? `<div class="cu-sub"><a href="#" data-cu="edit" data-id="${r.id}">+ 신랑·신부 코드</a></div>` : '') : ''}` : `<button class="btn btn-sm btn-primary" data-cu="create" data-id="${r.id}">코드 발급</button>`}</td>
           <td>${yes(c.contractUrl)}</td><td>${yes(c.youtube)}</td><td>${yes(giftSet(c))}</td>
           <td class="cu-acts">${has? `<button class="btn btn-sm" data-cu="invite" data-id="${r.id}">초대 문구</button><button class="btn btn-sm" data-cu="preview" data-id="${r.id}">미리보기</button>`:''}<button class="btn btn-sm ${open?'btn-primary':''}" data-cu="edit" data-id="${r.id}">${open?'닫기':'편집'}</button></td>
         </tr>${open? `<tr class="cu-edit"><td colspan="8"><div id="cpTabBox" class="cp-admin" data-rid="${r.id}"></div></td></tr>`:''}`;
@@ -8773,6 +8804,7 @@ document.addEventListener('click', async (ev)=>{
   if(el.tagName==='A') ev.preventDefault();
   const a = el.dataset.cu, rec = el.dataset.id ? recordById(el.dataset.id) : null;
   if(a==='create' && rec){ await saveClient(rec, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}, `${rec.clientName}님 코드를 발급했어요`); CUST_STATE.open = rec.id; renderCustomerTab(); return; }
+  if(a==='copy'){ ev.preventDefault(); copyText(el.dataset.code, `접속코드 ${el.dataset.code} 를 복사했어요`); return; }
   if(a==='invite' && rec){ copyText(customerInviteText(rec, clientOf(rec)), `${rec.clientName}님 초대 문구를 복사했어요`); return; }
   if(a==='preview' && rec){ openCustomerPreview(clientOf(rec).code); return; }
   if(a==='edit' && rec){ CUST_STATE.open = CUST_STATE.open===rec.id ? null : rec.id; renderCustomerTab(); return; }
@@ -8785,6 +8817,8 @@ document.addEventListener('click', async (ev)=>{
   }
 });
 document.addEventListener('change', async (ev)=>{
+  const ac = ev.target.closest('#custTabRoot [data-act="autoCode"]');
+  if(ac){ pSet().autoClientCode = ac.checked; pDirty.settings = true; showToast(ac.checked? '신규 계약 자동 발급을 켰어요' : '자동 발급을 껐어요'); await savePartnerDb(); if(ac.checked && autoIssueClientCodes()) renderCustomerTab(); return; }
   const st = ev.target.closest('#custTabRoot [data-act="setText"]');
   if(st){ pSet()[st.dataset.key] = st.value.trim(); pDirty.settings = true; showToast('고객 페이지 설정을 저장했어요'); await savePartnerDb(); return; }
   const el = ev.target.closest('#custTabRoot [data-cu]'); if(!el) return;
