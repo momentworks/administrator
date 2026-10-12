@@ -1363,8 +1363,12 @@ body.cp-preview-open{overflow:hidden;}
 .cp-dday{font-family:'Cormorant Garamond','Noto Serif KR',serif;font-size:64px;font-weight:700;line-height:1.05;letter-spacing:.04em;margin:10px 0 4px;
   background:linear-gradient(180deg,#FFF6E3 0%,#F2DDB0 38%,#D4AF6A 62%,#F5E3BC 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 2px 6px rgba(0,0,0,.28));font-variant-numeric:lining-nums;}
+.cp-dday span{background:inherit;-webkit-background-clip:text;background-clip:text;color:transparent;}
+.cp-dday:not(.done){display:flex;justify-content:center;align-items:baseline;gap:.14em;background:none;}
+.cp-dday:not(.done) span{background-image:linear-gradient(180deg,#FFF6E3 0%,#F2DDB0 38%,#D4AF6A 62%,#F5E3BC 100%);}
+.cp-dash{display:inline-block;width:.34em;height:.075em;border-radius:.04em;transform:translateY(-.28em);background:linear-gradient(90deg,#E9CF98,#D4AF6A);flex:0 0 auto;}
 .cp-dday.done{font-family:'Noto Serif KR',serif;font-size:40px;letter-spacing:.02em;}
-.cp-dday::after{content:'';display:block;width:42px;height:1px;margin:10px auto 0;background:linear-gradient(90deg,transparent,#D4AF6A,transparent);}
+.cp-dday + .cp-dsub::before{content:'';display:block;width:42px;height:1px;margin:2px auto 10px;background:linear-gradient(90deg,transparent,#D4AF6A,transparent);}
 .cp-dsub{font-size:12.5px;color:#E7D9C2;}
 .cp-when{margin:14px auto 16px;font-size:14px;line-height:1.7;border-top:1px solid rgba(255,255,255,.18);border-bottom:1px solid rgba(255,255,255,.18);padding:10px 0;}
 .cp-hero-acts{display:flex;gap:8px;}
@@ -6788,42 +6792,54 @@ function reviewDiscountFor_(count, contractDate) {
 /* ================= 진입점 ================= */
 
 function driveFileId_(u) {
-  u = String(u || '');
-  var m = u.match(/drive\.google\.com\/file\/d\/([\w-]+)/) || u.match(/drive\.google\.com\/(?:open|uc)\?(?:[^#]*&)?id=([\w-]+)/);
-  if (m) return { id: m[1], kind: 'file' };
-  m = u.match(/docs\.google\.com\/(document|spreadsheets|presentation)\/d\/([\w-]+)/);
+  u = String(u || '').trim();
+  var m = u.match(/docs\.google\.com\/(document|spreadsheets|presentation)\/(?:u\/\d+\/)?d\/([\w-]{15,})/);
   if (m) return { id: m[2], kind: m[1] };
+  m = u.match(/\/d\/([\w-]{15,})/) || u.match(/[?&]id=([\w-]{15,})/);
+  if (m) return { id: m[1], kind: 'file' };
+  if (/^[\w-]{25,}$/.test(u)) return { id: u, kind: 'file' }; // 파일 ID만 붙여넣은 경우
   return null;
 }
 function customerFile_(view) {
   var url = view._file;
   if (!url) return { ok: false, error: '계약서 파일이 아직 등록되지 않았어요' };
-  var info = driveFileId_(url), blob = null, name = '';
+  var info = driveFileId_(url), blob = null, name = '', reason = '';
   var base = '모먼트웍스_계약서_' + String(view.client.contractName || view.client.name || '').replace(/[\\\/:*?"<>|\s]+/g, '');
-  var FAIL = { ok: false, error: '계약서 파일을 불러오지 못했어요. 모먼트웍스로 문의해주세요' };
-  if (info) {
-    try { // 1순위: 대표 드라이브에서 바로 읽기
+  if (!info) reason = '링크에서 드라이브 파일 ID를 찾지 못했어요 (파일 공유 링크를 넣어주세요)';
+  else {
+    try { // 대표 드라이브에서 바로 읽기 (파일은 비공개여도 됨)
       var f = DriveApp.getFileById(info.id);
-      blob = info.kind === 'file' ? f.getBlob() : f.getAs('application/pdf');
-      name = info.kind === 'file' ? f.getName() : base + '.pdf';
-    } catch (err) { blob = null; }
+      var mt = f.getMimeType();
+      if (mt && mt.indexOf('application/vnd.google-apps.') === 0) { blob = f.getAs('application/pdf'); name = f.getName() + '.pdf'; }
+      else { blob = f.getBlob(); name = f.getName(); }
+    } catch (err) {
+      var msg = String(err && err.message || err);
+      reason = /permission|권한|authoriz|승인|scope/i.test(msg)
+        ? '서버 스크립트에 드라이브 권한이 승인되지 않았어요 — 편집기에서 authorizeDrive 를 한 번 실행해 승인해주세요 (' + msg + ')'
+        : '드라이브에서 파일을 열지 못했어요 — 스크립트 계정이 이 파일에 접근할 수 있는지 확인해주세요 (' + msg + ')';
+    }
   }
-  if (!blob) { // 2순위: 공개 링크로 내려받기
-    var dl = !info ? url : info.kind === 'file' ? 'https://drive.google.com/uc?export=download&id=' + info.id
-      : 'https://docs.google.com/' + info.kind + '/d/' + info.id + '/export?format=pdf';
-    try {
-      var res = UrlFetchApp.fetch(dl, { followRedirects: true, muteHttpExceptions: true });
-      var ct = String(res.getHeaders()['Content-Type'] || '');
-      if (res.getResponseCode() !== 200 || ct.indexOf('text/html') === 0) return FAIL;
-      blob = res.getBlob();
-    } catch (err2) { return FAIL; }
-  }
+  if (!blob) return { ok: false, error: '계약서 파일을 불러오지 못했어요. 모먼트웍스로 문의해주세요', reason: reason };
   var bytes = blob.getBytes();
-  if (bytes.length > 25 * 1024 * 1024) return { ok: false, error: '파일이 너무 커서 바로 받을 수 없어요. 모먼트웍스로 문의해주세요' };
+  if (bytes.length > 25 * 1024 * 1024) return { ok: false, error: '파일이 너무 커서 바로 받을 수 없어요. 모먼트웍스로 문의해주세요', reason: '25MB 초과' };
   var mime = blob.getContentType() || 'application/pdf';
-  if (!name) name = blob.getName() || '';
-  if (!name || name.indexOf('.') < 0) name = base + (mime === 'application/pdf' ? '.pdf' : '');
+  if (!name || name.indexOf('.') < 0) name = (name || base) + (mime === 'application/pdf' ? '.pdf' : '');
   return { ok: true, name: name, mime: mime, size: bytes.length, data: Utilities.base64Encode(bytes) };
+}
+
+/** ▶ 편집기에서 한 번 실행: 드라이브 권한 승인 + 등록된 계약서 파일 점검 (보기 → 실행 로그) */
+function authorizeDrive() {
+  DriveApp.getRootFolder(); // 권한 승인 창을 띄우기 위한 호출
+  var db = readJson_(PARTNER_SHEET, {}), rp = db.referralPay || {}, n = 0, bad = 0;
+  Object.keys(rp).forEach(function (k) {
+    var c = rp[k];
+    if (k.indexOf('client:') !== 0 || !c || !c.contractUrl) return;
+    n++;
+    var r = customerFile_({ _file: c.contractUrl, client: { contractName: c.code } });
+    if (!r.ok) bad++;
+    Logger.log((r.ok ? '✅ ' : '❌ ') + (c.code || k) + ' · ' + (r.ok ? r.name + ' (' + Math.round(r.size / 1024) + 'KB)' : r.reason));
+  });
+  Logger.log('계약서 파일 점검: ' + n + '건 중 ' + (n - bad) + '건 정상');
 }
 
 function doGet(e) {
@@ -6846,7 +6862,9 @@ function doGet(e) {
       if (tooManyFails_()) return json_({ ok: false, error: '시도가 너무 많아요. 10분 뒤 다시 시도해주세요' });
       var fv = buildCustomerView(contractRecordsCached_(), readJson_(PARTNER_SHEET, {}), p.code, today_(), true);
       if (!fv.ok) { addFail_(); return json_(fv); }
-      return json_(customerFile_(fv));
+      var fres = customerFile_(fv);
+      if (!fres.ok && !(p.diag && authorized_(p))) delete fres.reason; // 상세 사유는 관리자에게만
+      return json_(fres);
     }
     if (!authorized_(p)) return json_({ ok: false, error: '관리자 키가 올바르지 않습니다' });
     if (p.sheet === 'partners') return json_(readJson_(PARTNER_SHEET, {}));
@@ -8329,7 +8347,7 @@ const CustomerPortal = (function(){
     const sub = n===null ? '예식 일정이 정해지면 여기에 표시돼요' : n>0 ? '예식까지 남은 날' : n===0 ? '오늘 예식을 진심으로 축하드려요 💐' : '소중한 날을 함께해 주셔서 감사합니다';
     return `<section class="cp-hero">
       <div class="cp-hello">${view.client.sideLabel? `<span class="cp-side">${e(view.client.sideLabel)}</span>`:''}${e(view.client.name)}님의 예식</div>
-      <div class="cp-dday${n!==null && n<0 ? ' done' : ''}">${big}</div>
+      <div class="cp-dday${n!==null && n<0 ? ' done' : ''}">${n!==null && n>=0 ? `<span>D</span><i class="cp-dash" aria-hidden="true"></i><span>${n>0? n : 'DAY'}</span>` : big}</div>
       <div class="cp-dsub">${sub}</div>
       <div class="cp-when"><b>${fdate(w.date, true)}</b>${w.time? ` · ${e(w.time)}` : ''}<br>${e(w.venue)} ${e(w.hall)}</div>
       <div class="cp-hero-acts">
@@ -8581,6 +8599,20 @@ async function saveClient(rec, patch, msg){
   if(msg) showToast(msg);
   await savePartnerDb();
 }
+async function checkContractFile(code, btn){
+  if(!code){ showToast('접속코드를 먼저 발급해주세요'); return; }
+  if(typeof SERVER_URL==='undefined' || !SERVER_URL){ showToast('서버가 연결되어 있지 않아요'); return; }
+  const old = btn.textContent; btn.textContent = '점검 중…'; btn.disabled = true;
+  try{
+    await savePartnerDb();
+    const res = await fetch(apiUrl({action:'customerFile', code, diag:1}), {method:'GET'});
+    const j = await res.json();
+    if(j && j.ok) showToast(`✅ 고객이 바로 받을 수 있어요 · ${j.name} (${Math.max(1, Math.round((j.size||0)/1024))}KB)`);
+    else if(j && j.error && /관리자 키|접속코드/.test(j.error) && !j.reason) alert('서버 스크립트가 최신이 아니에요.\n새 서버 스크립트로 교체 후 「새 버전」으로 배포해주세요.\n\n' + j.error);
+    else alert('❌ 고객이 계약서를 받을 수 없어요\n\n' + ((j && (j.reason || j.error)) || '알 수 없는 오류'));
+  }catch(err){ alert('서버에 연결하지 못했어요: ' + (err.message||err)); }
+  finally{ btn.textContent = old; btn.disabled = false; }
+}
 function customerUrlFor(code){
   const base = String(pSet().customerUrl||'').trim();
   if(!base) return '';
@@ -8621,7 +8653,7 @@ function renderClientBox(rec, boxEl){
         <label>이 고객에게만 보이는 안내<textarea data-cpf="memo" rows="2" placeholder="예: 예식 당일 12시까지 축의대 앞에서 뵐게요">${esc(c.memo||'')}</textarea></label>
       </div>
       ${sidesHTML(rec, c)}
-      <div class="cp-admin-foot"><button type="button" class="btn btn-sm btn-ghost" data-cpa="regen">코드 재발급</button><button type="button" class="btn btn-sm btn-ghost ${off?'':'btn-danger'}" data-cpa="toggle">${off? '다시 사용' : '사용 중지'}</button>
+      <div class="cp-admin-foot">${c.contractUrl? '<button type="button" class="btn btn-sm" data-cpa="filecheck">📥 계약서 다운로드 점검</button>' : ''}<button type="button" class="btn btn-sm btn-ghost" data-cpa="regen">코드 재발급</button><button type="button" class="btn btn-sm btn-ghost ${off?'':'btn-danger'}" data-cpa="toggle">${off? '다시 사용' : '사용 중지'}</button>
         ${String(pSet().customerUrl||'').trim()? '' : '<span class="cp-admin-warn">파트너스 → 분리 운영 · 설정에서 고객 페이지 주소를 넣으면 초대 문구에 링크가 함께 들어가요</span>'}</div>`;
   }
   box.querySelectorAll('[data-cpa]').forEach(b=> b.addEventListener('click', async ()=>{
@@ -8629,6 +8661,7 @@ function renderClientBox(rec, boxEl){
     if(a==='create'){ await saveClient(rec, {code: genClientCode(), active:true, createdAt: new Date().toISOString()}, '고객 접속코드를 만들었어요'); renderClientBox(rec, box); custTabRefresh(); return; }
     if(a==='invite'){ copyText(customerInviteText(rec, cur), '초대 문구를 복사했어요 · 고객님께 카톡으로 보내주세요'); return; }
     if(a==='preview'){ openCustomerPreview(cur.code); return; }
+    if(a==='filecheck'){ checkContractFile(cur.code, b); return; }
     if(a==='regen'){ if(!confirm('코드를 새로 만들까요? 기존 코드로는 더 이상 접속할 수 없어요.')) return; await saveClient(rec, {code: genClientCode()}, '새 코드를 발급했어요'); renderClientBox(rec, box); custTabRefresh(); return; }
     if(a==='toggle'){ await saveClient(rec, {active: cur.active===false}, cur.active===false? '고객 페이지를 다시 열었어요' : '고객 페이지 접속을 중지했어요'); renderClientBox(rec, box); custTabRefresh(); return; }
   }));
@@ -8643,7 +8676,7 @@ function renderClientBox(rec, boxEl){
     renderClientBox(rec, box); custTabRefresh();
   }));
   box.querySelectorAll('[data-cps]').forEach(inp=> inp.addEventListener('change', async ()=>{ await saveSide(rec, inp.dataset.cps, {[inp.dataset.f]: inp.value.trim()}, '저장했어요'); custTabRefresh(); }));
-  box.querySelectorAll('[data-cpf]').forEach(inp=> inp.addEventListener('change', async ()=>{ await saveClient(rec, {[inp.dataset.cpf]: inp.value.trim()}, '고객 페이지에 반영했어요'); custTabRefresh(); }));
+  box.querySelectorAll('[data-cpf]').forEach(inp=> inp.addEventListener('change', async ()=>{ await saveClient(rec, {[inp.dataset.cpf]: inp.value.trim()}, '고객 페이지에 반영했어요'); if(inp.dataset.cpf==='contractUrl') renderClientBox(rec, box); custTabRefresh(); }));
 }
 new MutationObserver(injectClientBox).observe(document.getElementById('modalBody'), {childList:true, subtree:true});
 
