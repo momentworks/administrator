@@ -1326,6 +1326,20 @@ body.cp-preview-open{overflow:hidden;}
 .cu-table tr.open td{background:#FBF3DF !important;}
 .cu-table tr.cu-edit td{background:#FFFDF8 !important;padding:6px 10px 14px;}
 .cu-table tr.cu-edit .cp-admin{margin-top:4px;}
+/* 신랑 · 신부 따로 관리 */
+.cp-sides{margin-top:12px;border-top:1px dashed #E3CF9E;padding-top:10px;}
+.cp-sides-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.cp-sides-h span{font-size:11.5px;color:var(--slate);}
+.cp-sides-h .btn{margin-left:auto;}
+.cp-sides-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.cp-side-card{background:#fff;border:1px solid var(--line);border-top:3px solid var(--blue);border-radius:4px;padding:10px;}
+.cp-side-card.bride{border-top-color:var(--coral);}
+.cp-side-card .cp-admin-grid{grid-template-columns:1fr;}
+.cp-side-h{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.cp-side-code{font-weight:800;letter-spacing:.08em;font-size:14px;} .cp-side-code.off{text-decoration:line-through;color:var(--slate);}
+@media (max-width:820px){.cp-sides-grid{grid-template-columns:1fr;}}
+
+.cp-admin-hint{font-weight:500;color:var(--slate,#7a7a7a);font-size:10.5px;}
 /* ===== 고객 전용 페이지 ===== */
 .cp{--cp-ink:#1F1A1C;--cp-soft:#5E5750;--cp-paper:#F4F1EA;--cp-card:#FFFFFF;--cp-line:#E2DBCD;--cp-wine:#5C1F29;--cp-gold:#A9823C;--cp-gold-s:#F2E7CF;--cp-sage:#4F6F52;--cp-coral:#B0432E;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--cp-ink);background:var(--cp-paper);min-height:100vh;font-variant-numeric:tabular-nums;max-width:640px;margin:0 auto;position:relative;}
@@ -1399,6 +1413,7 @@ body.cp-preview-open{overflow:hidden;}
 .cp-foot b{display:block;letter-spacing:.32em;font-size:10.5px;color:var(--cp-ink);}
 .cp-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#1F1A1C;color:#fff;padding:11px 18px;border-radius:999px;font-size:13px;opacity:0;transition:all .25s;z-index:200;pointer-events:none;max-width:90vw;text-align:center;}
 .cp-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.cp-side{display:inline-block;background:var(--cp-gold);color:#fff;font-size:11px;font-weight:800;letter-spacing:.04em;border-radius:999px;padding:2px 9px;margin-right:6px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -4035,19 +4050,27 @@ function applyPartnerUpdate(db, records, code, op, todayStr){
 
 /* =========================================================
    고객 전용 페이지 (계약자별 접속코드)
-   - 고객 설정은 파트너 데이터의 referralPay['client:'+계약id]에 보관 {code, youtube, giftUrl, contractUrl, memo}
+   - 고객 설정은 파트너 데이터의 referralPay['client:'+계약id]에 보관 {code, youtube, giftCode, giftUrl(구버전), contractUrl, memo}
    - 서버(Apps Script)와 관리 페이지 미리보기가 똑같이 사용 → 자기완결형
 ========================================================= */
 function buildCustomerView(records, db, code, todayStr){
   function norm(c){ return String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,''); }
-  function mask(name){ name=String(name||''); if(name.length<2) return name; if(name.length===2) return name[0]+'*'; return name[0]+new Array(name.length-1).join('*')+name[name.length-1]; }
+  function mask(name){ name=String(name||'').trim(); if(!name) return ''; return name[0]+'**'; }
   function n(v){ return Number(v)||0; }
   db = db || {};
   var target = norm(code);
   if(!target) return {ok:false, error:'접속코드를 입력해주세요'};
   var rp = db.referralPay || {};
-  var recordId = null, client = null;
-  Object.keys(rp).forEach(function(k){ if(k.indexOf('client:')===0 && rp[k] && norm(rp[k].code)===target && rp[k].active!==false){ recordId = k.slice(7); client = rp[k]; } });
+  var recordId = null, client = null, sideKey = '', side = null;
+  Object.keys(rp).forEach(function(k){
+    if(k.indexOf('client:')!==0 || !rp[k]) return;
+    var c0 = rp[k];
+    if(c0.code && norm(c0.code)===target && c0.active!==false){ recordId = k.slice(7); client = c0; sideKey = ''; side = null; }
+    ['groom','bride'].forEach(function(sk){ // 양측 · 통합: 신랑 · 신부 각각의 코드
+      var sd = c0.sides && c0.sides[sk];
+      if(sd && sd.code && norm(sd.code)===target && sd.active!==false && c0.active!==false){ recordId = k.slice(7); client = c0; sideKey = sk; side = sd; }
+    });
+  });
   if(!recordId) return {ok:false, error:'접속코드가 올바르지 않아요. 모먼트웍스에서 받은 코드를 확인해주세요'};
   var all = (records||[]).filter(function(r){ return r && r.type==='contract'; });
   var r = null;
@@ -4094,16 +4117,22 @@ function buildCustomerView(records, db, code, todayStr){
   return {
     ok: true, v: 1,
     today: today,
-    client: {name: r.clientName||'', code: myCode},
+    client: {name: (side && side.name) || r.clientName||'', contractName: r.clientName||'', code: myCode, side: sideKey, sideLabel: sideKey==='groom' ? '신랑측' : sideKey==='bride' ? '신부측' : ''},
     wedding: {date: r.weddingDate||'', time: r.weddingTime||'', venue: r.venueName||'', hall: r.hallName||'', region: r.region||'',
       product: r.productType||'', groomGuests: n(r.groomGuests), brideGuests: n(r.brideGuests), settingsSubmitted: !!r.settingsSubmitted},
     contract: {date: r.contractDate||'', code: myCode, url: client.contractUrl||'',
       amounts: {base: base, earlyBird: eb, partnerDiscount: pd, referralDiscount: rd, reviewContract: revC, guestScaleDiscount: gsd, surcharge: sur, deposit: deposit, travel: travel, balance: balance, reviewDay: revD, final: balance - revD},
       settled: !!r.settlementDone},
-    live: {youtube: client.youtube||'', giftUrl: client.giftUrl||''},
+    live: (function(){
+      var base = String(s.giftBaseUrl || 'https://momentworks.github.io/arrange/').trim();
+      var code = String((side && side.giftCode) || client.giftCode || '').trim();
+      var custom = String((side && side.giftUrl) || client.giftUrl || '').trim();
+      var url = code ? base.split('#')[0] + '#code=' + encodeURIComponent(code) : (custom || base);
+      return {youtube: client.youtube||'', giftUrl: url, giftCode: code, giftBase: base};
+    })(),
     referral: {code: myCode, unit: UNIT, rows: refRows, total: refRows.length, discountCount: discountCnt, paybackCount: paybackCnt,
       discountAmount: discountCnt*UNIT, paybackAmount: paybackCnt*UNIT, paybackPaid: Math.min(paybackPaid, paybackCnt*UNIT)},
-    info: {notice: s.customerNotice || '', settingsFormUrl: s.settingsFormUrl || '', kakao: s.customerKakaoUrl || 'https://pf.kakao.com/_FbIfX/chat', phone: s.reportPhone || '010-5730-0614', memo: client.memo || ''},
+    info: {notice: s.customerNotice || '', settingsFormUrl: s.settingsFormUrl || '', kakao: s.customerKakaoUrl || 'https://pf.kakao.com/_FbIfX/chat', phone: s.reportPhone || '010-5730-0614', memo: [client.memo||'', (side && side.memo)||''].filter(function(x){ return x; }).join('\n')},
     generatedAt: new Date().toISOString()
   };
 }
@@ -8249,7 +8278,7 @@ const CustomerPortal = (function(){
     const big = n===null ? '' : n>0 ? 'D-'+n : n===0 ? 'D-DAY' : '예식 완료';
     const sub = n===null ? '예식 일정이 정해지면 여기에 표시돼요' : n>0 ? '예식까지 남은 날' : n===0 ? '오늘 예식을 진심으로 축하드려요 💐' : '소중한 날을 함께해 주셔서 감사합니다';
     return `<section class="cp-hero">
-      <div class="cp-hello">${e(view.client.name)}님의 예식</div>
+      <div class="cp-hello">${view.client.sideLabel? `<span class="cp-side">${e(view.client.sideLabel)}</span>`:''}${e(view.client.name)}님의 예식</div>
       <div class="cp-dday">${big}</div>
       <div class="cp-dsub">${sub}</div>
       <div class="cp-when"><b>${fdate(w.date, true)}</b>${w.time? ` · ${e(w.time)}` : ''}<br>${e(w.venue)} ${e(w.hall)}</div>
@@ -8274,7 +8303,7 @@ const CustomerPortal = (function(){
         <div><dt>예식장</dt><dd>${e(w.venue)||'-'} ${e(w.hall)}</dd></div>
         ${w.region? `<div><dt>지역</dt><dd>${e(w.region)}</dd></div>`:''}
         <div><dt>이용 상품</dt><dd>축의대 ${e(w.product)||'-'}</dd></div>
-        <div><dt>예상 하객</dt><dd>신랑측 ${w.groomGuests}명 · 신부측 ${w.brideGuests}명</dd></div>
+        <div><dt>예상 하객</dt><dd>${view.client.side==='groom' ? `<b>신랑측 ${w.groomGuests}명</b> · 신부측 ${w.brideGuests}명` : view.client.side==='bride' ? `신랑측 ${w.groomGuests}명 · <b>신부측 ${w.brideGuests}명</b>` : `신랑측 ${w.groomGuests}명 · 신부측 ${w.brideGuests}명`}</dd></div>
         <div><dt>운영 설정서</dt><dd>${w.settingsSubmitted? '<b class="ok">제출 완료 ✓</b>' : '<b class="wait">제출 전</b>'}</dd></div>
       </dl>
       ${!w.settingsSubmitted && i.settingsFormUrl ? `<a class="cp-btn primary wide" href="${e(i.settingsFormUrl)}" target="_blank" rel="noopener">📝 축의대 운영 설정서 작성하기</a>`:''}
@@ -8312,12 +8341,15 @@ const CustomerPortal = (function(){
     </section>`;
   }
   function giftHTML(){
-    const u = view.live.giftUrl;
+    const l = view.live || {};
+    const u = l.giftUrl || 'https://momentworks.github.io/arrange/', code = l.giftCode || '';
     return `<section class="cp-card" id="cp-gift"><h2>💌 실시간 축의 현황</h2>
-      ${u ? `<p class="cp-desc">예식 당일 축의대에서 접수되는 축의 내역을 실시간으로 확인하실 수 있어요.</p>
-        <div class="cp-row2"><a class="cp-btn primary" href="${e(u)}" target="_blank" rel="noopener">실시간 축의 현황 열기</a><button class="cp-btn ghost" data-cp="giftToggle">${giftOpen? '접기' : '여기서 보기'}</button></div>
-        ${giftOpen? `<div class="cp-frame"><iframe src="${e(u)}" title="실시간 축의 현황" loading="lazy"></iframe></div>`:''}`
-        : '<div class="cp-empty">예식 당일 축의 현황 링크가 여기에 열려요</div>'}
+      <p class="cp-desc">예식 당일 ${view.client.sideLabel? `<b>${e(view.client.sideLabel)}</b> ` : ''}축의대에서 접수되는 축의 내역을 실시간으로 확인하실 수 있어요.</p>
+      ${code ? `<div class="cp-code"><span>현황판 코드</span><b>${e(code)}</b><div class="cp-row2"><button class="cp-btn gold" data-cp="shareGift">현황판 공유하기</button><button class="cp-btn ghost" data-cp="copyGift">코드 복사</button></div></div>
+        <p class="cp-note">버튼을 누르면 코드가 자동 입력되어 바로 접속돼요.</p>`
+        : `<p class="cp-note">현황판 코드는 예식 전에 모먼트웍스에서 등록해드려요. 코드를 받으셨다면 열린 화면의 <b>실시간 축의 현황</b> 탭에 입력해주세요.</p>`}
+      <div class="cp-row2"><a class="cp-btn primary" href="${e(u)}" target="_blank" rel="noopener">실시간 축의 현황 열기</a><button class="cp-btn ghost" data-cp="giftToggle">${giftOpen? '접기' : '여기서 보기'}</button></div>
+      ${giftOpen? `<div class="cp-frame"><iframe src="${e(u)}" title="실시간 축의 현황" loading="lazy"></iframe></div>`:''}
     </section>`;
   }
   function referralHTML(){
@@ -8325,7 +8357,8 @@ const CustomerPortal = (function(){
     const lab = {pending:'예식 전', discount:'잔금 할인 확정', payback:'페이백 확정'};
     return `<section class="cp-card" id="cp-ref"><h2>💝 짝꿍코드 추천 현황</h2>
       <div class="cp-code"><span>나의 짝꿍코드</span><b>${e(r.code)||'-'}</b><div class="cp-row2"><button class="cp-btn gold" data-cp="shareCode">짝꿍코드 공유하기</button><button class="cp-btn ghost" data-cp="copyCode">복사</button></div></div>
-      <p class="cp-desc">지인분이 모먼트웍스 계약 시 짝꿍코드를 입력하면 지인분은 할인을 받고, 소개해주신 분께는 <b>건당 ${won(r.unit)}</b>이 적립돼요. 추천받은 분의 본식이 끝나면 확정되며, ${e(view.client.name)}님 예식 <b>전</b>에 확정된 금액은 잔금에서 할인, <b>이후</b> 확정분은 페이백으로 드려요.</p>
+      <p class="cp-desc">소개받은 분이 <b>${e(view.client.name)}</b>님의 짝꿍코드로 모먼트웍스와 계약 시 소개받은 분은 <b>2만원 할인</b>받고, <b>${e(view.client.name)}</b>님께는 소개받은 분의 예식 종료 후 <b>건당 ${won(r.unit)}</b> 혜택이 확정됩니다.</p>
+      <p class="cp-desc">${e(view.client.name)}님 예식 <b>전</b>에 확정된 금액은 잔금에서 할인되고,<br>예식 <b>이후</b> 확정된 금액은 계좌로 페이백해드립니다.</p>
       <div class="cp-stats">
         <div><span>추천 계약</span><b>${r.total}건</b></div>
         <div><span>잔금 할인</span><b>${won(r.discountAmount)}</b></div>
@@ -8334,10 +8367,13 @@ const CustomerPortal = (function(){
       ${r.rows.length? `<div class="cp-list">${r.rows.map(x=>`<div><span><b>${e(x.name)}</b>님<small>예식 ${x.weddingDate? fdate(x.weddingDate) : '미정'}</small></span><em class="${x.status}">${lab[x.status]}</em></div>`).join('')}</div>` : '<div class="cp-empty">아직 짝꿍코드로 계약한 분이 없어요. 코드를 공유해보세요!</div>'}
     </section>`;
   }
-  function infoHTML(){
+  function noticeHTML(){ // 📌 안내 (예식 일정 알림 위)
     const i = view.info;
-    return `${i.notice || i.memo ? `<section class="cp-card cp-notice"><h2>📌 안내</h2>${i.notice? `<p>${e(i.notice).replace(/\n/g,'<br>')}</p>`:''}${i.memo? `<p class="cp-memo">${e(i.memo).replace(/\n/g,'<br>')}</p>`:''}</section>`:''}
-      <section class="cp-card cp-contact"><h2>💬 문의하기</h2>
+    return `${i.notice || i.memo ? `<section class="cp-card cp-notice"><h2>📌 안내</h2>${i.notice? `<p>${e(i.notice).replace(/\n/g,'<br>')}</p>`:''}${i.memo? `<p class="cp-memo">${e(i.memo).replace(/\n/g,'<br>')}</p>`:''}</section>`:''}`;
+  }
+  function infoHTML(){ // 💬 문의하기
+    const i = view.info;
+    return `      <section class="cp-card cp-contact"><h2>💬 문의하기</h2>
         <div class="cp-row2"><a class="cp-btn kakao" href="${e(i.kakao)}" target="_blank" rel="noopener">카카오톡 상담</a><a class="cp-btn ghost" href="tel:${e(i.phone)}">📞 전화 문의</a></div>
       </section>`;
   }
@@ -8356,6 +8392,7 @@ const CustomerPortal = (function(){
       <nav class="cp-nav">${nav.map(([id,l])=>`<button data-cp="go" data-v="${id}">${l}</button>`).join('')}</nav>
       <main class="cp-main">
         ${heroHTML()}
+        ${noticeHTML()}
         ${alarmHTML()}
         ${weddingHTML()}
         ${contractHTML()}
@@ -8378,6 +8415,12 @@ const CustomerPortal = (function(){
     if(a==='shareCode'){
       const text = `💍 모먼트웍스 축의대 대행 서비스\n계약할 때 짝꿍코드 [${view.referral.code}] 를 입력하면 할인을 받을 수 있어요!\n상담: ${view.info.kakao}`;
       if(navigator.share){ try{ await navigator.share({text}); }catch(_){} } else if(await copyText(text)) toast('공유 문구를 복사했어요');
+      return;
+    }
+    if(a==='copyGift'){ if(await copyText(view.live.giftCode)) toast('현황판 코드를 복사했어요'); return; }
+    if(a==='shareGift'){
+      const text = `💌 ${view.client.name}님 ${view.client.sideLabel? view.client.sideLabel+' ' : ''}실시간 축의 현황\n아래 링크를 누르면 바로 열려요 (현황판 코드: ${view.live.giftCode})\n${view.live.giftUrl}`;
+      if(navigator.share){ try{ await navigator.share({text}); }catch(_){} } else if(await copyText(text)) toast('현황판 링크를 복사했어요');
       return;
     }
     if(a==='shareLive'){
@@ -8409,7 +8452,52 @@ const CustomerPortal = (function(){
 ========================================================= */
 function clientKey(rec){ return 'client:'+rec.id; }
 function clientOf(rec){ const db = ensurePdb(); return (db.referralPay||{})[clientKey(rec)] || null; }
-function allClientCodes(){ const rp = ensurePdb().referralPay||{}; return Object.keys(rp).filter(k=> k.indexOf('client:')===0 && rp[k] && rp[k].code).map(k=> String(rp[k].code).replace(/[^A-Z0-9]/gi,'').toUpperCase()); }
+function allClientCodes(){ // 계약자 코드 + 신랑 · 신부 코드 모두 (중복 발급 방지)
+  const rp = ensurePdb().referralPay||{}, out = [];
+  Object.keys(rp).forEach(k=>{ if(k.indexOf('client:')!==0 || !rp[k]) return; const c = rp[k];
+    if(c.code) out.push(c.code); ['groom','bride'].forEach(sk=>{ if(c.sides && c.sides[sk] && c.sides[sk].code) out.push(c.sides[sk].code); }); });
+  return out.map(x=> String(x).replace(/[^A-Z0-9]/gi,'').toUpperCase());
+}
+const SIDE_LABEL = {groom:'신랑', bride:'신부'};
+function sideEligible(rec){ return rec && (rec.productType==='양측' || rec.productType==='통합'); }
+async function saveSide(rec, sk, patch, msg){
+  const cur = clientOf(rec) || {};
+  const sides = Object.assign({}, cur.sides||{});
+  sides[sk] = Object.assign({}, sides[sk]||{}, patch, {updatedAt: new Date().toISOString()});
+  await saveClient(rec, {sides}, msg);
+}
+function sideInviteText(rec, sk, sd){
+  const url = customerUrlFor(sd.code);
+  const nm = sd.name || (SIDE_LABEL[sk]+'님');
+  return `[모먼트웍스] ${nm}님 전용 예식 페이지 💐 (${SIDE_LABEL[sk]}측)\n예식 정보 · 계약서 · 유튜브 라이브 · ${SIDE_LABEL[sk]}측 실시간 축의 현황 · 짝꿍코드 현황을 한 곳에서 확인하실 수 있어요.\n\n접속코드: ${sd.code}\n${url ? url : '(고객 페이지 주소는 모먼트웍스에서 안내드려요)'}\n\n※ 휴대폰 캘린더에 예식 알림도 추가하실 수 있어요.`;
+}
+function giftSet(c){
+  if(!c) return false;
+  if(c.giftCode || c.giftUrl) return true;
+  const sd = c.sides || {};
+  return !!((sd.groom && (sd.groom.giftCode || sd.groom.giftUrl)) || (sd.bride && (sd.bride.giftCode || sd.bride.giftUrl)));
+}
+function sidesHTML(rec, c){
+  if(!sideEligible(rec)) return '';
+  const sides = c.sides || {};
+  const card = sk=>{
+    const sd = sides[sk] || {}, has = !!sd.code, off = sd.active===false;
+    return `<div class="cp-side-card ${sk}">
+      <div class="cp-side-h"><b>${SIDE_LABEL[sk]}측</b>${has? `<span class="cp-side-code ${off?'off':''}">${esc(sd.code)}</span>${off?'<span class="badge badge-cancelled">사용 중지</span>':''}` : ''}</div>
+      <div class="cp-admin-grid">
+        <label>${SIDE_LABEL[sk]} 이름<input data-cps="${sk}" data-f="name" value="${esc(sd.name||'')}" placeholder="${SIDE_LABEL[sk]} 이름"></label>
+        <label>${SIDE_LABEL[sk]} 연락처<input data-cps="${sk}" data-f="phone" value="${esc(sd.phone||'')}" placeholder="010-0000-0000"></label>
+        <label>${SIDE_LABEL[sk]}측 축의 현황판 코드<input data-cps="${sk}" data-f="giftCode" value="${esc(sd.giftCode||'')}" placeholder="${c.giftCode? '비우면 공통 코드 '+esc(c.giftCode) : '축의 관리 시스템의 현황판 코드'}" autocomplete="off"></label>
+        <label>${SIDE_LABEL[sk]}에게만 보이는 안내<input data-cps="${sk}" data-f="memo" value="${esc(sd.memo||'')}" placeholder="예: 신랑측 축의대는 로비 왼쪽이에요"></label>
+      </div>
+      <div class="cp-admin-foot">${has? `<button type="button" class="btn btn-sm btn-primary" data-cpsa="invite" data-sk="${sk}">초대 문구 복사</button><button type="button" class="btn btn-sm" data-cpsa="preview" data-sk="${sk}">미리보기</button><button type="button" class="btn btn-sm btn-ghost" data-cpsa="regen" data-sk="${sk}">재발급</button><button type="button" class="btn btn-sm btn-ghost ${off?'':'btn-danger'}" data-cpsa="toggle" data-sk="${sk}">${off?'다시 사용':'사용 중지'}</button>` : `<button type="button" class="btn btn-sm btn-primary" data-cpsa="create" data-sk="${sk}">${SIDE_LABEL[sk]} 코드 추가 발급</button>`}</div>
+    </div>`;
+  };
+  return `<div class="cp-sides"><div class="cp-sides-h"><b>👰🤵 신랑 · 신부 따로 관리</b><span>${esc(rec.productType)} 계약 · 각자 전용 코드로 접속하면 이름 · ${rec.productType==='양측'?'각 측 ':''}축의 현황 · 안내가 따로 보여요</span>
+    ${!(sides.groom&&sides.groom.code) && !(sides.bride&&sides.bride.code) ? `<button type="button" class="btn btn-sm btn-primary" data-cpsa="both">신랑 · 신부 코드 함께 발급</button>`:''}</div>
+    <div class="cp-sides-grid">${card('groom')}${card('bride')}</div></div>`;
+}
+
 function genClientCode(){
   const used = new Set(allClientCodes().concat(ensurePdb().members.map(m=> String(m.code||'').replace(/[^A-Z0-9]/gi,'').toUpperCase())));
   let c; do{ c = genAccessCode(); }while(used.has(String(c).replace(/[^A-Z0-9]/gi,'').toUpperCase()));
@@ -8459,9 +8547,10 @@ function renderClientBox(rec, boxEl){
       <div class="cp-admin-grid">
         <label>계약서 PDF 링크<input data-cpf="contractUrl" value="${esc(c.contractUrl||'')}" placeholder="구글드라이브 공유 링크 (링크가 있는 모든 사용자 보기)"></label>
         <label>유튜브 실시간 라이브 링크<input data-cpf="youtube" value="${esc(c.youtube||'')}" placeholder="https://youtube.com/live/..."></label>
-        <label>실시간 축의 현황 (열람용 링크)<input data-cpf="giftUrl" value="${esc(c.giftUrl||'')}" placeholder="축의금 관리 시스템 열람(viewer) 링크"></label>
+        <label>실시간 축의 현황판 코드 <span class="cp-admin-hint">입력하면 고객이 버튼 한 번으로 현황판에 바로 로그인돼요</span><input data-cpf="giftCode" value="${esc(c.giftCode||'')}" placeholder="축의 관리 시스템(arrange)의 현황판 코드" autocomplete="off"></label>
         <label>이 고객에게만 보이는 안내<textarea data-cpf="memo" rows="2" placeholder="예: 예식 당일 12시까지 축의대 앞에서 뵐게요">${esc(c.memo||'')}</textarea></label>
       </div>
+      ${sidesHTML(rec, c)}
       <div class="cp-admin-foot"><button type="button" class="btn btn-sm btn-ghost" data-cpa="regen">코드 재발급</button><button type="button" class="btn btn-sm btn-ghost ${off?'':'btn-danger'}" data-cpa="toggle">${off? '다시 사용' : '사용 중지'}</button>
         ${String(pSet().customerUrl||'').trim()? '' : '<span class="cp-admin-warn">파트너스 → 분리 운영 · 설정에서 고객 페이지 주소를 넣으면 초대 문구에 링크가 함께 들어가요</span>'}</div>`;
   }
@@ -8473,6 +8562,17 @@ function renderClientBox(rec, boxEl){
     if(a==='regen'){ if(!confirm('코드를 새로 만들까요? 기존 코드로는 더 이상 접속할 수 없어요.')) return; await saveClient(rec, {code: genClientCode()}, '새 코드를 발급했어요'); renderClientBox(rec, box); custTabRefresh(); return; }
     if(a==='toggle'){ await saveClient(rec, {active: cur.active===false}, cur.active===false? '고객 페이지를 다시 열었어요' : '고객 페이지 접속을 중지했어요'); renderClientBox(rec, box); custTabRefresh(); return; }
   }));
+  box.querySelectorAll('[data-cpsa]').forEach(b=> b.addEventListener('click', async ()=>{
+    const a = b.dataset.cpsa, sk = b.dataset.sk, cur = clientOf(rec)||{}, sd = (cur.sides||{})[sk] || {};
+    if(a==='both'){ const sides = Object.assign({}, cur.sides||{}); ['groom','bride'].forEach(k=>{ sides[k] = Object.assign({}, sides[k]||{}, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}); }); await saveClient(rec, {sides}, '신랑 · 신부 코드를 발급했어요'); }
+    if(a==='create'){ await saveSide(rec, sk, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}, `${SIDE_LABEL[sk]} 코드를 발급했어요`); }
+    if(a==='invite'){ copyText(sideInviteText(rec, sk, sd), `${SIDE_LABEL[sk]} 초대 문구를 복사했어요`); return; }
+    if(a==='preview'){ openCustomerPreview(sd.code); return; }
+    if(a==='regen'){ if(!confirm(`${SIDE_LABEL[sk]} 코드를 새로 만들까요? 기존 코드로는 접속할 수 없어요.`)) return; await saveSide(rec, sk, {code: genClientCode()}, '새 코드를 발급했어요'); }
+    if(a==='toggle'){ await saveSide(rec, sk, {active: sd.active===false}, sd.active===false? '다시 사용해요' : '접속을 중지했어요'); }
+    renderClientBox(rec, box); custTabRefresh();
+  }));
+  box.querySelectorAll('[data-cps]').forEach(inp=> inp.addEventListener('change', async ()=>{ await saveSide(rec, inp.dataset.cps, {[inp.dataset.f]: inp.value.trim()}, '저장했어요'); custTabRefresh(); }));
   box.querySelectorAll('[data-cpf]').forEach(inp=> inp.addEventListener('change', async ()=>{ await saveClient(rec, {[inp.dataset.cpf]: inp.value.trim()}, '고객 페이지에 반영했어요'); custTabRefresh(); }));
 }
 new MutationObserver(injectClientBox).observe(document.getElementById('modalBody'), {childList:true, subtree:true});
@@ -8497,6 +8597,7 @@ function customerSettingsHTML(){
     <div class="sub">함께 드린 <b>모먼트웍스_고객페이지.html</b>을 GitHub Pages 등에 올리고 주소를 넣으세요 · 고객 코드는 각 계약 상세 창에서 만들어요 (현재 ${n}명 발급)</div>
     <div class="form-grid" style="grid-template-columns:1fr;gap:8px;">
       <div class="form-field"><label>고객 페이지 주소</label><input data-act="setText" data-key="customerUrl" value="${esc(s.customerUrl||'')}" placeholder="https://아이디.github.io/customer/"></div>
+      <div class="form-field"><label>실시간 축의 현황 기본 주소 <span class="hint">고객별 현황판 코드가 이 주소 뒤에 붙어 자동 로그인돼요</span></label><input data-act="setText" data-key="giftBaseUrl" value="${esc(s.giftBaseUrl||'')}" placeholder="https://momentworks.github.io/arrange/"></div>
       <div class="form-field"><label>축의대 운영 설정서 작성 링크 <span class="hint">설정서 제출 전 고객에게 버튼으로 보여요</span></label><input data-act="setText" data-key="settingsFormUrl" value="${esc(s.settingsFormUrl||'')}" placeholder="운영 설정서 페이지 주소"></div>
       <div class="form-field"><label>고객 문의 카카오톡 <span class="hint">비우면 모먼트웍스 공식 채널</span></label><input data-act="setText" data-key="customerKakaoUrl" value="${esc(s.customerKakaoUrl||'')}" placeholder="https://pf.kakao.com/_FbIfX/chat"></div>
       <div class="form-field"><label>모든 고객에게 보이는 안내문</label><textarea data-act="setText" data-key="customerNotice" rows="3" placeholder="예: 예식 1주일 전까지 운영 설정서를 제출해주세요.">${esc(s.customerNotice||'')}</textarea></div>
@@ -8514,7 +8615,7 @@ function custRows(){
   if(CUST_STATE.filter==='upcoming') list = list.filter(r=> r.weddingDate >= t);
   if(CUST_STATE.filter==='past') list = list.filter(r=> r.weddingDate < t);
   if(CUST_STATE.filter==='none') list = list.filter(r=>{ const c = clientOf(r); return !(c && c.code); });
-  if(CUST_STATE.filter==='missing') list = list.filter(r=>{ const c = clientOf(r); return c && c.code && (!c.contractUrl || !c.youtube || !c.giftUrl); });
+  if(CUST_STATE.filter==='missing') list = list.filter(r=>{ const c = clientOf(r); return c && c.code && (!c.contractUrl || !c.youtube || !giftSet(c)); });
   const q = CUST_STATE.q.trim();
   if(q) list = list.filter(r=> [r.clientName, r.contractCode, r.venueName, r.phone].some(v=> String(v||'').includes(q)));
   list.sort((a,b)=> CUST_STATE.filter==='past' ? String(b.weddingDate).localeCompare(String(a.weddingDate)) : String(a.weddingDate).localeCompare(String(b.weddingDate)));
@@ -8536,7 +8637,7 @@ function renderCustomerTab(){
       <div class="kpi-card accent"><div class="kpi-label">예정 예식 코드 발급</div><div class="kpi-value">${upIssued.length} / ${upc.length}</div><div class="kpi-sub">미발급 ${upc.length-upIssued.length}건</div></div>
       <div class="kpi-card"><div class="kpi-label">계약서 링크</div><div class="kpi-value">${linkCnt('contractUrl')}건</div><div class="kpi-sub">발급 ${issued.length}건 중</div></div>
       <div class="kpi-card"><div class="kpi-label">유튜브 라이브</div><div class="kpi-value">${linkCnt('youtube')}건</div><div class="kpi-sub">발급 ${issued.length}건 중</div></div>
-      <div class="kpi-card"><div class="kpi-label">축의 현황 링크</div><div class="kpi-value">${linkCnt('giftUrl')}건</div><div class="kpi-sub">발급 ${issued.length}건 중</div></div>
+      <div class="kpi-card"><div class="kpi-label">축의 현황판 코드</div><div class="kpi-value">${issued.filter(r=> giftSet(clientOf(r)||{})).length}건</div><div class="kpi-sub">발급 ${issued.length}건 중</div></div>
     </div>
     <div class="cu-bar">
       <select data-cu="filter">
@@ -8555,8 +8656,8 @@ function renderCustomerTab(){
           <td>${fmtDate(r.weddingDate)}${dd && dd.diff>=0 ? ` <span class="badge ${dd.diff<=7?'badge-urgent':'badge-normal'}">${dd.label}</span>`:''}</td>
           <td><b>${esc(r.clientName)}</b><div class="cu-sub">${esc(r.contractCode||'')}</div></td>
           <td>${esc(r.productType||'-')}<div class="cu-sub">${esc(r.venueName||'')}</div></td>
-          <td>${has? `<b class="cu-code ${off?'off':''}">${esc(c.code)}</b>${off?'<div class="cu-sub">사용 중지</div>':''}` : `<button class="btn btn-sm btn-primary" data-cu="create" data-id="${r.id}">코드 발급</button>`}</td>
-          <td>${yes(c.contractUrl)}</td><td>${yes(c.youtube)}</td><td>${yes(c.giftUrl)}</td>
+          <td>${has? `<b class="cu-code ${off?'off':''}">${esc(c.code)}</b>${off?'<div class="cu-sub">사용 중지</div>':''}${sideEligible(r)? ['groom','bride'].map(sk=>{ const sd=(c.sides||{})[sk]; return sd&&sd.code? `<div class="cu-sub">${SIDE_LABEL[sk]} <b class="cu-code ${sd.active===false?'off':''}">${esc(sd.code)}</b></div>` : ''; }).join('') + (!((c.sides||{}).groom||{}).code || !((c.sides||{}).bride||{}).code ? `<div class="cu-sub"><a href="#" data-cu="edit" data-id="${r.id}">+ 신랑·신부 코드</a></div>` : '') : ''}` : `<button class="btn btn-sm btn-primary" data-cu="create" data-id="${r.id}">코드 발급</button>`}</td>
+          <td>${yes(c.contractUrl)}</td><td>${yes(c.youtube)}</td><td>${yes(giftSet(c))}</td>
           <td class="cu-acts">${has? `<button class="btn btn-sm" data-cu="invite" data-id="${r.id}">초대 문구</button><button class="btn btn-sm" data-cu="preview" data-id="${r.id}">미리보기</button>`:''}<button class="btn btn-sm ${open?'btn-primary':''}" data-cu="edit" data-id="${r.id}">${open?'닫기':'편집'}</button></td>
         </tr>${open? `<tr class="cu-edit"><td colspan="8"><div id="cpTabBox" class="cp-admin" data-rid="${r.id}"></div></td></tr>`:''}`;
       }).join('') : '<tr><td colspan="8" style="padding:26px;text-align:center;color:var(--slate);">해당하는 계약이 없어요</td></tr>'}</tbody>
@@ -8566,6 +8667,7 @@ function renderCustomerTab(){
 }
 document.addEventListener('click', async (ev)=>{
   const el = ev.target.closest('#custTabRoot [data-cu]'); if(!el || el.tagName==='SELECT' || el.tagName==='INPUT') return;
+  if(el.tagName==='A') ev.preventDefault();
   const a = el.dataset.cu, rec = el.dataset.id ? recordById(el.dataset.id) : null;
   if(a==='create' && rec){ await saveClient(rec, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}, `${rec.clientName}님 코드를 발급했어요`); CUST_STATE.open = rec.id; renderCustomerTab(); return; }
   if(a==='invite' && rec){ copyText(customerInviteText(rec, clientOf(rec)), `${rec.clientName}님 초대 문구를 복사했어요`); return; }
