@@ -735,6 +735,22 @@ details.pp-past summary{cursor:pointer;font-size:13px;font-weight:700;color:var(
 .pw-fields input{border:none;outline:none;font:inherit;font-size:26px;font-weight:800;width:100%;padding:0;background:transparent;font-variant-numeric:tabular-nums;}
 .pw-fields em{position:absolute;right:12px;bottom:12px;font-style:normal;font-size:13px;color:var(--pp-slate);font-weight:700;}
 .pw-fields input::-webkit-outer-spin-button,.pw-fields input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;} .pw-fields input{-moz-appearance:textfield;appearance:textfield;padding-right:24px;}
+
+/* 상단 아이콘 버튼 (새로고침 · 로그아웃) */
+.pp-top .pp-icon{width:38px;height:38px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid var(--pp-line);background:#fff;color:var(--pp-soft);transition:color .15s,border-color .15s,background .15s;}
+.pp-top .pp-icon:hover{color:var(--pp-wine);border-color:var(--pp-gold);background:#FFFDF8;}
+.pp-top .pp-icon:active svg{transform:scale(.92);}
+.pp-busy ~ .pp-top .pp-icon[data-pp=refresh] svg{animation:ppSpin .8s linear infinite;}
+@keyframes ppSpin{to{transform:rotate(360deg)}}
+.pp-top-actions{align-items:center;}
+
+/* 배정 확인 완료 → 한 번 더 누르면 취소 */
+.pp-unconfirm{border:none;font:inherit;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;}
+.pp-unconfirm small{font-size:10.5px;font-weight:600;opacity:.75;border-left:1px solid currentColor;padding-left:7px;}
+.pp-unconfirm:hover{filter:brightness(.92);}
+
+.pp-logo-btn{border:none;background:none;padding:0;margin:0;cursor:pointer;display:block;line-height:0;-webkit-tap-highlight-color:transparent;}
+.pp-logo-btn:active img{transform:scale(.95);}
 /* ================= 접속 메인화면 (모먼트웍스 로고) ================= */
 .mw-entry{position:fixed;inset:0;z-index:500;overflow-y:auto;background:#F7F5F0;background-image:radial-gradient(ellipse at 50% 38%, #FFFFFF 0%, #F7F5F0 55%, #EFEBE3 100%);color:#1A1618;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;display:flex;align-items:center;justify-content:center;padding:56px 22px;box-sizing:border-box;}
@@ -1441,6 +1457,12 @@ body.cp-preview-open{overflow:hidden;}
 .cp-greet-t{font-family:'Noto Serif KR',serif;font-size:18px;font-weight:700;line-height:1.45;letter-spacing:-.01em;word-break:keep-all;}
 .cp-greet-s{font-size:13px;color:var(--cp-soft);margin-top:6px;line-height:1.7;word-break:keep-all;}
 .cp-greet-s b{color:var(--cp-wine);border-bottom:1px solid var(--cp-gold);}
+
+.cp-logo-btn{border:none;background:none;padding:0;margin:0;cursor:pointer;display:block;line-height:0;-webkit-tap-highlight-color:transparent;}
+.cp-logo-btn:active img{transform:scale(.95);}
+.cp-nav-link{flex:0 0 auto;color:#E9CF98;font-size:13px;font-weight:700;letter-spacing:.02em;padding:12px 14px;white-space:nowrap;text-decoration:none;border-left:1px solid rgba(255,255,255,.12);margin-left:4px;}
+.cp-nav-link:hover{color:#fff;}
+.cp-rec-box{background:#FAF7F1;border:1px solid var(--cp-line);border-radius:12px;padding:14px;font-size:13px;line-height:1.75;color:var(--cp-ink);margin-bottom:12px;word-break:keep-all;overflow-wrap:anywhere;max-height:320px;overflow:auto;}
 </style>
 </head>
 <body>
@@ -2190,9 +2212,16 @@ function confirmedReferralCountFor(contractCode){
   const code = contractCode.trim();
   return referralDiscountCount(code); // 본식이 끝난 추천 중 본인 예식 전에 확정된 건 (예식 후 확정분은 페이백)
 }
+const EARLYBIRD_POLICY_FROM = '2026-09-01';
+function isNewEarlyBirdPolicy(rec){ return !!(rec && String(rec.contractDate||'') >= EARLYBIRD_POLICY_FROM); }
+function earlyBirdPolicyAmount(rec){ return String((rec&&rec.productType)||'').trim()==='양측' ? 50000 : 30000; }
+function earlyBirdDiscountFor(rec){
+  if(!rec || rec.earlyBird!=='O') return 0;
+  return isNewEarlyBirdPolicy(rec) ? earlyBirdPolicyAmount(rec) : ((Number(rec.earlyBirdDiscount)||0) || 20000);
+}
 function computeFinancials(r){
   const base = Number(r.baseAmount)||0;
-  const eb = r.earlyBird==='O' ? ((Number(r.earlyBirdDiscount)||0) || 20000) : 0;
+  const eb = earlyBirdDiscountFor(r);
   const pd = (r.partnerCode && r.partnerCode.trim()) ? (Number(r.partnerDiscount)||0) : 0;
   const rd = confirmedReferralCountFor(r.contractCode) * 10000;
   const revC = Number(r.reviewDiscountContract)||0;
@@ -3630,7 +3659,7 @@ function renderFormInner(rec){
       <div class="form-field"><label>얼리버드</label>
         <select id="f_earlyBird">
           <option value="X" ${rec.earlyBird==='X'?'selected':''}>미적용</option>
-          <option value="O" ${rec.earlyBird==='O'?'selected':''}>적용(20,000원 할인)</option>
+          <option value="O" ${rec.earlyBird==='O'?'selected':''}>적용(${fmtMoney(isNewEarlyBirdPolicy(rec) ? earlyBirdPolicyAmount(rec) : ((Number(rec.earlyBirdDiscount)||0)||20000))} 할인)</option>
         </select>
       </div>
       <div class="form-field"><label>계약금</label><input type="number" id="f_deposit" value="${rec.deposit||100000}"></div>
@@ -3781,6 +3810,12 @@ function renderFormInner(rec){
     const cd = document.getElementById('f_contractDate'); if(cd) cd.addEventListener('change', apply);
     const lb = cnt.closest('.form-field') && cnt.closest('.form-field').querySelector('label'); const p0 = reviewPolicyOf({contractDate:(document.getElementById('f_contractDate')||{}).value||''}); if(lb) lb.innerHTML = (k==='Contract'?'계약후기':'본식후기')+` 작성수 <span class="hint">${p0.label}</span>`; cnt.max = p0.max;
   });
+  // 얼리버드: 계약일 · 상품에 따라 할인금액 안내 갱신 (9/1 이후 계약 = 한측·통합 3만원 / 양측 5만원)
+  { const eb = document.getElementById('f_earlyBird');
+    const upd = ()=>{ if(!eb) return; const d = {contractDate:(document.getElementById('f_contractDate')||{}).value||'', productType:(document.getElementById('f_productType')||{}).value||'', earlyBirdDiscount: rec.earlyBirdDiscount};
+      const amt = isNewEarlyBirdPolicy(d) ? earlyBirdPolicyAmount(d) : ((Number(rec.earlyBirdDiscount)||0)||20000);
+      const o = eb.querySelector('option[value="O"]'); if(o) o.textContent = `적용(${fmtMoney(amt)} 할인)`; recalc(); };
+    ['f_contractDate','f_productType'].forEach(id=>{ const el = document.getElementById(id); if(el) el.addEventListener('change', upd); }); }
   inner.querySelectorAll('input, select').forEach(el=> el.addEventListener('input', recalc));
   recalc();
 }
@@ -3805,6 +3840,7 @@ function collectFormValues(type){
     groomGuests: Number(val('f_groomGuests'))||0, brideGuests: Number(val('f_brideGuests'))||0,
     baseAmount: Number(val('f_baseAmount'))||0, travelFee: Number(val('f_travelFee'))||0,
     earlyBird: val('f_earlyBird'), deposit: Number(val('f_deposit'))||0,
+    ...(String(val('f_contractDate')||'') >= EARLYBIRD_POLICY_FROM ? {earlyBirdDiscount: val('f_earlyBird')==='O' ? earlyBirdPolicyAmount({productType: val('f_productType')}) : 0} : {}),
     partnerCode: val('f_partnerCode'), partnerDiscount: Number(val('f_partnerDiscount'))||0,
     referralCountTotal: Number(val('f_referralCountTotal'))||0,
     referralCountUnder60: Number(val('f_referralCountUnder60'))||0,
@@ -4135,7 +4171,7 @@ function buildCustomerView(records, db, code, todayStr, withFile){
   var surOverride = pick('guestSurcharge'); surOverride = (surOverride===null||surOverride===undefined||surOverride==='') ? null : n(surOverride);
   var sur = surOverride!==null ? surOverride : (over ? Math.ceil(over/unitN)*price : 0);
   var gsd = pick('guestScaleRemoved') ? 0 : n(pick('guestScaleDiscount'));
-  var base = n(r.baseAmount), eb = r.earlyBird==='O' ? (n(r.earlyBirdDiscount)||20000) : 0;
+  var base = n(r.baseAmount), eb = r.earlyBird!=='O' ? 0 : String(r.contractDate||'') >= '2026-09-01' ? (String(r.productType||'').trim()==='양측' ? 50000 : 30000) : (n(r.earlyBirdDiscount)||20000);
   var pd = (r.partnerCode && String(r.partnerCode).trim() && String(r.partnerCode).trim()!=='-') ? n(r.partnerDiscount) : 0;
   var rd = discountCnt * UNIT, revC = n(r.reviewDiscountContract), deposit = n(r.deposit), travel = n(r.travelFee);
   var balance = base - eb - pd - rd - revC - gsd - deposit + travel + sur;
@@ -4159,7 +4195,7 @@ function buildCustomerView(records, db, code, todayStr, withFile){
     })(),
     referral: {code: myCode, unit: UNIT, rows: refRows, total: refRows.length, discountCount: discountCnt, paybackCount: paybackCnt,
       discountAmount: discountCnt*UNIT, paybackAmount: paybackCnt*UNIT, paybackPaid: Math.min(paybackPaid, paybackCnt*UNIT)},
-    info: {notice: s.customerNotice || '', settingsFormUrl: s.settingsFormUrl || '', kakao: s.customerKakaoUrl || 'https://pf.kakao.com/_FbIfX/chat', phone: s.reportPhone || '010-5730-0614', memo: [client.memo||'', (side && side.memo)||''].filter(function(x){ return x; }).join('\n')},
+    info: {home: s.customerHomeUrl || 'https://momentworks.github.io/momentworks.kr/', notice: s.customerNotice || '', settingsFormUrl: s.settingsFormUrl || '', kakao: s.customerKakaoUrl || 'https://pf.kakao.com/_FbIfX/chat', phone: s.reportPhone || '010-5730-0614', memo: [client.memo||'', (side && side.memo)||''].filter(function(x){ return x; }).join('\n')},
     generatedAt: new Date().toISOString(),
     _file: withFile ? String(client.contractUrl||'').trim() : undefined
   };
@@ -4245,7 +4281,8 @@ const PartnerPortal = (function(){
         ? `<span class="pp-confirmed">📍 도착 체크인 ${new Date(ev.checkinAt).toTimeString().slice(0,5)}</span>`
         : `<button class="pp-btn gold" data-pp="checkin" data-rid="${e(ev.recordId)}">📍 현장 도착 체크인</button>`) : '';
     const confirm = n>=0 ? (ev.confirmed
-        ? `<span class="pp-confirmed">✓ 배정 확인 완료</span>`
+        ? (ev.checkinAt ? `<span class="pp-confirmed">✓ 배정 확인 완료</span>`
+          : `<button class="pp-confirmed pp-unconfirm" data-pp="unconfirm" data-rid="${e(ev.recordId)}" title="한 번 더 누르면 확인을 취소할 수 있어요">✓ 배정 확인 완료<small>누르면 취소</small></button>`)
         : `<button class="pp-btn primary" data-pp="confirm" data-rid="${e(ev.recordId)}">배정 확인했어요</button>`) : '';
     return `<article class="pp-card ${cls}">
       <div class="pp-card-top"><span class="pp-dday">${dLabel(ev.date)}</span><span class="pp-date">${fdate(ev.date,true)}</span>${ev.productType?`<span class="pp-prod">${e(ev.productType)}</span>`:''}</div>
@@ -4604,6 +4641,9 @@ const PartnerPortal = (function(){
     return ns.map(n=>`<div class="pp-notice ${n.pinned?'pin':''}"><h4>${n.pinned?'<em>고정</em>':''}${e(n.title)}</h4><p>${e(n.body)}</p><time>${n.createdAt? fdate(n.createdAt.slice(0,10),true):''}</time></div>`).join('');
   }
 
+  const PP_SVG = d=> `<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const PP_ICON_REFRESH = PP_SVG('<path d="M20 11a8 8 0 1 0-2.34 5.66"/><path d="M20 4v7h-7"/>');
+  const PP_ICON_LOGOUT = PP_SVG('<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4"/><path d="M19 12H9"/>');
   function render(){
     if(!root || !view) return;
     if(H.onCache){ try{ H.onCache(view); }catch(e){} }
@@ -4615,7 +4655,7 @@ const PartnerPortal = (function(){
       ${H.preview? `<div class="pp-preview">관리자 미리보기 · 파트너 화면과 같지만 변경은 저장되지 않아요 <button data-pp="closePreview">닫기</button></div>`:''}
       <header class="pp-top">
         <div class="pp-brandrow">
-          ${typeof MW_LOGO_MARK!=='undefined' ? `<img class="pp-mark" src="${MW_LOGO_MARK}" alt="MW">` : ''}
+          ${typeof MW_LOGO_MARK!=='undefined' ? `<button class="pp-logo-btn" data-pp="home" title="홈으로 · 새로고침" aria-label="홈으로 · 새로고침"><img class="pp-mark" src="${MW_LOGO_MARK}" alt="MW"></button>` : ''}
           <div>
           <div class="pp-brand">Partners Office</div>
           <div class="pp-who"><span class="pp-dot" style="background:${e(view.member.color)}"></span>${e(view.member.name)}<span class="pp-role">${e(view.member.title||'파트너')}</span></div>
@@ -4623,8 +4663,8 @@ const PartnerPortal = (function(){
         </div>
         <div class="pp-top-actions">
           <span class="pp-sync ${qGet().length?'on':''}" title="저장 대기 중"></span>
-          <button class="pp-icon" data-pp="refresh" title="새로고침">↻</button>
-          ${H.preview? '' : '<button class="pp-ghost" data-pp="logout">로그아웃</button>'}
+          <button class="pp-icon" data-pp="refresh" title="새로고침" aria-label="새로고침">${PP_ICON_REFRESH}</button>
+          ${H.preview? '' : `<button class="pp-icon" data-pp="logout" title="로그아웃" aria-label="로그아웃">${PP_ICON_LOGOUT}</button>`}
         </div>
       </header>
       <nav class="pp-tabs">${TABS.map(([k,l])=>`<button class="${tab===k?'on':''}" data-pp="tab" data-v="${k}">${l}${k==='schedule'&&pendingCount?`<span class="pp-n">${pendingCount}</span>`:''}</button>`).join('')}</nav>
@@ -4713,8 +4753,9 @@ const PartnerPortal = (function(){
         return;
       }
     }
-    if(act==='refresh'){
-      if(busy) return; busy=true; render();
+    if(act==='home'){ tab='home'; selDay=null; sheet=null; window.scrollTo(0,0); }
+    if(act==='refresh' || act==='home'){
+      if(busy){ render(); return; } busy=true; render();
       try{ await flushQueue(); const nv = await H.onRefresh(); if(nv){ view=nv; qGet().forEach(applyLocal); } toast('최신 정보로 업데이트했어요'); }
       catch(err){ toast(err.message||'불러오지 못했어요'); }
       finally{ busy=false; render(); }
@@ -4723,6 +4764,7 @@ const PartnerPortal = (function(){
     if(act==='logout'){ if(H.onLogout) H.onLogout(); return; }
     if(act==='closePreview'){ if(H.onClosePreview) H.onClosePreview(); return; }
     if(act==='confirm'){ queueOp({type:'confirm', recordId:rid, value:true}, '배정 확인 완료! 대표에게 전달돼요'); return; }
+    if(act==='unconfirm'){ if(!confirm('배정 확인을 취소할까요?\n대표에게 "확인 대기"로 다시 표시돼요.')) return; queueOp({type:'confirm', recordId:rid, value:false}, '배정 확인을 취소했어요'); return; }
     if(act==='checkin'){ queueOp({type:'checkin', recordId:rid}, '도착 체크인 완료! 오늘도 잘 부탁드려요'); return; }
     if(act==='prep' || act==='sel'){ selRecord=rid; tab='prep'; render(); if(act==='prep') window.scrollTo(0,0); return; }
     if(act==='map'){ const x=eventById(rid); if(x) openMap(x); return; }
@@ -6809,6 +6851,14 @@ function reviewDiscountFor_(count, contractDate) {
   return Math.min(n, isNew ? 2 : 3) * (isNew ? 20000 : 10000);
 }
 
+/* 얼리버드 할인: 2026-09-01 이후 계약 = 한측·통합 30,000원 / 양측 50,000원 · 이전 계약 = 시트 금액(없으면 20,000원) */
+function earlyBirdFor_(IDX, row, contractDate) {
+  var on = toEarlyBird_(IDX.earlyBird >= 0 ? row[IDX.earlyBird] : 'X') === 'O';
+  if (!on) return IDX.earlyBirdDiscount >= 0 ? (toNum_(row[IDX.earlyBirdDiscount]) || 0) : 0;
+  if (String(contractDate || '') >= REVIEW_POLICY_FROM) return String((IDX.productType >= 0 ? toStr_(row[IDX.productType]) : '') || '양측').trim() === '양측' ? 50000 : 30000;
+  return (IDX.earlyBirdDiscount >= 0 ? toNum_(row[IDX.earlyBirdDiscount]) : 0) || 20000;
+}
+
 /* ================= 진입점 ================= */
 
 function driveFileId_(u) {
@@ -7326,7 +7376,7 @@ function contractsFromContext_(ctx) {
       brideGuests: IDX.brideGuests >= 0 ? toNum_(row[IDX.brideGuests]) : 0,
       baseAmount: IDX.baseAmount >= 0 ? toNum_(row[IDX.baseAmount]) : 0,
       earlyBird: IDX.earlyBird >= 0 ? toEarlyBird_(row[IDX.earlyBird]) : 'X',
-      earlyBirdDiscount: (IDX.earlyBirdDiscount >= 0 ? toNum_(row[IDX.earlyBirdDiscount]) : 0) || (toEarlyBird_(IDX.earlyBird >= 0 ? row[IDX.earlyBird] : 'X') === 'O' ? 20000 : 0),
+      earlyBirdDiscount: earlyBirdFor_(IDX, row, contractDateStr),
       partnerCode: partnerRaw === '-' ? '' : partnerRaw,
       partnerDiscount: IDX.partnerDiscount >= 0 ? toNum_(row[IDX.partnerDiscount]) : 0,
       travelFee: IDX.travelFee >= 0 ? toNum_(row[IDX.travelFee]) : 0,
@@ -7727,6 +7777,11 @@ function syncDerivedFields(){
     set('referralDiscount', fin.rd);
     set('balanceDue', fin.balance);
     set('weddingDone', !!(dd && dd.diff<0));
+    // 2026-09-01 이후 계약: 얼리버드 할인금액 = 한측·통합 30,000원 / 양측 50,000원
+    if(typeof isNewEarlyBirdPolicy==='function' && isNewEarlyBirdPolicy(r) && !FORMULA_FIELDS.has('earlyBirdDiscount')){
+      const want = earlyBirdDiscountFor(r);
+      if((Number(r.earlyBirdDiscount)||0)!==want){ r.earlyBirdDiscount = want; markDirty(r); changed = true; }
+    }
     // 2026-09-01 이후 계약: 후기 할인 1개당 20,000원 · 최대 2개로 맞춤
     if(isNewReviewPolicy(r)){
       ['Contract','Day'].forEach(k=>{
@@ -8517,6 +8572,36 @@ const CustomerPortal = (function(){
     const i = view.info;
     return `${i.notice || i.memo ? `<section class="cp-card cp-notice"><h2>📌 안내</h2>${i.notice? `<p>${e(i.notice).replace(/\n/g,'<br>')}</p>`:''}${i.memo? `<p class="cp-memo">${e(i.memo).replace(/\n/g,'<br>')}</p>`:''}</section>`:''}`;
   }
+  const HOME_URL = 'https://momentworks.github.io/momentworks.kr/';
+  function homeUrl(){ return (view.info && view.info.home) || HOME_URL; }
+  function recommendText(){
+    const code = view.referral && view.referral.code, kakao = (view.info && view.info.kakao) || 'https://pf.kakao.com/_FbIfX/chat';
+    return [
+      '💐 결혼 준비 중이라면 꼭 알려주고 싶은 곳!',
+      '',
+      (dday(view.wedding.date)!==null && dday(view.wedding.date)<0) ? '저는 결혼식 축의대를 "모먼트웍스"에 맡겼는데, 정말 만족스러워서 추천해요 😊' : '저는 결혼식 축의대를 "모먼트웍스"에 맡기기로 했는데, 꼼꼼하고 든든해서 추천해요 😊',
+      '',
+      '✨ 모먼트웍스 축의대 대행 서비스',
+      '✔️ 교육받은 전문 파트너가 축의금 접수 · 식권 배부부터 정산까지 책임져요',
+      '✔️ 가족 · 친구에게 축의대를 부탁하는 부담이 없어요',
+      '✔️ 예식 중에도 실시간으로 축의 현황을 확인할 수 있어요',
+      '✔️ 예식 후 깔끔하게 정리된 정산 내역을 받아볼 수 있어요',
+      '✔️ 전용 고객 페이지로 예식 정보 · 계약서 · 일정 알림까지 한 번에!',
+      '',
+      code ? `🎁 계약할 때 제 짝꿍코드 [${code}] 를 입력하면 2만원 할인 혜택을 받을 수 있어요!` : '',
+      code ? '' : null,
+      `🏠 홈페이지: ${homeUrl()}`,
+      `💬 카카오톡 상담: ${kakao}`,
+    ].filter(x=> x!==null).join('\n').replace(/\n{3,}/g,'\n\n');
+  }
+  function recommendHTML(){
+    const code = view.referral && view.referral.code;
+    return `<section class="cp-card cp-rec" id="cp-rec"><h2>💝 모먼트웍스 추천하기</h2>
+      <p class="cp-desc">결혼을 준비하는 지인분께 모먼트웍스를 소개해주세요.${code? ` 추천 글에 <b>${e(view.client.name)}님의 짝꿍코드</b>가 함께 들어가서, 지인분은 할인을 받고 ${e(view.client.name)}님께는 혜택이 적립돼요 🎁` : ''}</p>
+      <div class="cp-rec-box">${e(recommendText()).replace(/\n/g,'<br>')}</div>
+      <div class="cp-row2"><button class="cp-btn primary" data-cp="recShare">📤 추천하기 (공유)</button><button class="cp-btn ghost" data-cp="recCopy">추천 글 복사</button></div>
+    </section>`;
+  }
   function infoHTML(){ // 💬 문의하기
     const i = view.info;
     return `      <section class="cp-card cp-contact"><h2>💬 문의하기</h2>
@@ -8538,14 +8623,14 @@ const CustomerPortal = (function(){
   }
   function render(){
     if(!root || !view) return;
-    const nav = [['cp-wedding','예식'],['cp-contract','계약'],['cp-live','라이브'],['cp-gift','축의현황'],['cp-ref','짝꿍코드']];
+    const nav = [['cp-wedding','예식'],['cp-contract','계약'],['cp-live','라이브'],['cp-gift','축의현황'],['cp-ref','짝꿍코드'],['cp-rec','추천하기']];
     const up = view.generatedAt ? new Date(view.generatedAt) : new Date();
     root.innerHTML = `<div class="cp">
       ${busy? '<div class="cp-busy"></div>':''}
       ${H.preview? `<div class="cp-preview">관리자 미리보기 · 고객에게 보이는 화면이에요 <button data-cp="closePreview">닫기</button></div>`:''}
       <header class="cp-top">
         <div class="cp-brandrow">
-          ${typeof MW_LOGO_MARK!=='undefined' ? `<img class="cp-mark" src="${MW_LOGO_MARK}" alt="Moment Works">` : ''}
+          ${typeof MW_LOGO_MARK!=='undefined' ? `<button class="cp-logo-btn" data-cp="home" title="홈으로 · 새로고침" aria-label="홈으로 · 새로고침"><img class="cp-mark" src="${MW_LOGO_MARK}" alt="Moment Works"></button>` : ''}
           <div>
             <div class="cp-brand">My Moment</div>
             <div class="cp-who">${e(view.client.name)}님${view.client.sideLabel? `<span class="cp-role">${e(view.client.sideLabel)}</span>` : ''}</div>
@@ -8553,7 +8638,7 @@ const CustomerPortal = (function(){
         </div>
         <div class="cp-top-acts"><button class="cp-icon" data-cp="refresh" title="새로고침" aria-label="새로고침">${ICON_REFRESH}</button>${H.preview? '' : `<button class="cp-icon" data-cp="logout" title="로그아웃" aria-label="로그아웃">${ICON_LOGOUT}</button>`}</div>
       </header>
-      <nav class="cp-nav">${nav.map(([id,l],i)=>`<button class="${(navOn||nav[0][0])===id?'on':''}" data-cp="go" data-v="${id}">${l}</button>`).join('')}</nav>
+      <nav class="cp-nav">${nav.map(([id,l],i)=>`<button class="${(navOn||nav[0][0])===id?'on':''}" data-cp="go" data-v="${id}">${l}</button>`).join('')}<a class="cp-nav-link" href="${e(homeUrl())}" target="_blank" rel="noopener">홈페이지 ↗</a></nav>
       <main class="cp-main">
         ${greetHTML()}
         ${heroHTML()}
@@ -8564,6 +8649,7 @@ const CustomerPortal = (function(){
         ${liveHTML()}
         ${giftHTML()}
         ${referralHTML()}
+        ${recommendHTML()}
         ${infoHTML()}
         ${H.onInstall && !(H.isInstalled && H.isInstalled()) ? '<div style="text-align:center;margin:6px 0 4px;"><button class="cp-install" data-cp="install">📲 홈 화면에 바로가기 추가</button></div>' : ''}
       </main>
@@ -8577,6 +8663,13 @@ const CustomerPortal = (function(){
     if(a==='go'){ const t = document.getElementById(el.dataset.v); if(t) t.scrollIntoView({behavior:'smooth', block:'start'}); setNav(el.dataset.v); return; }
     if(a==='giftToggle'){ giftOpen = !giftOpen; render(); const t=document.getElementById('cp-gift'); if(t) t.scrollIntoView({block:'start'}); return; }
     if(a==='copyCode'){ if(await copyText(view.referral.code)) toast('짝꿍코드를 복사했어요'); return; }
+    if(a==='recShare'){
+      const text = recommendText();
+      if(navigator.share){ try{ await navigator.share({title:'모먼트웍스 축의대 대행 서비스 추천', text}); }catch(_){} }
+      else if(await copyText(text)) toast('추천 글을 복사했어요 · 카톡에 붙여넣어 보내주세요');
+      return;
+    }
+    if(a==='recCopy'){ if(await copyText(recommendText())) toast('추천 글을 복사했어요'); return; }
     if(a==='shareCode'){
       const text = `💍 모먼트웍스 축의대 대행 서비스\n계약할 때 짝꿍코드 [${view.referral.code}] 를 입력하면 할인을 받을 수 있어요!\n상담: ${view.info.kakao}`;
       if(navigator.share){ try{ await navigator.share({text}); }catch(_){} } else if(await copyText(text)) toast('공유 문구를 복사했어요');
@@ -8594,7 +8687,8 @@ const CustomerPortal = (function(){
       if(navigator.share){ try{ await navigator.share({text}); }catch(_){} } else if(await copyText(text)) toast('라이브 링크를 복사했어요');
       return;
     }
-    if(a==='refresh'){
+    if(a==='home'){ window.scrollTo(0,0); navOn=null; setNav((root.querySelector('.cp-nav button')||{dataset:{}}).dataset.v); }
+    if(a==='refresh' || a==='home'){
       if(busy || !H.onRefresh) return; busy=true; render();
       try{ const nv = await H.onRefresh(); if(nv) view = nv; toast('최신 정보로 업데이트했어요'); }catch(err){ toast(err.message||'불러오지 못했어요'); }
       finally{ busy=false; render(); }
@@ -8796,6 +8890,7 @@ function customerSettingsHTML(){
       <div class="form-field"><label>고객 페이지 주소</label><input data-act="setText" data-key="customerUrl" value="${esc(s.customerUrl||'')}" placeholder="https://아이디.github.io/customer/"></div>
       <div class="form-field"><label>실시간 축의 현황 기본 주소 <span class="hint">고객별 현황판 코드가 이 주소 뒤에 붙어 자동 로그인돼요</span></label><input data-act="setText" data-key="giftBaseUrl" value="${esc(s.giftBaseUrl||'')}" placeholder="https://momentworks.github.io/arrange/"></div>
       <div class="form-field"><label>축의대 운영 설정서 작성 링크 <span class="hint">설정서 제출 전 고객에게 버튼으로 보여요</span></label><input data-act="setText" data-key="settingsFormUrl" value="${esc(s.settingsFormUrl||'')}" placeholder="운영 설정서 페이지 주소"></div>
+      <div class="form-field"><label>모먼트웍스 홈페이지 <span class="hint">고객 페이지 메뉴 · 추천 글에 들어가요</span></label><input data-act="setText" data-key="customerHomeUrl" value="${esc(s.customerHomeUrl||'')}" placeholder="https://momentworks.github.io/momentworks.kr/"></div>
       <div class="form-field"><label>고객 문의 카카오톡 <span class="hint">비우면 모먼트웍스 공식 채널</span></label><input data-act="setText" data-key="customerKakaoUrl" value="${esc(s.customerKakaoUrl||'')}" placeholder="https://pf.kakao.com/_FbIfX/chat"></div>
       <div class="form-field"><label>모든 고객에게 보이는 안내문</label><textarea data-act="setText" data-key="customerNotice" rows="3" placeholder="예: 예식 1주일 전까지 운영 설정서를 제출해주세요.">${esc(s.customerNotice||'')}</textarea></div>
     </div>
