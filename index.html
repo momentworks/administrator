@@ -8570,10 +8570,11 @@ const CustomerPortal = (function(){
     return `<section class="cp-card" id="cp-live"><h2>🎥 유튜브 실시간 라이브</h2>
       ${tabs}
       ${emb ? `<div class="cp-video"><iframe src="${e(emb)}" title="예식 라이브${cur.label?' · '+e(cur.label):''}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
-        <div class="cp-row2"><a class="cp-btn ghost" href="${e(cur.url)}" target="_blank" rel="noopener">유튜브에서 보기</a><button class="cp-btn ghost" data-cp="shareLive">🔗 라이브 링크 공유</button></div>
+        <div class="cp-row2"><button class="cp-btn primary" data-cp="shareLive">🔗 링크 공유하기</button><a class="cp-btn ghost" href="${e(cur.url)}" target="_blank" rel="noopener">▶ 유튜브에서 보기</a></div>
         <p class="cp-note">⏰ 유튜브 라이브는 <b>예식 당일 1시간 전${liveStart()? `(${liveStart()})`:''}부터</b> 중계가 시작돼요.<br>🔗 라이브 링크를 공유하면 오시지 못하는 분들도 예식을 함께 보실 수 있어요 💐</p>`
         : (n!==null && n<0 ? `<div class="cp-empty">라이브 영상이 등록되지 않았어요</div>`
           : `<div class="cp-live-wait"><div class="ic">📺</div><b>유튜브 라이브는 예식 당일<br>1시간 전부터 중계가 시작돼요</b>${liveStart()? `<span>⏰ ${fdate(view.wedding.date)} ${liveStart()}부터 시청 가능</span>`:''}<small>중계가 시작되면 이 자리에서 바로 보실 수 있어요 🎥</small></div>
+        <button class="cp-btn primary wide" data-cp="shareLive">🔗 라이브 안내 공유하기</button>
         <p class="cp-note">🔗 라이브 링크는 예식 전에 등록되며, 공유하면 오시지 못하는 분들도 예식을 함께 보실 수 있어요 💐</p>`)}
     </section>`;
   }
@@ -8721,9 +8722,14 @@ const CustomerPortal = (function(){
       return;
     }
     if(a==='shareLive'){
-      const sts = (Array.isArray(view.live.streams) && view.live.streams.length) ? view.live.streams : [{label:'', url:view.live.youtube}];
-      const text = `💍 ${view.client.contractName||view.client.name}님 예식 라이브\n${fdate(view.wedding.date, true)} ${view.wedding.time}\n` + sts.map(st=> (st.label? `${st.label}: ` : '') + st.url).join('\n');
-      if(navigator.share){ try{ await navigator.share({text}); }catch(_){} } else if(await copyText(text)) toast('라이브 링크를 복사했어요');
+      const sts = ((Array.isArray(view.live.streams) && view.live.streams.length) ? view.live.streams : [{label:'', url:view.live.youtube}]).filter(st=> st.url);
+      const w = view.wedding, st0 = liveStart();
+      const head = `💍 ${view.client.contractName||view.client.name}님 결혼식 유튜브 라이브\n📅 ${fdate(w.date, true)} ${w.time||''}${w.venue? `\n📍 ${w.venue} ${w.hall||''}`.trimEnd() : ''}\n⏰ 라이브 중계는 예식 1시간 전${st0? `(${st0})` : ''}부터 시작돼요`;
+      const text = sts.length
+        ? head + '\n\n' + sts.map(x=> `🎥 ${x.label? x.label+' 라이브' : '라이브 보기'}\n${x.url}`).join('\n\n') + '\n\n오시지 못하는 분들도 함께 축하해 주세요 💐'
+        : head + '\n\n🔗 라이브 링크는 예식 당일에 다시 보내드릴게요.\n오시지 못하는 분들도 함께 축하해 주세요 💐';
+      if(navigator.share){ try{ await navigator.share({title:'결혼식 유튜브 라이브', text}); }catch(_){} }
+      else if(await copyText(text)) toast(sts.length? '라이브 링크를 복사했어요 · 카톡에 붙여넣어 보내주세요' : '라이브 안내를 복사했어요');
       return;
     }
     if(a==='home'){ window.scrollTo(0,0); navOn=null; setNav((root.querySelector('.cp-nav button')||{dataset:{}}).dataset.v); }
