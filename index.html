@@ -1368,6 +1368,15 @@ body.cp-preview-open{overflow:hidden;}
 .cp-gd-admin[open] summary{margin-bottom:8px;}
 .cp-gd-st{font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px;background:#EEE;color:#777;}
 .cp-gd-st.form{background:#E6EFE6;color:#4F6F52;} .cp-gd-st.admin{background:#F2E7CF;color:#7E5E22;}
+.cu-gimport{background:#FFFDF8;border:1px solid var(--line,#ddd);border-radius:12px;padding:12px 14px;margin:0 0 12px;}
+.cu-gimport-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;}
+.cu-gimport-h span{flex:1;min-width:220px;font-size:11.5px;color:var(--slate,#777);}
+.cu-gimport-list{margin-top:10px;display:flex;flex-direction:column;gap:6px;font-size:12.5px;}
+.cu-gimport-list>div{padding:7px 10px;border-radius:8px;background:#F7F5F0;}
+.cu-gimport-list .ok{background:#EEF4EC;} .cu-gimport-list .bad{background:#FBF1EC;}
+.cu-gimport-list small{color:var(--slate,#888);margin-left:4px;}
+.cu-gimport-pick{display:inline-flex;gap:6px;margin-left:6px;flex-wrap:wrap;} .cu-gimport-pick select{max-width:280px;font-size:12px;}
+.cp-gd-pdf{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;font-size:11.5px;color:var(--slate,#777);}
 /* ===== 고객 전용 페이지 ===== */
 .cp{--cp-ink:#1F1A1C;--cp-soft:#5E5750;--cp-paper:#F4F1EA;--cp-card:#FFFFFF;--cp-line:#E2DBCD;--cp-wine:#5C1F29;--cp-gold:#A9823C;--cp-gold-s:#F2E7CF;--cp-sage:#4F6F52;--cp-coral:#B0432E;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--cp-ink);background:var(--cp-paper);min-height:100vh;font-variant-numeric:tabular-nums;max-width:640px;margin:0 auto;position:relative;}
@@ -4243,7 +4252,8 @@ function applySettingsGuide(records, db, payload, trusted){
   if(!trusted && !date) return {ok:false, error:'예식일이 필요해요'};
   var all = (records||[]).filter(function(r){ return r && r.type==='contract' && !r.cancelled; });
   var hit = null;
-  if(code) hit = all.filter(function(r){ return String(r.contractCode||'').trim().toUpperCase()===code; })[0] || null;
+  if(trusted && payload.recordId) hit = all.filter(function(r){ return r.id===payload.recordId; })[0] || null; // 관리자가 계약을 직접 지정
+  if(!hit && code) hit = all.filter(function(r){ return String(r.contractCode||'').trim().toUpperCase()===code; })[0] || null;
   if(hit && !trusted && date && hit.weddingDate!==date) hit = null;            // 외부 제출: 코드 + 예식일이 맞아야
   if(!hit && date){
     var sameDay = all.filter(function(r){ return r.weddingDate===date; });
@@ -4261,7 +4271,7 @@ function applySettingsGuide(records, db, payload, trusted){
   var k = 'guide:'+hit.id, prev = db.referralPay[k] || {};
   db.referralPay[k] = {groomName: g.groomName || prev.groomName || '', brideName: g.brideName || prev.brideName || '', items: g.items,
     notes: {groom: g.notes.groom || '', bride: g.notes.bride || ''},
-    source: trusted==='admin' ? 'admin' : 'form', key: hit.contractCode ? 'C:'+hit.contractCode : '', updatedAt: new Date().toISOString(), submittedAt: new Date().toISOString()};
+    source: trusted==='admin' ? 'admin' : trusted==='pdf' ? 'pdf' : 'form', key: hit.contractCode ? 'C:'+hit.contractCode : '', updatedAt: new Date().toISOString(), submittedAt: new Date().toISOString()};
   return {ok:true, db:db, recordId: hit.id, contractCode: hit.contractCode||'', items: Object.keys(g.items).length};
 }
 
@@ -9163,6 +9173,15 @@ function renderClientBox(rec, boxEl){
     renderClientBox(rec, box); custTabRefresh();
   }));
   box.querySelectorAll('[data-cps]').forEach(inp=> inp.addEventListener('change', async ()=>{ await saveSide(rec, inp.dataset.cps, {[inp.dataset.f]: inp.value.trim()}, '저장했어요'); custTabRefresh(); }));
+  box.querySelectorAll('[data-cpgpdf]').forEach(inp=> inp.addEventListener('change', async ()=>{
+    const f = inp.files && inp.files[0]; inp.value = ''; if(!f) return;
+    showToast('설정서를 읽는 중이에요…');
+    try{
+      const r = await importSettingsPdf(f, rec.id);
+      if(r.ok){ showToast(`✅ ${rec.clientName}님 예식 안내문을 불러왔어요 (${r.items}개 항목)`); renderClientBox(rec, box); custTabRefresh(); }
+      else alert('❌ ' + r.error);
+    }catch(err){ alert('설정서를 읽지 못했어요: ' + (err.message||err)); }
+  }));
   box.querySelectorAll('[data-cpg]').forEach(inp=> inp.addEventListener('change', async ()=>{ const f = inp.dataset.cpg, v = inp.value.trim();
     const patch = (f==='groomName'||f==='brideName') ? {[f]: v} : f.startsWith('n:') ? {notes: {[f.slice(2)]: v}} : {items: {[f]: v}};
     await saveGuide(rec, patch); const g = guideOf(rec)||{};
@@ -9190,7 +9209,7 @@ function guideAdminHTML(rec){
   const g = guideOf(rec) || {}, it = g.items || {}, F = guideNormalize({}).fields;
   const when = g.updatedAt ? new Date(g.updatedAt) : null;
   const st = !g.updatedAt ? '<span class="cp-gd-st none">아직 없음 · 운영설정서가 제출되면 자동으로 채워져요</span>'
-    : `<span class="cp-gd-st ${g.source==='form'?'form':'admin'}">${g.source==='form'?'📝 운영설정서 연동':'✏️ 직접 입력'} · ${when.getMonth()+1}/${when.getDate()} ${String(when.getHours()).padStart(2,'0')}:${String(when.getMinutes()).padStart(2,'0')}</span>`;
+    : `<span class="cp-gd-st ${g.source==='form'||g.source==='pdf'?'form':'admin'}">${g.source==='form'?'📝 운영설정서 연동':g.source==='pdf'?'📄 설정서 PDF':'✏️ 직접 입력'} · ${when.getMonth()+1}/${when.getDate()} ${String(when.getHours()).padStart(2,'0')}:${String(when.getMinutes()).padStart(2,'0')}</span>`;
   return `<details class="cp-gd-admin" ${g.updatedAt?'':'open'}><summary><b>📋 예식 안내문</b> ${st}</summary>
     <div class="cp-admin-grid">
       <label>🤵 신랑 성함<input data-cpg="groomName" value="${esc(g.groomName||'')}" placeholder="예: 김철수"></label>
@@ -9200,6 +9219,7 @@ function guideAdminHTML(rec){
       <label>신랑측 추가 안내 <span class="cp-admin-hint">신랑측 안내문에만</span><input data-cpg="n:groom" value="${esc((g.notes||{}).groom||'')}" placeholder="예: 답례품은 축의대에서 드려요"></label>
       <label>신부측 추가 안내 <span class="cp-admin-hint">신부측 안내문에만</span><input data-cpg="n:bride" value="${esc((g.notes||{}).bride||'')}" placeholder=""></label>
     </div>
+    <div class="cp-gd-pdf"><label class="btn btn-sm">📄 설정서 PDF에서 불러오기<input type="file" accept="application/pdf" data-cpgpdf hidden></label><span>이미 받은 축의대 설정서 PDF를 올리면 하객 안내사항이 자동으로 채워져요</span></div>
     <div class="cp-admin-hint" style="margin-top:6px;">전화번호 · 계좌번호 같은 민감한 정보는 저장할 때 자동으로 빠져요. 고객 페이지 · 하객 공유에는 위 항목만 보여요.</div>
   </details>`;
 }
@@ -9213,6 +9233,86 @@ async function saveGuide(rec, patch){
   Object.keys(patch.items||{}).forEach(key=>{ if(!patch.items[key]) delete n.items[key]; });
   db.referralPay[k] = {groomName: n.groomName, brideName: n.brideName, items: n.items, notes: n.notes, source:'admin', key: recordKey(rec), updatedAt: new Date().toISOString(), submittedAt: prev.submittedAt||''};
   pDirty.referral.add(k); showToast('예식 안내문을 저장했어요'); await savePartnerDb();
+}
+/* ---------- 이미 제출된 축의대 설정서 PDF → 예식 안내문 (pdf.js · 브라우저에서만 읽음) ---------- */
+let GUIDE_IMPORT = []; // 일괄 불러오기 결과
+function loadPdfJs(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(loadPdfJs._p) return loadPdfJs._p;
+  loadPdfJs._p = new Promise((res, rej)=>{
+    const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    sc.onload = ()=>{ try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; res(window.pdfjsLib); }catch(e){ rej(e); } };
+    sc.onerror = ()=>{ loadPdfJs._p = null; rej(new Error('PDF 읽기 도구를 불러오지 못했어요 (인터넷 연결 확인)')); };
+    document.head.appendChild(sc);
+  });
+  return loadPdfJs._p;
+}
+async function pdfToText(file){
+  const lib = await loadPdfJs();
+  const pdf = await lib.getDocument({data: await file.arrayBuffer()}).promise;
+  let out = '';
+  for(let p=1; p<=pdf.numPages; p++){
+    const page = await pdf.getPage(p), content = await page.getTextContent();
+    const items = content.items.map(it=>({str:it.str, x:it.transform[4], y:it.transform[5], w:it.width||0})).filter(it=> it.str && it.str.trim()).sort((a,b)=> (Math.abs(b.y-a.y)>3 ? b.y-a.y : a.x-b.x));
+    const lines = []; let cy = null, cur = '', lastEnd = null;
+    items.forEach(it=>{ // 같은 줄: 글자가 붙어 있으면 그대로 잇고, 떨어져 있으면 띄어쓰기
+      if(cy===null || Math.abs(it.y-cy)<=3){ cur += (cur && lastEnd!==null && it.x - lastEnd > 1.5 ? ' ' : '') + it.str; if(cy===null) cy = it.y; }
+      else { lines.push(cur); cur = it.str; cy = it.y; }
+      lastEnd = it.x + it.w;
+    });
+    if(cur) lines.push(cur);
+    out += lines.join('\n') + '\n';
+  }
+  return out;
+}
+/* 설정서 PDF 텍스트 → 운영설정서와 같은 형식의 데이터 (숨은 데이터 블록 우선, 없으면 항목명으로 찾기) */
+function settingsDataFromText(text){
+  const m = text.match(/--MW-DATA-START--([\s\S]*?)--MW-DATA-END--/);
+  if(m){ try{ const b64 = m[1].replace(/\s+/g,''); const bin = atob(b64), bytes = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+    const o = JSON.parse(new TextDecoder('utf-8').decode(bytes)); if(o && typeof o==='object') return {data:o, via:'숨은 데이터'}; }catch(e){} }
+  const DEF = [['info_parking_way',['주차 등록 방법','주차등록 방법','주차 등록']],['info_parking_time',['무료 주차 시간','무료주차 시간','무료 주차']],['info_atm',['ATM 위치','ATM']],
+    ['info_hall',['연회장 위치','연회장']],['info_bride_room',['신부대기실 위치','신부 대기실 위치','신부대기실']],['info_meal_time',['식사 가능 시간','식사 가능시간','식사시간']],
+    ['child_ticket_age',['소인 식권의 나이 기준','소인식권 나이 기준','소인 식권 나이','소인식권']],['groom_name',['신랑 성함']],['bride_name',['신부 성함']],['wedding_date',['예식일']],['contractor_name',['계약자 성함']]];
+  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean), out = {};
+  DEF.forEach(([k, labels])=>{
+    const ls = [...labels].sort((a,b)=> b.length-a.length); let v = '';
+    for(let i=0;i<lines.length && !v;i++){ for(const lb of ls){ const ix = lines[i].indexOf(lb); if(ix<0) continue;
+      let rest = lines[i].slice(ix+lb.length).replace(/^[\s:：\-–|]+/,'').trim();
+      if(!rest && lines[i+1] && !DEF.some(d=> d[1].some(l=> lines[i+1].includes(l)))) rest = lines[i+1].trim();
+      rest = rest.split('|')[0].trim(); if(rest){ v = rest; break; } } }
+    if(v) out[k] = v;
+  });
+  return Object.keys(out).length ? {data:out, via:'항목명'} : null;
+}
+async function importSettingsPdf(file, recordId){
+  const text = await pdfToText(file);
+  const found = settingsDataFromText(text);
+  if(!found) return {ok:false, error:'설정서 내용을 찾지 못했어요 (이미지로만 된 PDF일 수 있어요 · 직접 입력해주세요)', file:file.name};
+  const pick = ['groom_name','bride_name','contractor_name','wedding_date','contract_code','phone','info_parking_way','info_parking_time','info_atm','info_hall','info_bride_room','info_meal_time','child_ticket_age'];
+  const payload = {}; pick.forEach(k=>{ if(found.data[k]!==undefined && found.data[k]!==null && found.data[k]!=='') payload[k] = found.data[k]; });
+  if(recordId) payload.recordId = recordId;
+  const db = ensurePdb();
+  const r = applySettingsGuide(RECORDS, db, payload, 'pdf');
+  const info = {file: file.name, via: found.via, groom: payload.groom_name||'', bride: payload.bride_name||'', date: payload.wedding_date||'', payload};
+  if(!r.ok) return Object.assign({ok:false, error: r.error}, info);
+  pDirty.referral.add('guide:'+r.recordId); await savePartnerDb();
+  return Object.assign({ok:true, recordId: r.recordId, items: r.items}, info);
+}
+function guideImportHTML(){
+  const done = activeContracts().filter(r=> guideOf(r)).length;
+  return `<div class="cu-gimport">
+    <div class="cu-gimport-h"><b>📋 설정서 PDF로 예식 안내문 불러오기</b><span>이미 제출된 축의대 설정서 PDF를 한 번에 여러 개 올리면, 예식일 · 성함으로 계약을 찾아 안내문을 자동으로 채워요 · 안내문 등록 ${done}건</span>
+      <label class="btn btn-sm btn-primary">PDF 선택 (여러 개 가능)<input type="file" accept="application/pdf" multiple data-cu="gimport" hidden></label></div>
+    ${GUIDE_IMPORT.length? `<div class="cu-gimport-list">${GUIDE_IMPORT.map((x,i)=>{
+      const rec = x.recordId ? recordById(x.recordId) : null;
+      if(x.busy) return `<div class="busy">⏳ ${esc(x.file)} 읽는 중…</div>`;
+      if(x.ok) return `<div class="ok">✅ <b>${esc(rec? rec.clientName : '')}</b> ${rec? fmtDate(rec.weddingDate):''} · 안내 항목 ${x.items}개 <small>${esc(x.file)} · ${esc(x.via)}</small></div>`;
+      const cands = activeContracts().filter(r=> !x.date || !r.weddingDate || String(r.weddingDate) === (String(x.date).match(/\d{4}\D{0,3}\d{1,2}\D{0,3}\d{1,2}/) ? (()=>{ const m = String(x.date).match(/(\d{4})\D{0,3}(\d{1,2})\D{0,3}(\d{1,2})/); return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0'); })() : r.weddingDate));
+      const list = (cands.length ? cands : activeContracts()).slice().sort((a,b)=> String(a.weddingDate).localeCompare(String(b.weddingDate)));
+      return `<div class="bad">⚠️ ${esc(x.file)} — ${esc(x.error)}${x.groom||x.bride? ` <small>(설정서: ${esc([x.groom,x.bride].filter(Boolean).join(' · '))} ${esc(x.date||'')})</small>`:''}
+        ${x.payload? `<span class="cu-gimport-pick"><select data-gi="${i}"><option value="">계약 직접 선택…</option>${list.map(r=>`<option value="${r.id}">${fmtDate(r.weddingDate)} ${esc(r.clientName)} (${esc(r.productType||'')})</option>`).join('')}</select><button class="btn btn-sm" data-cu="gassign" data-gi="${i}">이 계약에 적용</button></span>` : ''}</div>`;
+    }).join('')}</div>` : ''}
+  </div>`;
 }
 function settingsGuideSnippet(){
   const url = (typeof SERVER_URL!=='undefined' && SERVER_URL) || '여기에_통합관리_서버주소(…/exec)';
@@ -9344,8 +9444,9 @@ function renderCustomerTab(){
       <span class="cu-count">${rows.length}건</span>
       ${upc.length-upIssued.length ? `<button class="btn btn-primary btn-sm" data-cu="bulk">예정 예식 ${upc.length-upIssued.length}건 코드 일괄 발급</button>`:''}
     </div>
+    ${guideImportHTML()}
     <div class="table-wrap"><div style="overflow-x:auto;"><table class="cu-table">
-      <thead><tr><th>예식일시</th><th>계약자</th><th>상품 · 예식장</th><th>접속코드</th><th>계약서</th><th>라이브</th><th>축의현황</th><th>관리</th></tr></thead>
+      <thead><tr><th>예식일시</th><th>계약자</th><th>상품 · 예식장</th><th>접속코드</th><th>계약서</th><th>라이브</th><th>축의현황</th><th>안내문</th><th>관리</th></tr></thead>
       <tbody>${rows.length? rows.map(r=>{
         const c = clientOf(r) || {}, has = !!c.code, off = c.active===false, open = CUST_STATE.open===r.id;
         const dd = ddayInfo(r.weddingDate);
@@ -9354,10 +9455,10 @@ function renderCustomerTab(){
           <td><b>${esc(r.clientName)}</b><div class="cu-sub">${esc(r.contractCode||'')}</div></td>
           <td>${esc(r.productType||'-')}<div class="cu-sub">${esc(r.venueName||'')}</div></td>
           <td>${has? `<b class="cu-code ${off?'off':''}">${esc(c.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(c.code)}" title="접속코드 복사">📋</button>${off?'<div class="cu-sub">사용 중지</div>':''}${sideEligible(r)? ['groom','bride'].map(sk=>{ const sd=(c.sides||{})[sk]; return sd&&sd.code? `<div class="cu-sub">${SIDE_LABEL[sk]} <b class="cu-code ${sd.active===false?'off':''}">${esc(sd.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(sd.code)}" title="${SIDE_LABEL[sk]} 접속코드 복사">📋</button></div>` : ''; }).join('') + (!((c.sides||{}).groom||{}).code || !((c.sides||{}).bride||{}).code ? `<div class="cu-sub"><a href="#" data-cu="edit" data-id="${r.id}">+ 신랑·신부 코드</a></div>` : '') : ''}` : `<button class="btn btn-sm btn-primary" data-cu="create" data-id="${r.id}">코드 발급</button>`}</td>
-          <td>${yes(c.contractUrl)}</td><td>${yes(liveSet(c))}${c.youtubeGroom&&c.youtubeBride?'<div class="cu-sub">신랑·신부</div>':''}</td><td>${yes(giftSet(c))}</td>
+          <td>${yes(c.contractUrl)}</td><td>${yes(liveSet(c))}${c.youtubeGroom&&c.youtubeBride?'<div class="cu-sub">신랑·신부</div>':''}</td><td>${yes(giftSet(c))}</td><td>${yes(guideOf(r))}</td>
           <td class="cu-acts">${has? `<button class="btn btn-sm" data-cu="invite" data-id="${r.id}">초대 문구</button><button class="btn btn-sm" data-cu="preview" data-id="${r.id}">미리보기</button>`:''}<button class="btn btn-sm ${open?'btn-primary':''}" data-cu="edit" data-id="${r.id}">${open?'닫기':'편집'}</button></td>
-        </tr>${open? `<tr class="cu-edit"><td colspan="8"><div id="cpTabBox" class="cp-admin" data-rid="${r.id}"></div></td></tr>`:''}`;
-      }).join('') : '<tr><td colspan="8" style="padding:26px;text-align:center;color:var(--slate);">해당하는 계약이 없어요</td></tr>'}</tbody>
+        </tr>${open? `<tr class="cu-edit"><td colspan="9"><div id="cpTabBox" class="cp-admin" data-rid="${r.id}"></div></td></tr>`:''}`;
+      }).join('') : '<tr><td colspan="9" style="padding:26px;text-align:center;color:var(--slate);">해당하는 계약이 없어요</td></tr>'}</tbody>
     </table></div></div>
     ${customerSettingsHTML()}`;
   if(CUST_STATE.open){ const rec = recordById(CUST_STATE.open); if(rec) renderClientBox(rec, document.getElementById('cpTabBox')); }
@@ -9367,6 +9468,14 @@ document.addEventListener('click', async (ev)=>{
   if(el.tagName==='A') ev.preventDefault();
   const a = el.dataset.cu, rec = el.dataset.id ? recordById(el.dataset.id) : null;
   if(a==='create' && rec){ await saveClient(rec, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}, `${rec.clientName}님 코드를 발급했어요`); CUST_STATE.open = rec.id; renderCustomerTab(); return; }
+  if(a==='gassign'){
+    const i = Number(el.dataset.gi), x = GUIDE_IMPORT[i], sel = document.querySelector(`#custTabRoot select[data-gi="${i}"]`);
+    if(!x || !x.payload || !sel || !sel.value){ showToast('적용할 계약을 선택해주세요'); return; }
+    const r = applySettingsGuide(RECORDS, ensurePdb(), Object.assign({}, x.payload, {recordId: sel.value}), 'pdf');
+    if(!r.ok){ alert(r.error); return; }
+    pDirty.referral.add('guide:'+r.recordId); GUIDE_IMPORT[i] = Object.assign({}, x, {ok:true, recordId:r.recordId, items:r.items});
+    renderCustomerTab(); showToast('예식 안내문을 적용했어요'); await savePartnerDb(); return;
+  }
   if(a==='copySnippet'){ copyText(settingsGuideSnippet(), '연동 코드를 복사했어요 · 운영설정서 Apps Script에 붙여넣어 주세요'); return; }
   if(a==='copy'){ ev.preventDefault(); copyText(el.dataset.code, `접속코드 ${el.dataset.code} 를 복사했어요`); return; }
   if(a==='invite' && rec){ copyText(customerInviteText(rec, clientOf(rec)), `${rec.clientName}님 초대 문구를 복사했어요`); return; }
@@ -9386,6 +9495,16 @@ document.addEventListener('change', async (ev)=>{
   const st = ev.target.closest('#custTabRoot [data-act="setText"]');
   if(st){ pSet()[st.dataset.key] = st.value.trim(); pDirty.settings = true; showToast('고객 페이지 설정을 저장했어요'); await savePartnerDb(); return; }
   const el = ev.target.closest('#custTabRoot [data-cu]'); if(!el) return;
+  if(el.dataset.cu==='gimport'){
+    const files = [...(el.files||[])]; el.value = ''; if(!files.length) return;
+    GUIDE_IMPORT = files.map(f=>({file:f.name, busy:true})); renderCustomerTab();
+    for(let i=0;i<files.length;i++){
+      try{ GUIDE_IMPORT[i] = await importSettingsPdf(files[i]); GUIDE_IMPORT[i]._f = files[i]; }
+      catch(err){ GUIDE_IMPORT[i] = {ok:false, file:files[i].name, error: err.message||String(err)}; }
+      renderCustomerTab();
+    }
+    const okN = GUIDE_IMPORT.filter(x=>x.ok).length; showToast(`설정서 ${files.length}개 중 ${okN}개 안내문을 불러왔어요`); return;
+  }
   if(el.dataset.cu==='filter'){ CUST_STATE.filter = el.value; CUST_STATE.open = null; renderCustomerTab(); }
 });
 document.addEventListener('input', (ev)=>{
