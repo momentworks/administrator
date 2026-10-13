@@ -1361,6 +1361,8 @@ body.cp-preview-open{overflow:hidden;}
 .cp-admin-code .btn{margin-left:2px;}
 .cu-check{display:flex !important;align-items:center;gap:8px;font-weight:700;cursor:pointer;}
 .cu-check input{width:16px;height:16px;}
+.cu-when{white-space:nowrap;} .cu-when b{font-weight:700;color:var(--wine,#5C1F29);margin-left:2px;}
+.held-when{white-space:nowrap;} .held-when b{color:var(--wine,#5C1F29);font-weight:700;margin-left:2px;}
 /* ===== 고객 전용 페이지 ===== */
 .cp{--cp-ink:#1F1A1C;--cp-soft:#5E5750;--cp-paper:#F4F1EA;--cp-card:#FFFFFF;--cp-line:#E2DBCD;--cp-wine:#5C1F29;--cp-gold:#A9823C;--cp-gold-s:#F2E7CF;--cp-sage:#4F6F52;--cp-coral:#B0432E;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--cp-ink);background:var(--cp-paper);min-height:100vh;font-variant-numeric:tabular-nums;max-width:640px;margin:0 auto;position:relative;}
@@ -1467,6 +1469,9 @@ body.cp-preview-open{overflow:hidden;}
 .cp-install-bar span{flex:1;line-height:1.5;word-break:keep-all;} .cp-install-bar b{color:var(--cp-ink);}
 .cp-install-bar button{border:none;background:#1C1719;color:#fff;border-radius:8px;padding:8px 13px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
 .cp-install-bar button.x{background:none;color:#8A857C;padding:4px 6px;font-size:15px;}
+.cp-live-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:-2px 0 10px;}
+.cp-live-tabs button{border:1px solid var(--cp-line);background:#fff;border-radius:10px;padding:10px 8px;font:inherit;font-size:13px;font-weight:700;color:var(--cp-soft);cursor:pointer;}
+.cp-live-tabs button.on{background:#1C1719;border-color:#1C1719;color:#fff;}
 </style>
 </head>
 <body>
@@ -1806,7 +1811,7 @@ body.cp-preview-open{overflow:hidden;}
       <div style="overflow-x:auto;">
       <table id="heldTable">
         <thead><tr>
-          <th>예식일자</th><th>계약자명</th><th>연락처</th><th>계약코드</th><th>예식장</th>
+          <th>예식일시</th><th>계약자명</th><th>연락처</th><th>계약코드</th><th>예식장</th>
           <th>잔금</th><th>페이백</th><th>최종금액</th><th>정산</th><th>설정서</th><th>계약후기</th><th>본식후기</th>
         </tr></thead>
         <tbody id="heldBody"></tbody>
@@ -2171,7 +2176,8 @@ function productTypeShort(pt){
 }
 function dateTimeSortKey(r){
   const d = r.weddingDate || '9999-99-99';
-  const t = r.weddingTime || '99:99';
+  const m = String(r.weddingTime||'').match(/(\d{1,2})\s*[:시]\s*(\d{0,2})/);
+  const t = m ? String(m[1]).padStart(2,'0')+':'+String(m[2]||'0').padStart(2,'0') : '99:99';
   return d + ' ' + t;
 }
 function ddayInfo(weddingDateStr){
@@ -2963,7 +2969,7 @@ function renderHeld(){
   body.innerHTML = held.map(r=>{
     const fin = computeFinancials(r);
     return `<tr data-id="${r.id}">
-      <td>${fmtDate(r.weddingDate)}</td>
+      <td class="held-when">${fmtDate(r.weddingDate)}${r.weddingTime? ` <b>${esc(r.weddingTime)}</b>` : ''}</td>
       <td>${esc(r.clientName)}</td>
       <td class="mono">${esc(r.phone||'-')}</td>
       <td class="mono">${esc(r.contractCode||'-')}</td>
@@ -4195,7 +4201,13 @@ function buildCustomerView(records, db, code, todayStr, withFile){
       var code = String((side && side.giftCode) || client.giftCode || '').trim();
       var custom = String((side && side.giftUrl) || client.giftUrl || '').trim();
       var url = code ? base.split('#')[0] + '#code=' + encodeURIComponent(code) : (custom || base);
-      return {youtube: client.youtube||'', giftUrl: url, giftCode: code, giftBase: base};
+      var yg = String(client.youtubeGroom||'').trim(), yb = String(client.youtubeBride||'').trim(), streams = [];
+      if(String(r.productType||'').trim()==='양측' && (yg || yb)){
+        if(yg) streams.push({key:'groom', label:'신랑측', url: yg});
+        if(yb) streams.push({key:'bride', label:'신부측', url: yb});
+        if(sideKey==='bride') streams.reverse(); // 신부측 코드로 접속하면 신부측 라이브부터
+      } else if(String(client.youtube||'').trim()) streams.push({key:'', label:'', url: String(client.youtube).trim()});
+      return {youtube: streams.length ? streams[0].url : '', streams: streams, giftUrl: url, giftCode: code, giftBase: base};
     })(),
     referral: {code: myCode, unit: UNIT, rows: refRows, total: refRows.length, discountCount: discountCnt, paybackCount: paybackCnt,
       discountAmount: discountCnt*UNIT, paybackAmount: paybackCnt*UNIT, paybackPaid: Math.min(paybackPaid, paybackCnt*UNIT)},
@@ -8372,7 +8384,7 @@ function renderSettlePicker(){
 ================================================================================================ */
 const CustomerPortal = (function(){
   const WD = ['일','월','화','수','목','금','토'];
-  let root=null, view=null, H={}, busy=false, giftOpen=false, navOn=null;
+  let root=null, view=null, H={}, busy=false, giftOpen=false, navOn=null, liveSel=0;
   const SVG = d=> `<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   const ICON_REFRESH = SVG('<path d="M20 11a8 8 0 1 0-2.34 5.66"/><path d="M20 4v7h-7"/>');
   const ICON_LOGOUT = SVG('<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4"/><path d="M19 12H9"/>');
@@ -8540,10 +8552,15 @@ const CustomerPortal = (function(){
     finally{ dlBusy = false; if(btn){ btn.textContent = old; btn.disabled = false; } }
   }
   function liveHTML(){
-    const l = view.live, emb = ytEmbed(l.youtube), n = dday(view.wedding.date);
+    const l = view.live, n = dday(view.wedding.date);
+    const streams = (Array.isArray(l.streams) && l.streams.length) ? l.streams : (l.youtube ? [{key:'', label:'', url:l.youtube}] : []);
+    if(liveSel >= streams.length) liveSel = 0;
+    const cur = streams[liveSel] || {}, emb = ytEmbed(cur.url);
+    const tabs = streams.length>1 ? `<div class="cp-live-tabs">${streams.map((st,i)=>`<button class="${i===liveSel?'on':''}" data-cp="liveSel" data-v="${i}">${st.key==='bride'?'👰':'🤵'} ${e(st.label)} 라이브</button>`).join('')}</div>` : '';
     return `<section class="cp-card" id="cp-live"><h2>🎥 유튜브 실시간 라이브</h2>
-      ${emb ? `<div class="cp-video"><iframe src="${e(emb)}" title="예식 라이브" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
-        <div class="cp-row2"><a class="cp-btn ghost" href="${e(l.youtube)}" target="_blank" rel="noopener">유튜브에서 보기</a><button class="cp-btn ghost" data-cp="shareLive">🔗 라이브 링크 공유</button></div>
+      ${tabs}
+      ${emb ? `<div class="cp-video"><iframe src="${e(emb)}" title="예식 라이브${cur.label?' · '+e(cur.label):''}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+        <div class="cp-row2"><a class="cp-btn ghost" href="${e(cur.url)}" target="_blank" rel="noopener">유튜브에서 보기</a><button class="cp-btn ghost" data-cp="shareLive">🔗 라이브 링크 공유</button></div>
         <p class="cp-note">라이브 링크를 공유하면 오시지 못하는 분들도 예식을 함께 보실 수 있어요.</p>`
         : `<div class="cp-empty">${n!==null && n<0 ? '라이브 영상이 등록되지 않았어요' : '예식 당일 라이브 링크가 여기에 열려요'}</div>`}
     </section>`;
@@ -8677,6 +8694,7 @@ const CustomerPortal = (function(){
       return;
     }
     if(a==='installHide'){ try{ localStorage.setItem('cp_install_hide','1'); }catch(_){} render(); return; }
+    if(a==='liveSel'){ liveSel = Number(el.dataset.v)||0; render(); const t=document.getElementById('cp-live'); if(t) t.scrollIntoView({block:'start'}); return; }
     if(a==='recCopy'){ if(await copyText(recommendText())) toast('추천 글을 복사했어요'); return; }
     if(a==='shareCode'){
       const text = `💍 모먼트웍스 축의대 대행 서비스\n계약할 때 짝꿍코드 [${view.referral.code}] 를 입력하면 할인을 받을 수 있어요!\n상담: ${view.info.kakao}`;
@@ -8691,7 +8709,8 @@ const CustomerPortal = (function(){
       return;
     }
     if(a==='shareLive'){
-      const text = `💍 ${view.client.name}님 예식 라이브\n${fdate(view.wedding.date, true)} ${view.wedding.time}\n${view.live.youtube}`;
+      const sts = (Array.isArray(view.live.streams) && view.live.streams.length) ? view.live.streams : [{label:'', url:view.live.youtube}];
+      const text = `💍 ${view.client.contractName||view.client.name}님 예식 라이브\n${fdate(view.wedding.date, true)} ${view.wedding.time}\n` + sts.map(st=> (st.label? `${st.label}: ` : '') + st.url).join('\n');
       if(navigator.share){ try{ await navigator.share({text}); }catch(_){} } else if(await copyText(text)) toast('라이브 링크를 복사했어요');
       return;
     }
@@ -8739,6 +8758,7 @@ function sideInviteText(rec, sk, sd){
   const nm = sd.name || (SIDE_LABEL[sk]+'님');
   return `[모먼트웍스] ${nm}님 전용 예식 페이지 💐 (${SIDE_LABEL[sk]}측)\n예식 정보 · 계약서 · 유튜브 라이브 · ${SIDE_LABEL[sk]}측 실시간 축의 현황 · 짝꿍코드 현황을 한 곳에서 확인하실 수 있어요.\n\n접속코드: ${sd.code}\n${url ? url : '(고객 페이지 주소는 모먼트웍스에서 안내드려요)'}\n\n※ 메인 페이지 하단의 [홈 화면에 바로가기 추가]를 눌러 홈화면 추가시 편리하게 접속 가능합니다.`;
 }
+function liveSet(c){ return !!(c && (c.youtube || c.youtubeGroom || c.youtubeBride)); }
 function giftSet(c){
   if(!c) return false;
   if(c.giftCode || c.giftUrl) return true;
@@ -8841,7 +8861,10 @@ function renderClientBox(rec, boxEl){
         <button type="button" class="btn btn-sm" data-cpa="preview">고객 화면 미리보기</button></div>
       <div class="cp-admin-grid">
         <label>계약서 파일 (구글드라이브 링크) <span class="cp-admin-hint">비공개(제한됨) 그대로 두세요 · 고객은 접속코드로 다운로드만 가능</span><input data-cpf="contractUrl" value="${esc(c.contractUrl||'')}" placeholder="대표 드라이브의 계약서 파일 링크"></label>
-        <label>유튜브 실시간 라이브 링크<input data-cpf="youtube" value="${esc(c.youtube||'')}" placeholder="https://youtube.com/live/..."></label>
+        ${String(rec.productType||'').trim()==='양측'
+          ? `<label>🤵 신랑측 유튜브 라이브 링크<input data-cpf="youtubeGroom" value="${esc(c.youtubeGroom||c.youtube||'')}" placeholder="https://youtube.com/live/..."></label>
+        <label>👰 신부측 유튜브 라이브 링크<input data-cpf="youtubeBride" value="${esc(c.youtubeBride||'')}" placeholder="https://youtube.com/live/..."></label>`
+          : `<label>유튜브 실시간 라이브 링크<input data-cpf="youtube" value="${esc(c.youtube||'')}" placeholder="https://youtube.com/live/..."></label>`}
         <label>실시간 축의 현황판 코드 <span class="cp-admin-hint">입력하면 고객이 버튼 한 번으로 현황판에 바로 로그인돼요</span><input data-cpf="giftCode" value="${esc(c.giftCode||'')}" placeholder="축의 관리 시스템(arrange)의 현황판 코드" autocomplete="off"></label>
         <label>이 고객에게만 보이는 안내<textarea data-cpf="memo" rows="2" placeholder="예: 예식 당일 12시까지 축의대 앞에서 뵐게요">${esc(c.memo||'')}</textarea></label>
       </div>
@@ -8871,7 +8894,8 @@ function renderClientBox(rec, boxEl){
     renderClientBox(rec, box); custTabRefresh();
   }));
   box.querySelectorAll('[data-cps]').forEach(inp=> inp.addEventListener('change', async ()=>{ await saveSide(rec, inp.dataset.cps, {[inp.dataset.f]: inp.value.trim()}, '저장했어요'); custTabRefresh(); }));
-  box.querySelectorAll('[data-cpf]').forEach(inp=> inp.addEventListener('change', async ()=>{ await saveClient(rec, {[inp.dataset.cpf]: inp.value.trim()}, '고객 페이지에 반영했어요'); if(inp.dataset.cpf==='contractUrl') renderClientBox(rec, box); custTabRefresh(); }));
+  box.querySelectorAll('[data-cpf]').forEach(inp=> inp.addEventListener('change', async ()=>{ const f = inp.dataset.cpf, patch = {[f]: inp.value.trim()}; if(f==='youtubeGroom' || f==='youtubeBride') patch.youtube = ''; // 양측: 신랑 · 신부 라이브로 나눠 보관
+    await saveClient(rec, patch, '고객 페이지에 반영했어요'); if(inp.dataset.cpf==='contractUrl') renderClientBox(rec, box); custTabRefresh(); }));
 }
 new MutationObserver(injectClientBox).observe(document.getElementById('modalBody'), {childList:true, subtree:true});
 
@@ -8915,10 +8939,11 @@ function custRows(){
   if(CUST_STATE.filter==='upcoming') list = list.filter(r=> r.weddingDate >= t);
   if(CUST_STATE.filter==='past') list = list.filter(r=> r.weddingDate < t);
   if(CUST_STATE.filter==='none') list = list.filter(r=>{ const c = clientOf(r); return !(c && c.code); });
-  if(CUST_STATE.filter==='missing') list = list.filter(r=>{ const c = clientOf(r); return c && c.code && (!c.contractUrl || !c.youtube || !giftSet(c)); });
+  if(CUST_STATE.filter==='missing') list = list.filter(r=>{ const c = clientOf(r); return c && c.code && (!c.contractUrl || !liveSet(c) || !giftSet(c)); });
   const q = CUST_STATE.q.trim();
   if(q) list = list.filter(r=> [r.clientName, r.contractCode, r.venueName, r.phone].some(v=> String(v||'').includes(q)));
-  list.sort((a,b)=> CUST_STATE.filter==='past' ? String(b.weddingDate).localeCompare(String(a.weddingDate)) : String(a.weddingDate).localeCompare(String(b.weddingDate)));
+  const dtKey = r=>{ const m = String(r.weddingTime||'').match(/(\d{1,2})\s*[:시]\s*(\d{0,2})/); return String(r.weddingDate||'9999-99-99') + ' ' + (m ? String(m[1]).padStart(2,'0')+':'+String(m[2]||'0').padStart(2,'0') : '99:99'); };
+  list.sort((a,b)=> CUST_STATE.filter==='past' ? dtKey(b).localeCompare(dtKey(a)) : dtKey(a).localeCompare(dtKey(b)));
   return list;
 }
 function renderCustomerTab(){
@@ -8936,7 +8961,7 @@ function renderCustomerTab(){
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
       <div class="kpi-card accent"><div class="kpi-label">예정 예식 코드 발급</div><div class="kpi-value">${upIssued.length} / ${upc.length}</div><div class="kpi-sub">미발급 ${upc.length-upIssued.length}건</div></div>
       <div class="kpi-card"><div class="kpi-label">계약서 링크</div><div class="kpi-value">${linkCnt('contractUrl')}건</div><div class="kpi-sub">발급 ${issued.length}건 중</div></div>
-      <div class="kpi-card"><div class="kpi-label">유튜브 라이브</div><div class="kpi-value">${linkCnt('youtube')}건</div><div class="kpi-sub">발급 ${issued.length}건 중</div></div>
+      <div class="kpi-card"><div class="kpi-label">유튜브 라이브</div><div class="kpi-value">${issued.filter(r=> liveSet(clientOf(r)||{})).length}건</div><div class="kpi-sub">발급 ${issued.length}건 중</div></div>
       <div class="kpi-card"><div class="kpi-label">축의 현황판 코드</div><div class="kpi-value">${issued.filter(r=> giftSet(clientOf(r)||{})).length}건</div><div class="kpi-sub">발급 ${issued.length}건 중</div></div>
     </div>
     <div class="cu-bar">
@@ -8948,16 +8973,16 @@ function renderCustomerTab(){
       ${upc.length-upIssued.length ? `<button class="btn btn-primary btn-sm" data-cu="bulk">예정 예식 ${upc.length-upIssued.length}건 코드 일괄 발급</button>`:''}
     </div>
     <div class="table-wrap"><div style="overflow-x:auto;"><table class="cu-table">
-      <thead><tr><th>예식일</th><th>계약자</th><th>상품 · 예식장</th><th>접속코드</th><th>계약서</th><th>라이브</th><th>축의현황</th><th>관리</th></tr></thead>
+      <thead><tr><th>예식일시</th><th>계약자</th><th>상품 · 예식장</th><th>접속코드</th><th>계약서</th><th>라이브</th><th>축의현황</th><th>관리</th></tr></thead>
       <tbody>${rows.length? rows.map(r=>{
         const c = clientOf(r) || {}, has = !!c.code, off = c.active===false, open = CUST_STATE.open===r.id;
         const dd = ddayInfo(r.weddingDate);
         return `<tr class="${open?'open':''}">
-          <td>${fmtDate(r.weddingDate)}${dd && dd.diff>=0 ? ` <span class="badge ${dd.diff<=7?'badge-urgent':'badge-normal'}">${dd.label}</span>`:''}</td>
+          <td><span class="cu-when">${fmtDate(r.weddingDate)}${r.weddingTime? ` <b>${esc(r.weddingTime)}</b>`:''}</span>${dd && dd.diff>=0 ? ` <span class="badge ${dd.diff<=7?'badge-urgent':'badge-normal'}">${dd.label}</span>`:''}</td>
           <td><b>${esc(r.clientName)}</b><div class="cu-sub">${esc(r.contractCode||'')}</div></td>
           <td>${esc(r.productType||'-')}<div class="cu-sub">${esc(r.venueName||'')}</div></td>
           <td>${has? `<b class="cu-code ${off?'off':''}">${esc(c.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(c.code)}" title="접속코드 복사">📋</button>${off?'<div class="cu-sub">사용 중지</div>':''}${sideEligible(r)? ['groom','bride'].map(sk=>{ const sd=(c.sides||{})[sk]; return sd&&sd.code? `<div class="cu-sub">${SIDE_LABEL[sk]} <b class="cu-code ${sd.active===false?'off':''}">${esc(sd.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(sd.code)}" title="${SIDE_LABEL[sk]} 접속코드 복사">📋</button></div>` : ''; }).join('') + (!((c.sides||{}).groom||{}).code || !((c.sides||{}).bride||{}).code ? `<div class="cu-sub"><a href="#" data-cu="edit" data-id="${r.id}">+ 신랑·신부 코드</a></div>` : '') : ''}` : `<button class="btn btn-sm btn-primary" data-cu="create" data-id="${r.id}">코드 발급</button>`}</td>
-          <td>${yes(c.contractUrl)}</td><td>${yes(c.youtube)}</td><td>${yes(giftSet(c))}</td>
+          <td>${yes(c.contractUrl)}</td><td>${yes(liveSet(c))}${c.youtubeGroom&&c.youtubeBride?'<div class="cu-sub">신랑·신부</div>':''}</td><td>${yes(giftSet(c))}</td>
           <td class="cu-acts">${has? `<button class="btn btn-sm" data-cu="invite" data-id="${r.id}">초대 문구</button><button class="btn btn-sm" data-cu="preview" data-id="${r.id}">미리보기</button>`:''}<button class="btn btn-sm ${open?'btn-primary':''}" data-cu="edit" data-id="${r.id}">${open?'닫기':'편집'}</button></td>
         </tr>${open? `<tr class="cu-edit"><td colspan="8"><div id="cpTabBox" class="cp-admin" data-rid="${r.id}"></div></td></tr>`:''}`;
       }).join('') : '<tr><td colspan="8" style="padding:26px;text-align:center;color:var(--slate);">해당하는 계약이 없어요</td></tr>'}</tbody>
