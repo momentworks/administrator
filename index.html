@@ -1363,6 +1363,11 @@ body.cp-preview-open{overflow:hidden;}
 .cu-check input{width:16px;height:16px;}
 .cu-when{white-space:nowrap;} .cu-when b{font-weight:700;color:var(--wine,#5C1F29);margin-left:2px;}
 .held-when{white-space:nowrap;} .held-when b{color:var(--wine,#5C1F29);font-weight:700;margin-left:2px;}
+.cp-gd-admin{margin-top:12px;border:1px solid var(--line,#ddd);border-radius:10px;padding:10px 12px;background:#FFFDF8;}
+.cp-gd-admin summary{cursor:pointer;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;}
+.cp-gd-admin[open] summary{margin-bottom:8px;}
+.cp-gd-st{font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px;background:#EEE;color:#777;}
+.cp-gd-st.form{background:#E6EFE6;color:#4F6F52;} .cp-gd-st.admin{background:#F2E7CF;color:#7E5E22;}
 /* ===== 고객 전용 페이지 ===== */
 .cp{--cp-ink:#1F1A1C;--cp-soft:#5E5750;--cp-paper:#F4F1EA;--cp-card:#FFFFFF;--cp-line:#E2DBCD;--cp-wine:#5C1F29;--cp-gold:#A9823C;--cp-gold-s:#F2E7CF;--cp-sage:#4F6F52;--cp-coral:#B0432E;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--cp-ink);background:var(--cp-paper);min-height:100vh;font-variant-numeric:tabular-nums;max-width:640px;margin:0 auto;position:relative;}
@@ -1492,6 +1497,47 @@ body.cp-preview-open{overflow:hidden;}
 .cp-gift-codebox{display:flex;align-items:center;justify-content:center;gap:10px;background:#FAF7F1;border:1px dashed var(--cp-line);border-radius:10px;padding:9px 12px;margin-top:4px;}
 .cp-gift-codebox b{font-size:15px;letter-spacing:.08em;color:var(--cp-wine);}
 .cp-gift-codebox button{border:1px solid var(--cp-line);background:#fff;border-radius:999px;padding:4px 11px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;}
+/* 예식 안내문 · A. 온-비비드 (하객 안내문 생성기와 동일한 A4 원본을 축소해서 표시) */
+.gd-a4wrap{position:relative;width:100%;overflow:hidden;border-radius:6px;box-shadow:0 10px 30px rgba(58,46,38,.14);background:#fff;}
+.gd-a4{--g-ink:#3A2E26;--g-soft:#6F6055;--g-rose:#B8916B;--g-rose-d:#9C7550;--g-line:#E6DCCB;--g-ivory-d:#F3EBE0;--g-groom:#5C7CA6;--g-bride:#C77D86;
+  width:210mm;height:297mm;background:#fff;box-sizing:border-box;padding:5mm;overflow:hidden;transform-origin:top left;position:absolute;top:0;left:0;
+  font-family:'Pretendard','Malgun Gothic',sans-serif;color:var(--g-ink);text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.gd-a4 *{box-sizing:border-box;}
+.gd-a4 .sheet-frame{width:100%;height:100%;border:.7mm double var(--g-rose);border-radius:1.5mm;padding:7mm 4mm 3mm;overflow:hidden;position:relative;display:flex;flex-direction:column;align-items:center;background:radial-gradient(ellipse at top, rgba(184,145,107,.07), transparent 65%);}
+.gd-a4 .sheet-content{display:flex;flex-direction:column;width:100%;flex-shrink:0;transform-origin:top center;}
+.gd-a4 .sheet-mark{text-align:center;}
+.gd-a4 .sheet-mark img{height:16mm;width:auto;margin:0 auto 5.5mm;display:block;}
+.gd-a4 .sheet-couple{text-align:center;font-size:12mm;font-weight:700;color:var(--g-ink);margin-top:2.5mm;line-height:1.25;letter-spacing:.02em;}
+.gd-a4 .sheet-date{text-align:center;font-size:7mm;font-weight:600;color:var(--g-soft);margin-top:5mm;letter-spacing:.3mm;line-height:1.2;}
+.gd-a4 .sheet-hr{width:16mm;height:.4mm;background:var(--g-rose);margin:6mm auto;}
+.gd-a4 .sheet-side-badge{display:block;width:fit-content;margin:0 auto 7mm;font-size:3.4mm;font-weight:700;letter-spacing:.6mm;line-height:1.2;padding:1.6mm 5mm;border-radius:999px;}
+.gd-a4 .sheet-side-badge.groom{background:#EAF0F6;color:var(--g-groom);}
+.gd-a4 .sheet-side-badge.bride{background:#FBEEEF;color:var(--g-bride);}
+.gd-a4 .sheet-rows{display:grid;grid-template-columns:1fr 1fr;gap:9mm;align-content:start;align-items:stretch;}
+.gd-a4 .sheet-row{display:flex;flex-direction:column;align-items:center;text-align:center;border:.4mm solid var(--g-line);border-radius:3.5mm;padding:3.4mm 4mm;background:rgba(250,246,240,.55);}
+.gd-a4 .sheet-row:nth-last-child(1):nth-child(odd){grid-column:1 / -1;}
+.gd-a4 .sheet-icon{width:20mm;height:20mm;border-radius:50%;flex-shrink:0;margin-bottom:2.2mm;display:flex;align-items:center;justify-content:center;box-shadow:0 1mm 2.5mm rgba(58,46,38,.12);}
+.gd-a4 .sheet-icon svg{width:14mm;height:14mm;}
+.gd-a4 .sheet-icon.c-parking{background:#EAF0F6;border:.5mm solid #6E8CAE;color:#4F6E8F;}
+.gd-a4 .sheet-icon.c-atm{background:#EEF3EC;border:.5mm solid #7C9473;color:#587550;}
+.gd-a4 .sheet-icon.c-hall{background:#F7EFE4;border:.5mm solid var(--g-rose);color:var(--g-rose-d);}
+.gd-a4 .sheet-icon.c-bride{background:#FBEEEF;border:.5mm solid #C77D86;color:#A85C66;}
+.gd-a4 .sheet-icon.c-meal{background:#FBF3E0;border:.5mm solid #C79A4B;color:#9C7826;}
+.gd-a4 .sheet-icon.c-child{background:#F3EFF7;border:.5mm solid #9B87B0;color:#7C6797;}
+.gd-a4 .sheet-row-title{font-size:8.5mm;font-weight:700;color:var(--g-ink);margin-bottom:1.7mm;line-height:1.2;letter-spacing:.01em;}
+.gd-a4 .sheet-row-body{font-size:6.5mm;font-weight:500;color:var(--g-soft);line-height:1.35;word-break:keep-all;}
+.gd-a4 .sheet-row-body div + div{margin-top:.8mm;}
+.gd-a4 .sheet-note-box{grid-column:1 / -1;padding:4mm 5mm;background:var(--g-ivory-d);border-radius:3mm;font-size:4.2mm;color:var(--g-ink);line-height:1.4;white-space:pre-line;}
+.gd-a4 .sheet-note-box .nt{font-weight:700;font-size:3.8mm;color:var(--g-rose-d);margin-bottom:1.2mm;letter-spacing:.3mm;}
+.gd-a4 .sheet-footer{margin-top:3mm;padding-top:2.5mm;border-top:.4mm dashed var(--g-line);text-align:center;font-size:4.8mm;font-weight:500;color:var(--g-soft);line-height:1.4;}
+#gdPrint{display:none;}
+@media print{
+  body.gd-printing > *:not(#gdPrint){display:none !important;}
+  body.gd-printing{background:#fff !important;margin:0;}
+  body.gd-printing #gdPrint{display:block !important;}
+  body.gd-printing #gdPrint .gd-a4{position:static;transform:none !important;}
+  @page{size:A4;margin:0;}
+}
 </style>
 </head>
 <body>
@@ -4142,6 +4188,84 @@ function applyPartnerUpdate(db, records, code, op, todayStr){
 }
 
 /* =========================================================
+   예식 안내문 (축의대 운영설정서 '07 하객 안내사항' 기반)
+   - 운영설정서 제출 시 서버로 전달 → referralPay['guide:'+계약id]에 보관
+   - 하객에게 보여줄 6개 항목만 화이트리스트로 저장 · 전화번호/계좌번호 같은 민감정보는 자동 제거
+========================================================= */
+function guideNormalize(input){
+  var FIELDS = [
+    ['parking','주차 정산',['주차정산','주차','주차안내','주차등록','주차권']],
+    ['atm','ATM 위치',['info_atm','atm위치','atm','현금인출기','atm기','atm안내']],
+    ['banquet','연회장 위치',['info_hall','연회장위치','연회장','식당위치','식당','피로연장','식사장소']],
+    ['bridalRoom','신부대기실',['info_bride_room','신부대기실','신부대기실위치','신부대기실안내','대기실']],
+    ['mealTime','식사 가능 시간',['info_meal_time','식사가능시간','식사시간','식사가능','식사안내']],
+    ['childTicket','소인식권',['child_ticket_age','소인식권','소인','어린이식권','소인식권기준','어린이']]
+  ];
+  var key = function(x){ return String(x||'').toLowerCase().replace(/[\s·\-_:()]/g,''); };
+  var clean = function(v){
+    v = String(v===undefined||v===null ? '' : v).replace(/\r/g,'').trim();
+    v = v.replace(/01[016789][\s.\-]?\d{3,4}[\s.\-]?\d{4}/g, '')          // 휴대폰 번호
+         .replace(/\d{2,6}[\s\-]\d{2,6}[\s\-]\d{2,8}([\s\-]\d{1,6})?/g, '')   // 계좌번호 형식
+         .replace(/\d{10,}/g, '')                                         // 긴 숫자열
+         .replace(/[ \t]{2,}/g,' ').trim();
+    return v.slice(0, 120);
+  };
+  input = input || {};
+  var src = input.guide && typeof input.guide==='object' ? input.guide : input;
+  var flat = {};
+  Object.keys(src).forEach(function(k){ flat[key(k)] = src[k]; });
+  // 운영설정서 원본 데이터(MW-DATA): 주차 = 등록 방법(줄마다) + '무료주차 시간'
+  if(src.parking===undefined && (src.info_parking_way || src.info_parking_time)){
+    var pw = String(src.info_parking_way||'').trim(), pt = String(src.info_parking_time||'').trim();
+    flat[key('주차 정산')] = [pw, pt ? '무료주차 '+pt : ''].filter(function(x){ return x; }).join('\n');
+  }
+  var items = {};
+  FIELDS.forEach(function(f){
+    var v = src[f[0]];
+    if(v===undefined){ var c = [f[1]].concat(f[2]); for(var i=0;i<c.length && v===undefined;i++){ if(flat[key(c[i])]!==undefined) v = flat[key(c[i])]; } }
+    v = clean(v); if(v) items[f[0]] = v;
+  });
+  var nm = function(x){ return String(x||'').replace(/[^가-힣a-zA-Z\s]/g,'').trim().slice(0,20); };
+  var pick = function(keys){ for(var i=0;i<keys.length;i++){ if(input[keys[i]]!==undefined && input[keys[i]]!==null && input[keys[i]]!=='') return input[keys[i]]; var f2 = flat[key(keys[i])]; if(f2!==undefined && f2!=='') return f2; } return ''; };
+  var note = function(x){ return clean(x).slice(0, 200); };
+  return {groomName: nm(input.groomName || input.groom_name || input['신랑성함'] || input['신랑 성함'] || input['신랑']), brideName: nm(input.brideName || input.bride_name || input['신부성함'] || input['신부 성함'] || input['신부']),
+    notes: {groom: note(pick(['noteGroom','신랑측 안내','신랑측안내'])), bride: note(pick(['noteBride','신부측 안내','신부측안내']))},
+    items: items, fields: FIELDS.map(function(f){ return {key:f[0], label:f[1]}; })};
+}
+function applySettingsGuide(records, db, payload, trusted){
+  db = db || {}; payload = payload || {};
+  var digits = function(x){ return String(x||'').replace(/\D/g,''); };
+  var ymd = function(x){ var m = String(x||'').match(/(\d{4})\D{0,3}(\d{1,2})\D{0,3}(\d{1,2})/); return m ? m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2) : ''; };
+  var code = String(payload.contractCode||payload['계약코드']||'').trim().toUpperCase();
+  var date = ymd(payload.weddingDate||payload.wedding_date||payload['예식일자']||payload['예식일']);
+  var phone = digits(payload.phone||payload.contact_phone||payload.client_phone||payload.contractor_phone||payload['연락처']);
+  var names = [payload.clientName, payload.groomName, payload.brideName, payload.groom_name, payload.bride_name, payload.client_name, payload.contractor_name, payload['계약자명'], payload['신랑성함'], payload['신부성함']].map(function(x){ return String(x||'').replace(/\s/g,''); }).filter(Boolean);
+  if(!trusted && !date) return {ok:false, error:'예식일이 필요해요'};
+  var all = (records||[]).filter(function(r){ return r && r.type==='contract' && !r.cancelled; });
+  var hit = null;
+  if(code) hit = all.filter(function(r){ return String(r.contractCode||'').trim().toUpperCase()===code; })[0] || null;
+  if(hit && !trusted && date && hit.weddingDate!==date) hit = null;            // 외부 제출: 코드 + 예식일이 맞아야
+  if(!hit && date){
+    var sameDay = all.filter(function(r){ return r.weddingDate===date; });
+    hit = (phone && sameDay.filter(function(r){ return digits(r.phone)===phone; })[0])
+      || null;
+    if(!hit && names.length){ // 성함 + 예식일: 그날 같은 이름의 계약이 하나뿐일 때만
+      var byName = sameDay.filter(function(r){ return names.indexOf(String(r.clientName||'').replace(/\s/g,''))>=0; });
+      if(byName.length===1) hit = byName[0];
+    }
+  }
+  if(!hit) return {ok:false, error:'일치하는 계약을 찾지 못했어요 (계약코드 · 예식일 · 연락처 또는 성함 확인)'};
+  var g = guideNormalize(payload);
+  if(!Object.keys(g.items).length && !g.groomName && !g.brideName) return {ok:false, error:'하객 안내사항 내용이 없어요'};
+  db.referralPay = db.referralPay || {};
+  var k = 'guide:'+hit.id, prev = db.referralPay[k] || {};
+  db.referralPay[k] = {groomName: g.groomName || prev.groomName || '', brideName: g.brideName || prev.brideName || '', items: g.items,
+    notes: {groom: g.notes.groom || '', bride: g.notes.bride || ''},
+    source: trusted==='admin' ? 'admin' : 'form', key: hit.contractCode ? 'C:'+hit.contractCode : '', updatedAt: new Date().toISOString(), submittedAt: new Date().toISOString()};
+  return {ok:true, db:db, recordId: hit.id, contractCode: hit.contractCode||'', items: Object.keys(g.items).length};
+}
+
+/* =========================================================
    고객 전용 페이지 (계약자별 접속코드)
    - 고객 설정은 파트너 데이터의 referralPay['client:'+계약id]에 보관 {code, youtube, giftCode, giftUrl(구버전), contractUrl, memo}
    - 서버(Apps Script)와 관리 페이지 미리보기가 똑같이 사용 → 자기완결형
@@ -4232,6 +4356,19 @@ function buildCustomerView(records, db, code, todayStr, withFile){
     referral: {code: myCode, unit: UNIT, rows: refRows, total: refRows.length, discountCount: discountCnt, paybackCount: paybackCnt,
       discountAmount: discountCnt*UNIT, paybackAmount: paybackCnt*UNIT, paybackPaid: Math.min(paybackPaid, paybackCnt*UNIT)},
     info: {home: s.customerHomeUrl || 'https://momentworks.github.io/momentworks.kr/', notice: s.customerNotice || '', settingsFormUrl: s.settingsFormUrl || '', kakao: s.customerKakaoUrl || 'https://pf.kakao.com/_FbIfX/chat', phone: s.reportPhone || '010-5730-0614', memo: [client.memo||'', (side && side.memo)||''].filter(function(x){ return x; }).join('\n')},
+    guide: (function(){
+      var gd = rp['guide:'+r.id] || null;
+      if(!gd || !gd.items) return null;
+      var labels = guideNormalize({}).fields, items = [];
+      labels.forEach(function(f){ if(gd.items[f.key]) items.push({key:f.key, label:f.label, value:gd.items[f.key]}); });
+      if(!items.length) return null;
+      var sides = [], nt = gd.notes || {};
+      if(gd.groomName) sides.push({key:'groom', label:'신랑', en:'GROOM SIDE · 신랑측', name: gd.groomName, note: nt.groom || ''});
+      if(gd.brideName) sides.push({key:'bride', label:'신부', en:'BRIDE SIDE · 신부측', name: gd.brideName, note: nt.bride || ''});
+      if(sideKey==='groom') sides = sides.filter(function(x){ return x.key==='groom'; });
+      if(sideKey==='bride') sides = sides.filter(function(x){ return x.key==='bride'; });
+      return {sides: sides, items: items, updatedAt: gd.updatedAt||''};
+    })(),
     generatedAt: new Date().toISOString(),
     _file: withFile ? String(client.contractUrl||'').trim() : undefined
   };
@@ -7019,6 +7156,18 @@ function doPost(e) {
       return json_({ ok: true, view: buildPartnerView(contractRecordsCached_(), res.db, req.code, today_()) });
     }
 
+    // 축의대 운영설정서 → 예식 안내문 (07 하객 안내사항). 관리자 키가 있으면 신뢰, 없으면 계약코드/연락처 + 예식일 일치 필요
+    if (p.action === 'settingsGuide') {
+      if (tooManyFails_()) return json_({ ok: false, error: '시도가 너무 많아요. 10분 뒤 다시 시도해주세요' });
+      var gp = JSON.parse(body || '{}');
+      var trusted = !!(p.key && adminKey_() && p.key === adminKey_());
+      var gdb = readJson_(PARTNER_SHEET, {});
+      var gr = applySettingsGuide(contractRecordsCached_(), gdb, gp, trusted);
+      if (!gr.ok) { addFail_(); return json_(gr); }
+      writeRaw_(PARTNER_SHEET, JSON.stringify(gr.db));
+      return json_({ ok: true, contractCode: gr.contractCode, items: gr.items });
+    }
+
     if (!authorized_(p)) return json_({ ok: false, error: '관리자 키가 올바르지 않습니다' });
 
     // 관리자: 파트너 데이터 저장 (v6: 바뀐 항목만 / 이전: 문서 전체)
@@ -7705,7 +7854,7 @@ function toEarlyBird_(v) {
 `;
 function buildAppsScriptV2(){
   const core = MW_GAS_CORE;;
-  return core + [pvDefaultSettings, pvDefaultWorkflow, pvDefaultMessages, buildPartnerView, applyPartnerUpdate, buildCustomerView].map(f=> f.toString()).join('\n\n') + '\n';
+  return core + [pvDefaultSettings, pvDefaultWorkflow, pvDefaultMessages, buildPartnerView, applyPartnerUpdate, guideNormalize, applySettingsGuide, buildCustomerView].map(f=> f.toString()).join('\n\n') + '\n';
 }
 (function initServerScriptBox(){
   const ta = document.getElementById('appsScriptCode');
@@ -8404,7 +8553,7 @@ function renderSettlePicker(){
 ================================================================================================ */
 const CustomerPortal = (function(){
   const WD = ['일','월','화','수','목','금','토'];
-  let root=null, view=null, H={}, busy=false, giftOpen=false, navOn=null, liveSel=0;
+  let root=null, view=null, H={}, busy=false, giftOpen=false, navOn=null, liveSel=0, guideSel=0;
   const SVG = d=> `<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   const ICON_REFRESH = SVG('<path d="M20 11a8 8 0 1 0-2.34 5.66"/><path d="M20 4v7h-7"/>');
   const ICON_LOGOUT = SVG('<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4"/><path d="M19 12H9"/>');
@@ -8598,6 +8747,71 @@ const CustomerPortal = (function(){
     </section>`;
   }
   let giftCodeOpen = false;
+  /* ---------- 예식 안내문 (운영설정서 07 하객 안내사항) ---------- */
+  const GI = { // A. 온-비비드 (하객 안내문 생성기와 같은 아이콘 · 색)
+    parking: ['c-parking','<path d="M4.5 15.5l1.4-5A2 2 0 017.8 9h8.4a2 2 0 011.9 1.5l1.4 5"/><rect x="3.2" y="15.5" width="17.6" height="4.2" rx="1.4"/><circle cx="7.5" cy="19.7" r="1.3"/><circle cx="16.5" cy="19.7" r="1.3"/>'],
+    atm: ['c-atm','<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10.5h18"/><path d="M6.5 15h4"/>'],
+    banquet: ['c-hall','<path d="M12 21s7-7.4 7-12.2A7 7 0 105 8.8C5 13.6 12 21 12 21z"/><circle cx="12" cy="8.8" r="2.6"/>'],
+    bridalRoom: ['c-bride','<rect x="5.5" y="3" width="13" height="18" rx="1.2"/><circle cx="14.5" cy="12" r="1"/>'],
+    mealTime: ['c-meal','<path d="M7 3v6.5a1.6 1.6 0 003.2 0V3M8.6 9.5V21"/><path d="M16.5 3c-1.4 0-2.4 2-2.4 4.4S15.1 12 16.5 12M16.5 3v18"/>'],
+    childTicket: ['c-child','<path d="M3 9.5a2 2 0 012-2h14a2 2 0 012 2 1.5 1.5 0 000 5 2 2 0 01-2 2H5a2 2 0 01-2-2 1.5 1.5 0 000-5z"/><path d="M9.5 7.5v9" stroke-dasharray="1.6 1.8"/>']
+  };
+  function guideSheetHTML(sd, items){
+    const logo = typeof MW_LOGO_FULL!=='undefined' ? MW_LOGO_FULL : (typeof MW_LOGO_MARK!=='undefined' ? MW_LOGO_MARK : '');
+    const rows = items.map(it=>{ const c = GI[it.key] || GI.banquet;
+      return `<div class="sheet-row"><div class="sheet-icon ${c[0]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${c[1]}</svg></div><div class="sheet-row-title">${e(it.label)}</div><div class="sheet-row-body">${String(it.value||'').split('\n').map(x=>x.trim()).filter(Boolean).map(x=>`<div>${e(x)}</div>`).join('')}</div></div>`; }).join('');
+    const note = sd.note ? `<div class="sheet-note-box"><div class="nt">${e(sd.label||'')}측 안내</div>${e(sd.note)}</div>` : '';
+    return `<div class="gd-a4 tpl-a"><div class="sheet-frame"><div class="sheet-content">
+      ${logo? `<div class="sheet-mark"><img src="${logo}" alt="Moment Works"></div>` : ''}
+      <div class="sheet-couple">${sd.label && sd.name ? e(sd.label)+' '+e(sd.name) : sd.name ? e(sd.name) : '결혼을 진심으로 축하합니다'}</div>
+      <div class="sheet-hr"></div>
+      ${sd.en? `<div class="sheet-side-badge ${sd.key}">${e(sd.en)}</div>` : ''}
+      <div class="sheet-rows">${rows}${note}</div>
+      <div class="sheet-footer">궁금하신 점은 언제든 축의대 데스크로 편하게 말씀해 주세요.<br>참석해 주셔서 진심으로 감사드립니다.</div>
+    </div></div></div>`;
+  }
+  // A4(210×297mm) 원본 그대로 만들고 화면 폭에 맞춰 축소 · 내용이 넘치면 자동 축소
+  function fitGuide(){
+    if(!root) return;
+    root.querySelectorAll('.gd-a4wrap').forEach(wrap=>{
+      const sheet = wrap.querySelector('.gd-a4'); if(!sheet) return;
+      const content = sheet.querySelector('.sheet-content'), frame = sheet.querySelector('.sheet-frame');
+      if(content && frame){ content.style.zoom = '1'; const cs = getComputedStyle(frame); const room = frame.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+        if(content.scrollHeight > room && room>0) content.style.zoom = String(Math.max(0.55, room / content.scrollHeight)); }
+      sheet.style.transform = 'none';
+      const w = sheet.offsetWidth, h = sheet.offsetHeight, sc = Math.min(1, (wrap.clientWidth || w) / w);
+      sheet.style.transform = `scale(${sc})`; wrap.style.height = (h*sc) + 'px';
+    });
+  }
+  if(typeof window!=='undefined' && !window.__gdFit){ window.__gdFit = true; window.addEventListener('resize', ()=> fitGuide()); }
+  function guideHTML(){
+    const g = view.guide;
+    if(!g || !g.items || !g.items.length){
+      const f = view.info && view.info.settingsFormUrl;
+      return `<section class="cp-card" id="cp-guide"><h2>📋 예식 안내문</h2>
+        <div class="cp-empty">축의대 운영설정서를 제출하시면<br><b>하객 안내사항</b>으로 예식 안내문이 자동으로 만들어져요 ✨</div>
+        ${f && !view.wedding.settingsSubmitted ? `<a class="cp-btn primary wide" href="${e(f)}" target="_blank" rel="noopener">📝 운영설정서 작성하기</a>` : ''}
+      </section>`;
+    }
+    const sides = g.sides.length ? g.sides : [{key:'', label:'', en:'', name: view.client.contractName||view.client.name, note:''}];
+    if(guideSel >= sides.length) guideSel = 0;
+    const sd = sides[guideSel];
+    const tabs = sides.length>1 ? `<div class="cp-live-tabs">${sides.map((x,i)=>`<button class="${i===guideSel?'on':''}" data-cp="guideSel" data-v="${i}">${x.key==='bride'?'👰':'🤵'} ${e(x.label)}측 안내문</button>`).join('')}</div>` : '';
+    setTimeout(fitGuide, 0);
+    return `<section class="cp-card" id="cp-guide"><h2>📋 예식 안내문</h2>
+      <p class="cp-desc">운영설정서의 <b>하객 안내사항</b>으로 만든 축의대 안내문이에요. 예식 당일 축의대에 비치되고, 하객분들께 미리 공유하실 수도 있어요.</p>
+      ${tabs}
+      <div class="gd-a4wrap" id="gdSheet">${guideSheetHTML(sd, g.items)}</div>
+      <div class="cp-row2" style="margin-top:12px;"><button class="cp-btn primary" data-cp="guideShare">📤 안내문 공유하기</button><button class="cp-btn ghost" data-cp="guidePrint">🖨 PDF로 저장</button></div>
+    </section>`;
+  }
+  function guideText(){
+    const g = view.guide; if(!g) return '';
+    const sides = g.sides.length ? g.sides : [{label:'', name: view.client.contractName||view.client.name}];
+    const sd = sides[guideSel] || sides[0], w = view.wedding;
+    return [`💐 ${sd.label? sd.label+' ' : ''}${sd.name} 결혼식 안내`, `📅 ${fdate(w.date, true)} ${w.time||''}`, w.venue ? `📍 ${w.venue} ${w.hall||''}`.trim() : '', '',
+      ...g.items.map(it=> `▪️ ${it.label}: ${it.value}`), '', '참석해 주셔서 진심으로 감사드립니다 🙏'].filter((x,i,a)=> x!=='' || a[i-1]!=='').join('\n');
+  }
   function giftHTML(){
     const l = view.live || {};
     const u = l.giftUrl || 'https://momentworks.github.io/arrange/', code = l.giftCode || '';
@@ -8685,7 +8899,7 @@ const CustomerPortal = (function(){
   }
   function render(){
     if(!root || !view) return;
-    const nav = [['cp-wedding','예식'],['cp-contract','계약'],['cp-live','라이브'],['cp-gift','축의현황'],['cp-ref','짝꿍코드'],['cp-rec','추천하기']];
+    const nav = [['cp-wedding','예식'],['cp-guide','안내문'],['cp-contract','계약'],['cp-live','라이브'],['cp-gift','축의현황'],['cp-ref','짝꿍코드'],['cp-rec','추천하기']];
     const up = view.generatedAt ? new Date(view.generatedAt) : new Date();
     root.innerHTML = `<div class="cp">
       ${busy? '<div class="cp-busy"></div>':''}
@@ -8707,6 +8921,7 @@ const CustomerPortal = (function(){
         ${noticeHTML()}
         ${alarmHTML()}
         ${weddingHTML()}
+        ${guideHTML()}
         ${contractHTML()}
         ${liveHTML()}
         ${giftHTML()}
@@ -8740,6 +8955,15 @@ const CustomerPortal = (function(){
       return;
     }
     if(a==='contractDownload'){ downloadDoc(el); return; }
+    if(a==='guideSel'){ guideSel = Number(el.dataset.v)||0; render(); const t=document.getElementById('cp-guide'); if(t) t.scrollIntoView({block:'start'}); return; }
+    if(a==='guideShare'){ const text = guideText(); if(navigator.share){ try{ await navigator.share({title:'결혼식 안내', text}); }catch(_){} } else if(await copyText(text)) toast('안내문을 복사했어요 · 카톡에 붙여넣어 보내주세요'); return; }
+    if(a==='guidePrint'){
+      const sh = document.getElementById('gdSheet'); if(!sh) return;
+      let pr = document.getElementById('gdPrint'); if(pr) pr.remove();
+      pr = document.createElement('div'); pr.id = 'gdPrint'; const a4 = sh.querySelector('.gd-a4').cloneNode(true); a4.style.transform = 'none'; pr.appendChild(a4); document.body.appendChild(pr);
+      document.body.classList.add('gd-printing');
+      const done = ()=>{ document.body.classList.remove('gd-printing'); const x = document.getElementById('gdPrint'); if(x) x.remove(); window.removeEventListener('afterprint', done); };
+      window.addEventListener('afterprint', done); setTimeout(()=>{ window.print(); setTimeout(done, 2000); }, 60); return; }
     if(a==='giftCode'){ giftCodeOpen = !giftCodeOpen; render(); return; }
     if(a==='copyGift'){ if(await copyText(view.live.giftCode)) toast('현황판 코드를 복사했어요'); return; }
     if(a==='shareGift'){
@@ -8913,6 +9137,7 @@ function renderClientBox(rec, boxEl){
         <label>이 고객에게만 보이는 안내<textarea data-cpf="memo" rows="2" placeholder="예: 예식 당일 12시까지 축의대 앞에서 뵐게요">${esc(c.memo||'')}</textarea></label>
       </div>
       ${sidesHTML(rec, c)}
+      ${guideAdminHTML(rec)}
       <div class="cp-admin-foot">${c.contractUrl? '<button type="button" class="btn btn-sm" data-cpa="filecheck">📥 계약서 다운로드 점검</button>' : ''}<button type="button" class="btn btn-sm btn-ghost" data-cpa="regen">코드 재발급</button><button type="button" class="btn btn-sm btn-ghost ${off?'':'btn-danger'}" data-cpa="toggle">${off? '다시 사용' : '사용 중지'}</button>
         ${String(pSet().customerUrl||'').trim()? '' : '<span class="cp-admin-warn">파트너스 → 분리 운영 · 설정에서 고객 페이지 주소를 넣으면 초대 문구에 링크가 함께 들어가요</span>'}</div>`;
   }
@@ -8938,6 +9163,10 @@ function renderClientBox(rec, boxEl){
     renderClientBox(rec, box); custTabRefresh();
   }));
   box.querySelectorAll('[data-cps]').forEach(inp=> inp.addEventListener('change', async ()=>{ await saveSide(rec, inp.dataset.cps, {[inp.dataset.f]: inp.value.trim()}, '저장했어요'); custTabRefresh(); }));
+  box.querySelectorAll('[data-cpg]').forEach(inp=> inp.addEventListener('change', async ()=>{ const f = inp.dataset.cpg, v = inp.value.trim();
+    const patch = (f==='groomName'||f==='brideName') ? {[f]: v} : f.startsWith('n:') ? {notes: {[f.slice(2)]: v}} : {items: {[f]: v}};
+    await saveGuide(rec, patch); const g = guideOf(rec)||{};
+    inp.value = f.startsWith('n:') ? ((g.notes||{})[f.slice(2)]||'') : (f==='groomName'||f==='brideName') ? (g[f]||'') : ((g.items||{})[f]||''); custTabRefresh(); }));
   box.querySelectorAll('[data-cpf]').forEach(inp=> inp.addEventListener('change', async ()=>{ const f = inp.dataset.cpf, patch = {[f]: inp.value.trim()}; if(f==='youtubeGroom' || f==='youtubeBride') patch.youtube = ''; // 양측: 신랑 · 신부 라이브로 나눠 보관
     await saveClient(rec, patch, '고객 페이지에 반영했어요'); if(inp.dataset.cpf==='contractUrl') renderClientBox(rec, box); custTabRefresh(); }));
 }
@@ -8955,6 +9184,102 @@ function openCustomerPreview(code){
 }
 
 /* ---------- 분리 운영 · 설정: 고객 페이지 ---------- */
+/* ---------- 예식 안내문 (운영설정서 07 하객 안내사항) ---------- */
+function guideOf(rec){ const rp = ensurePdb().referralPay || {}; return rp['guide:'+rec.id] || null; }
+function guideAdminHTML(rec){
+  const g = guideOf(rec) || {}, it = g.items || {}, F = guideNormalize({}).fields;
+  const when = g.updatedAt ? new Date(g.updatedAt) : null;
+  const st = !g.updatedAt ? '<span class="cp-gd-st none">아직 없음 · 운영설정서가 제출되면 자동으로 채워져요</span>'
+    : `<span class="cp-gd-st ${g.source==='form'?'form':'admin'}">${g.source==='form'?'📝 운영설정서 연동':'✏️ 직접 입력'} · ${when.getMonth()+1}/${when.getDate()} ${String(when.getHours()).padStart(2,'0')}:${String(when.getMinutes()).padStart(2,'0')}</span>`;
+  return `<details class="cp-gd-admin" ${g.updatedAt?'':'open'}><summary><b>📋 예식 안내문</b> ${st}</summary>
+    <div class="cp-admin-grid">
+      <label>🤵 신랑 성함<input data-cpg="groomName" value="${esc(g.groomName||'')}" placeholder="예: 김철수"></label>
+      <label>👰 신부 성함<input data-cpg="brideName" value="${esc(g.brideName||'')}" placeholder="예: 이영희"></label>
+
+      ${F.map(f=>`<label>${esc(f.label)}<input data-cpg="${f.key}" value="${esc(it[f.key]||'')}" placeholder="${esc({parking:'예: 운동장 내 무료주차 (16시까지 출차)',atm:'예: 인근 GS25 ATM기 이용(도보 5분)',banquet:'예: 본당 옆',bridalRoom:'예: 본당과 연회장 중앙 통로',mealTime:'예: 예식 30분 전',childTicket:'예: 해당없음 (7세 이하 무료)'}[f.key]||'')}"></label>`).join('')}
+      <label>신랑측 추가 안내 <span class="cp-admin-hint">신랑측 안내문에만</span><input data-cpg="n:groom" value="${esc((g.notes||{}).groom||'')}" placeholder="예: 답례품은 축의대에서 드려요"></label>
+      <label>신부측 추가 안내 <span class="cp-admin-hint">신부측 안내문에만</span><input data-cpg="n:bride" value="${esc((g.notes||{}).bride||'')}" placeholder=""></label>
+    </div>
+    <div class="cp-admin-hint" style="margin-top:6px;">전화번호 · 계좌번호 같은 민감한 정보는 저장할 때 자동으로 빠져요. 고객 페이지 · 하객 공유에는 위 항목만 보여요.</div>
+  </details>`;
+}
+async function saveGuide(rec, patch){
+  const db = ensurePdb(); db.referralPay = db.referralPay || {};
+  const k = 'guide:'+rec.id, prev = db.referralPay[k] || {};
+  const merged = Object.assign({}, prev.items||{}, patch.items||{});
+  const notes = Object.assign({}, prev.notes||{}, patch.notes||{});
+  const n = guideNormalize(Object.assign({groomName: patch.groomName!==undefined ? patch.groomName : prev.groomName, brideName: patch.brideName!==undefined ? patch.brideName : prev.brideName, guide: merged,
+    noteGroom: notes.groom||'', noteBride: notes.bride||''}));
+  Object.keys(patch.items||{}).forEach(key=>{ if(!patch.items[key]) delete n.items[key]; });
+  db.referralPay[k] = {groomName: n.groomName, brideName: n.brideName, items: n.items, notes: n.notes, source:'admin', key: recordKey(rec), updatedAt: new Date().toISOString(), submittedAt: prev.submittedAt||''};
+  pDirty.referral.add(k); showToast('예식 안내문을 저장했어요'); await savePartnerDb();
+}
+function settingsGuideSnippet(){
+  const url = (typeof SERVER_URL!=='undefined' && SERVER_URL) || '여기에_통합관리_서버주소(…/exec)';
+  const key = (typeof ADMIN_KEY!=='undefined' && ADMIN_KEY) || '';
+  return `/* =====================================================================
+   모먼트웍스 통합관리 연동 : 축의대 운영설정서 → 고객페이지 「예식 안내문」
+   ---------------------------------------------------------------------
+   [1] 이 코드 전체를 운영설정서 Apps Script 프로젝트에 새 파일로 추가 (또는 맨 아래에 붙여넣기)
+   [2] 운영설정서 doPost(e) 안, PDF 저장 · 메일 발송 코드 바로 뒤에 아래 한 줄 추가
+         sendGuideToMomentWorks(e);
+   [3] 저장 → 배포 관리 → 새 버전으로 배포  (처음 한 번 '외부 서비스 연결' 권한 허용)
+   ---------------------------------------------------------------------
+   · 운영설정서가 보내는 원본 데이터(groom_name · bride_name · wedding_date · info_parking_way ·
+     info_parking_time · info_atm · info_hall · info_bride_room · info_meal_time · child_ticket_age)를
+     자동으로 찾아서 '07 하객 안내사항'만 보냅니다. 계좌 · 연락처 등 나머지 정보는 보내지 않아요.
+   · 계약 찾기: 예식일 + 신랑/신부 성함(= 계약자명) · 계약코드나 연락처가 있으면 함께 사용
+   · 연동이 실패해도 운영설정서 제출은 그대로 진행돼요 (로그만 남김)
+===================================================================== */
+var MW_SERVER_URL = '${url}';
+var MW_ADMIN_KEY  = '${key}';
+
+function sendGuideToMomentWorks(input) {
+  try {
+    var d = mwFindSettingsData_(input);
+    if (!d) { Logger.log('모먼트웍스 연동: 운영설정서 데이터를 찾지 못했어요'); return { ok: false, error: '운영설정서 데이터를 찾지 못했어요' }; }
+    var pick = ['groom_name', 'bride_name', 'contractor_name', 'wedding_date', 'contract_code', 'contractCode', 'phone', 'client_phone', 'contact_phone', 'contractor_phone',
+                'info_parking_way', 'info_parking_time', 'info_atm', 'info_hall', 'info_bride_room', 'info_meal_time', 'child_ticket_age',
+                'note_groom', 'note_bride'];
+    var body = {};
+    pick.forEach(function (k) { if (d[k] !== undefined && d[k] !== null && d[k] !== '') body[k] = d[k]; });
+    if (body.note_groom) { body.noteGroom = body.note_groom; delete body.note_groom; }
+    if (body.note_bride) { body.noteBride = body.note_bride; delete body.note_bride; }
+    var url = MW_SERVER_URL + '?action=settingsGuide' + (MW_ADMIN_KEY ? '&key=' + encodeURIComponent(MW_ADMIN_KEY) : '');
+    var res = UrlFetchApp.fetch(url, { method: 'post', contentType: 'text/plain;charset=utf-8', payload: JSON.stringify(body), muteHttpExceptions: true, followRedirects: true });
+    Logger.log('모먼트웍스 안내문 연동: ' + res.getContentText());
+    try { return JSON.parse(res.getContentText()); } catch (e3) { return { ok: false, error: '서버 응답을 읽지 못했어요' }; }
+  } catch (err) { Logger.log('모먼트웍스 안내문 연동 실패: ' + err); return { ok: false, error: String(err && err.message || err) }; }
+}
+
+/* doPost의 e · JSON 문자열 · 객체 어디에 있든 운영설정서 입력값(groom_name / info_* 가 있는 객체)을 찾아요 */
+function mwFindSettingsData_(x, depth) {
+  depth = depth || 0;
+  if (x === null || x === undefined || depth > 5) return null;
+  if (typeof x === 'string') {
+    var t = x.trim();
+    if (t.charAt(0) === '{' || t.charAt(0) === '[') { try { return mwFindSettingsData_(JSON.parse(t), depth + 1); } catch (e) { return null; } }
+    if (t.indexOf('--MW-DATA-START--') >= 0) { // PDF 숨은 데이터 블록
+      var m = t.match(/--MW-DATA-START--([\\s\\S]*?)--MW-DATA-END--/);
+      if (m) { try { return mwFindSettingsData_(Utilities.newBlob(Utilities.base64Decode(m[1].replace(/\\s+/g, ''))).getDataAsString('UTF-8'), depth + 1); } catch (e2) {} }
+    }
+    return null;
+  }
+  if (typeof x !== 'object') return null;
+  if (x.postData && x.postData.contents) { var r0 = mwFindSettingsData_(x.postData.contents, depth + 1); if (r0) return r0; }
+  if (x.parameter && (x.parameter.groom_name || x.parameter.info_atm)) return x.parameter;
+  if (x.groom_name !== undefined || x.bride_name !== undefined || x.info_atm !== undefined || x.info_hall !== undefined || x.info_meal_time !== undefined) return x;
+  for (var k in x) { if (x.hasOwnProperty(k) && x[k] && (typeof x[k] === 'object' || typeof x[k] === 'string')) { var r = mwFindSettingsData_(x[k], depth + 1); if (r) return r; } }
+  return null;
+}
+
+/* 연결 테스트: 편집기에서 실행 → 실행 로그에 {"ok":true ...} 가 나오면 성공 (예식일 · 성함을 실제 계약으로 바꿔서 실행) */
+function testSendGuideToMomentWorks() {
+  sendGuideToMomentWorks({ groom_name: '김철수', bride_name: '이영희', wedding_date: '2026-10-17',
+    info_parking_way: '운동장 내 무료주차', info_parking_time: '2시간', info_atm: '인근 GS25 ATM기 이용(도보 5분)',
+    info_hall: '본당 옆', info_bride_room: '본당과 연회장 중앙 통로', info_meal_time: '예식 30분 전', child_ticket_age: '해당없음 (7세 이하 무료)' });
+}`;
+}
 function customerSettingsHTML(){
   const s = pSet();
   const n = allClientCodes().length;
@@ -8969,6 +9294,9 @@ function customerSettingsHTML(){
       <div class="form-field"><label>모먼트웍스 홈페이지 <span class="hint">고객 페이지 메뉴 · 추천 글에 들어가요</span></label><input data-act="setText" data-key="customerHomeUrl" value="${esc(s.customerHomeUrl||'')}" placeholder="https://momentworks.github.io/momentworks.kr/"></div>
       <div class="form-field"><label>고객 문의 카카오톡 <span class="hint">비우면 모먼트웍스 공식 채널</span></label><input data-act="setText" data-key="customerKakaoUrl" value="${esc(s.customerKakaoUrl||'')}" placeholder="https://pf.kakao.com/_FbIfX/chat"></div>
       <div class="form-field"><label>모든 고객에게 보이는 안내문</label><textarea data-act="setText" data-key="customerNotice" rows="3" placeholder="예: 예식 1주일 전까지 운영 설정서를 제출해주세요.">${esc(s.customerNotice||'')}</textarea></div>
+      <div class="form-field"><label>📋 운영설정서 → 예식 안내문 연동 코드 <span class="hint">운영설정서 Apps Script에 붙여넣으면 제출 즉시 고객페이지에 안내문이 생겨요</span></label>
+        <textarea readonly rows="6" class="mono" id="cpGuideSnippet" style="font-size:11px;">${esc(settingsGuideSnippet())}</textarea>
+        <button type="button" class="btn btn-sm" data-cu="copySnippet" style="margin-top:6px;">연동 코드 복사</button></div>
     </div>
   </div>`;
 }
@@ -9039,6 +9367,7 @@ document.addEventListener('click', async (ev)=>{
   if(el.tagName==='A') ev.preventDefault();
   const a = el.dataset.cu, rec = el.dataset.id ? recordById(el.dataset.id) : null;
   if(a==='create' && rec){ await saveClient(rec, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}, `${rec.clientName}님 코드를 발급했어요`); CUST_STATE.open = rec.id; renderCustomerTab(); return; }
+  if(a==='copySnippet'){ copyText(settingsGuideSnippet(), '연동 코드를 복사했어요 · 운영설정서 Apps Script에 붙여넣어 주세요'); return; }
   if(a==='copy'){ ev.preventDefault(); copyText(el.dataset.code, `접속코드 ${el.dataset.code} 를 복사했어요`); return; }
   if(a==='invite' && rec){ copyText(customerInviteText(rec, clientOf(rec)), `${rec.clientName}님 초대 문구를 복사했어요`); return; }
   if(a==='preview' && rec){ openCustomerPreview(clientOf(rec).code); return; }
