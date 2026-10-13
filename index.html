@@ -1379,6 +1379,24 @@ body.cp-preview-open{overflow:hidden;}
 .cp-gd-pdf{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;font-size:11.5px;color:var(--slate,#777);}
 .cu-gimport-why{font-size:12px;color:#8A4B35;margin:3px 0 6px;} .cu-gimport-pick{margin-left:0;}
 .cp-gd-admin textarea{font-weight:400;color:var(--ink,#222);width:100%;resize:vertical;min-height:52px;font:inherit;font-size:13px;line-height:1.5;padding:7px 9px;border:1px solid var(--line,#ddd);border-radius:7px;}
+.cu-gprog{margin-top:10px;background:#fff;border:1px solid var(--line,#ddd);border-radius:10px;padding:10px 12px;}
+.cu-gprog-top{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap;}
+.cu-gprog-top .pct{font-size:16px;color:var(--wine,#5C1F29);margin-left:4px;}
+.cu-gprog-top span{font-size:12px;color:var(--slate,#777);}
+.cu-gprog-bar{height:10px;background:#EFEAE0;border-radius:999px;overflow:hidden;margin-top:8px;}
+.cu-gprog-bar i{display:block;height:100%;background:linear-gradient(90deg,#B8916B,#5C1F29);border-radius:999px;transition:width .25s ease;}
+.cu-gprog.done .cu-gprog-bar i{background:#4F7A52;}
+.cu-gprog-cur{font-size:11.5px;color:var(--slate,#888);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+label.btn.disabled{opacity:.5;pointer-events:none;}
+.cu-gimport-fold{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;color:var(--slate,#666);} .cu-gimport-fold span{flex:1;} .cu-gimport-fold b{color:#A6542F;}
+html,body{overflow-anchor:none;}
+/* 고객 페이지 편집: 한 번에 저장 */
+.cp-savebar{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:8px;margin:12px -2px 4px;padding:10px 12px;border-radius:12px;background:var(--paper,#fff);border:1px solid var(--line,#e3e3e8);box-shadow:0 -2px 10px rgba(0,0,0,.04);}
+.cp-savebar .cp-save-st{flex:1;font-size:13px;color:var(--slate,#7a7a85);}
+.cp-savebar.on{border-color:#f0b44c;background:#fff8ea;box-shadow:0 -4px 16px rgba(240,160,40,.18);}
+.cp-savebar.on .cp-save-st b{color:#b86e00;}
+.cp-savebar .btn-primary:disabled{opacity:.45;cursor:not-allowed;}
+.cp-admin .cp-changed{border-color:#f0b44c !important;background:#fffaf0 !important;box-shadow:0 0 0 2px rgba(240,180,76,.18);}
 /* ===== 고객 전용 페이지 ===== */
 .cp{--cp-ink:#1F1A1C;--cp-soft:#5E5750;--cp-paper:#F4F1EA;--cp-card:#FFFFFF;--cp-line:#E2DBCD;--cp-wine:#5C1F29;--cp-gold:#A9823C;--cp-gold-s:#F2E7CF;--cp-sage:#4F6F52;--cp-coral:#B0432E;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--cp-ink);background:var(--cp-paper);min-height:100vh;font-variant-numeric:tabular-nums;max-width:640px;margin:0 auto;position:relative;}
@@ -5428,6 +5446,7 @@ function autoSyncBlocked(){
   const login = document.getElementById('loginOverlay'); if(login && getComputedStyle(login).display!=='none') return true;  // 로그인 전
   if(document.body.classList.contains('portal-open')) return true;           // 파트너 화면 보는 중
   if(document.querySelector('.overlay.active')) return true;               // 계약 편집 · 설정 창이 열려 있음
+  if(document.querySelector('.cp-admin[data-dirty]')) return true;         // 고객 페이지 정보 저장 전
   const ae = document.activeElement;
   if(ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) return true;       // 입력 중
   return false;
@@ -5438,9 +5457,7 @@ async function quietSync(force){
   try{
     await _recSaveChain.catch(()=>{}); await _pSaveChain.catch(()=>{});   // 저장이 끝난 뒤에 받아오기
     if(!force && autoSyncBlocked()) return;
-    const scrollY = window.scrollY;
-    await loadRecords();
-    window.scrollTo(0, scrollY);
+    await loadRecords();   // 화면 위치는 다시 그릴 때(renderAll) 그 순간의 위치를 그대로 유지
   }catch(e){ /* 조용히 무시 · 다음 주기에 다시 */ }
   finally{ _autoSyncBusy = false; }
 }
@@ -9150,11 +9167,13 @@ function renderClientBox(rec, boxEl){
       </div>
       ${sidesHTML(rec, c)}
       ${guideAdminHTML(rec)}
+      <div class="cp-savebar" data-cpsavebar><span class="cp-save-st" data-cpst>변경사항 없음</span><button type="button" class="btn btn-sm btn-ghost" data-cpsave="revert" disabled>되돌리기</button><button type="button" class="btn btn-sm btn-primary" data-cpsave="save" disabled>💾 저장</button></div>
       <div class="cp-admin-foot">${c.contractUrl? '<button type="button" class="btn btn-sm" data-cpa="filecheck">📥 계약서 다운로드 점검</button>' : ''}<button type="button" class="btn btn-sm btn-ghost" data-cpa="regen">코드 재발급</button><button type="button" class="btn btn-sm btn-ghost ${off?'':'btn-danger'}" data-cpa="toggle">${off? '다시 사용' : '사용 중지'}</button>
         ${String(pSet().customerUrl||'').trim()? '' : '<span class="cp-admin-warn">파트너스 → 분리 운영 · 설정에서 고객 페이지 주소를 넣으면 초대 문구에 링크가 함께 들어가요</span>'}</div>`;
   }
   box.querySelectorAll('[data-cpa]').forEach(b=> b.addEventListener('click', async ()=>{
     const a = b.dataset.cpa, cur = clientOf(rec)||{};
+    if(['create','regen','toggle'].includes(a) && !(await cpResolveDirty(rec, box))) return;
     if(a==='create'){ await saveClient(rec, {code: genClientCode(), active:true, createdAt: new Date().toISOString()}, '고객 접속코드를 만들었어요'); renderClientBox(rec, box); custTabRefresh(); return; }
     if(a==='invite'){ copyText(customerInviteText(rec, cur), '초대 문구를 복사했어요 · 고객님께 카톡으로 보내주세요'); return; }
     if(a==='preview'){ openCustomerPreview(cur.code); return; }
@@ -9164,7 +9183,9 @@ function renderClientBox(rec, boxEl){
     if(a==='toggle'){ await saveClient(rec, {active: cur.active===false}, cur.active===false? '고객 페이지를 다시 열었어요' : '고객 페이지 접속을 중지했어요'); renderClientBox(rec, box); custTabRefresh(); return; }
   }));
   box.querySelectorAll('[data-cpsa]').forEach(b=> b.addEventListener('click', async ()=>{
-    const a = b.dataset.cpsa, sk = b.dataset.sk, cur = clientOf(rec)||{}, sd = (cur.sides||{})[sk] || {};
+    const a = b.dataset.cpsa, sk = b.dataset.sk;
+    if(['both','create','regen','toggle'].includes(a) && !(await cpResolveDirty(rec, box))) return;
+    const cur = clientOf(rec)||{}, sd = (cur.sides||{})[sk] || {};
     if(a==='both'){ const sides = Object.assign({}, cur.sides||{}); ['groom','bride'].forEach(k=>{ sides[k] = Object.assign({}, sides[k]||{}, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}); }); await saveClient(rec, {sides}, '신랑 · 신부 코드를 발급했어요'); }
     if(a==='create'){ await saveSide(rec, sk, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}, `${SIDE_LABEL[sk]} 코드를 발급했어요`); }
     if(a==='invite'){ copyText(sideInviteText(rec, sk, sd), `${SIDE_LABEL[sk]} 초대 문구를 복사했어요`); return; }
@@ -9174,10 +9195,10 @@ function renderClientBox(rec, boxEl){
     if(a==='toggle'){ await saveSide(rec, sk, {active: sd.active===false}, sd.active===false? '다시 사용해요' : '접속을 중지했어요'); }
     renderClientBox(rec, box); custTabRefresh();
   }));
-  box.querySelectorAll('[data-cps]').forEach(inp=> inp.addEventListener('change', async ()=>{ await saveSide(rec, inp.dataset.cps, {[inp.dataset.f]: inp.value.trim()}, '저장했어요'); custTabRefresh(); }));
   box.querySelectorAll('details[data-gdrid]').forEach(d=> d.addEventListener('toggle', ()=>{ if(d.open) GUIDE_OPEN.add(d.dataset.gdrid); else GUIDE_OPEN.delete(d.dataset.gdrid); }));
   box.querySelectorAll('[data-cpgpdf]').forEach(inp=> inp.addEventListener('change', async ()=>{
     const f = inp.files && inp.files[0]; inp.value = ''; if(!f) return;
+    if(!(await cpResolveDirty(rec, box))) return;
     showToast('설정서를 읽는 중이에요…');
     try{
       const r = await importSettingsPdf(f, rec.id);
@@ -9185,12 +9206,74 @@ function renderClientBox(rec, boxEl){
       else alert('❌ ' + r.error);
     }catch(err){ alert('설정서를 읽지 못했어요: ' + (err.message||err)); }
   }));
-  box.querySelectorAll('[data-cpg]').forEach(inp=> inp.addEventListener('change', async ()=>{ const f = inp.dataset.cpg, v = inp.value.trim();
-    const patch = (f==='groomName'||f==='brideName') ? {[f]: v} : f.startsWith('n:') ? {notes: {[f.slice(2)]: v}} : {items: {[f]: v}};
-    await saveGuide(rec, patch); const g = guideOf(rec)||{};
-    inp.value = f.startsWith('n:') ? ((g.notes||{})[f.slice(2)]||'') : (f==='groomName'||f==='brideName') ? (g[f]||'') : ((g.items||{})[f]||''); custTabRefresh(); }));
-  box.querySelectorAll('[data-cpf]').forEach(inp=> inp.addEventListener('change', async ()=>{ const f = inp.dataset.cpf, patch = {[f]: inp.value.trim()}; if(f==='youtubeGroom' || f==='youtubeBride') patch.youtube = ''; // 양측: 신랑 · 신부 라이브로 나눠 보관
-    await saveClient(rec, patch, '고객 페이지에 반영했어요'); if(inp.dataset.cpf==='contractUrl') renderClientBox(rec, box); custTabRefresh(); }));
+  /* 입력은 바로 저장하지 않고, [💾 저장]을 눌러 한 번에 저장 */
+  const fields = ()=> [...box.querySelectorAll('[data-cpf],[data-cps],[data-cpg]')];
+  const refresh = ()=>{
+    const all = fields(), ch = all.filter(f=> f.value !== f.defaultValue);
+    all.forEach(f=> f.classList.toggle('cp-changed', f.value !== f.defaultValue));
+    if(ch.length) box.dataset.dirty = '1'; else delete box.dataset.dirty;
+    const st = box.querySelector('[data-cpst]'); if(st) st.innerHTML = ch.length ? `<b>저장하지 않은 변경사항 ${ch.length}개</b>` : '변경사항 없음';
+    box.querySelectorAll('[data-cpsave]').forEach(b=> b.disabled = !ch.length);
+    const bar = box.querySelector('[data-cpsavebar]'); if(bar) bar.classList.toggle('on', !!ch.length);
+  };
+  fields().forEach(f=>{
+    f.addEventListener('input', refresh); f.addEventListener('change', refresh);
+    if(f.tagName==='INPUT') f.addEventListener('keydown', e=>{ if(e.key==='Enter') e.preventDefault(); });
+    f.addEventListener('keydown', e=>{ if((e.ctrlKey||e.metaKey) && (e.key==='s'||e.key==='S')){ e.preventDefault(); saveClientBoxAll(rec, box); } });
+  });
+  box.querySelectorAll('[data-cpsave]').forEach(b=> b.addEventListener('click', async ()=>{
+    if(b.dataset.cpsave==='revert'){ if(!confirm('저장하지 않은 변경사항을 지우고 원래대로 되돌릴까요?')) return; fields().forEach(f=> f.value = f.defaultValue); refresh(); return; }
+    await saveClientBoxAll(rec, box);
+  }));
+  refresh();
+}
+/* 고객 박스 전체 저장: 계약서 · 라이브 · 현황판 코드 · 안내 · 신랑/신부 · 예식 안내문을 한 번에 */
+function cpBoxChanges(box){ return box ? [...box.querySelectorAll('[data-cpf],[data-cps],[data-cpg]')].filter(f=> f.value !== f.defaultValue) : []; }
+function cpDirtyBox(){ return document.querySelector('.cp-admin[data-dirty]'); }
+async function saveClientBoxAll(rec, box, opt){
+  opt = opt || {};
+  const changed = cpBoxChanges(box); if(!changed.length) return false;
+  const btn = box.querySelector('[data-cpsave="save"]'); if(btn){ btn.disabled = true; btn.textContent = '저장 중…'; }
+  const db = ensurePdb(); db.referralPay = db.referralPay || {};
+  const has = sel=> changed.some(f=> f.matches(sel));
+  const val = sel=> { const el = box.querySelector(sel); return el ? el.value.trim() : ''; };
+  if(has('[data-cpf],[data-cps]')){
+    const cur = clientOf(rec) || {}, patch = {};
+    changed.filter(f=> f.dataset.cpf).forEach(f=> patch[f.dataset.cpf] = f.value.trim());
+    if(has('[data-cpf="youtubeGroom"],[data-cpf="youtubeBride"]')){ // 양측: 신랑 · 신부 라이브로 나눠 보관
+      patch.youtubeGroom = val('[data-cpf="youtubeGroom"]'); patch.youtubeBride = val('[data-cpf="youtubeBride"]'); patch.youtube = '';
+    }
+    const sideCh = changed.filter(f=> f.dataset.cps);
+    if(sideCh.length){
+      const sides = Object.assign({}, cur.sides||{}), now = new Date().toISOString();
+      sideCh.forEach(f=>{ const sk = f.dataset.cps; sides[sk] = Object.assign({}, sides[sk]||{}, {[f.dataset.f]: f.value.trim(), updatedAt: now}); });
+      patch.sides = sides;
+    }
+    const k = clientKey(rec);
+    db.referralPay[k] = Object.assign({}, db.referralPay[k]||{}, patch, {key: recordKey(rec), updatedAt: new Date().toISOString()});
+    pDirty.referral.add(k);
+  }
+  if(has('[data-cpg]')){
+    const gp = {items:{}, notes:{}};
+    box.querySelectorAll('[data-cpg]').forEach(f=>{ const n = f.dataset.cpg, v = f.value.trim();
+      if(n==='groomName'||n==='brideName') gp[n] = v; else if(n.startsWith('n:')) gp.notes[n.slice(2)] = v; else gp.items[n] = v; });
+    applyGuidePatch(rec, gp);
+  }
+  changed.forEach(f=> f.defaultValue = f.value);   // 저장한 값이 새 기준값
+  delete box.dataset.dirty;
+  try{ await savePartnerDb(); }
+  finally{ if(btn) btn.textContent = '💾 저장'; }
+  if(!opt.silent) showToast(`💾 고객 페이지 정보를 저장했어요 (${changed.length}개 항목)`);
+  if(opt.noRender) return true;
+  if(document.body.contains(box)) renderClientBox(recordById(rec.id) || rec, box);
+  custTabRefresh();
+  return true;
+}
+/* 저장 안 한 내용이 있을 때 다른 동작(코드 발급 · PDF 불러오기 · 닫기) 전에 물어보기 · false면 그 동작을 멈춤 */
+async function cpResolveDirty(rec, box){
+  if(!box || !cpBoxChanges(box).length) return true;
+  if(confirm('저장하지 않은 고객 페이지 변경사항이 있어요.\n\n[확인] 저장하고 계속\n[취소] 돌아가서 계속 편집')){ await saveClientBoxAll(rec, box, {noRender:true}); return true; }
+  return false;
 }
 new MutationObserver(injectClientBox).observe(document.getElementById('modalBody'), {childList:true, subtree:true});
 
@@ -9227,7 +9310,8 @@ function guideAdminHTML(rec){
     <div class="cp-admin-hint" style="margin-top:6px;">칸 안에서 <b>Enter</b>로 줄을 나누면 안내문에도 줄이 나뉘어 보여요 · 전화번호 · 계좌번호 같은 민감한 정보는 저장할 때 자동으로 빠져요. 고객 페이지 · 하객 공유에는 위 항목만 보여요.</div>
   </details>`;
 }
-async function saveGuide(rec, patch){
+async function saveGuide(rec, patch){ applyGuidePatch(rec, patch); showToast('예식 안내문을 저장했어요'); await savePartnerDb(); }
+function applyGuidePatch(rec, patch){
   const db = ensurePdb(); db.referralPay = db.referralPay || {};
   const k = 'guide:'+rec.id, prev = db.referralPay[k] || {};
   const merged = Object.assign({}, prev.items||{}, patch.items||{});
@@ -9236,10 +9320,13 @@ async function saveGuide(rec, patch){
     noteGroom: notes.groom||'', noteBride: notes.bride||''}));
   Object.keys(patch.items||{}).forEach(key=>{ if(!patch.items[key]) delete n.items[key]; });
   db.referralPay[k] = {groomName: n.groomName, brideName: n.brideName, items: n.items, notes: n.notes, source:'admin', key: recordKey(rec), updatedAt: new Date().toISOString(), submittedAt: prev.submittedAt||''};
-  pDirty.referral.add(k); showToast('예식 안내문을 저장했어요'); await savePartnerDb();
+  pDirty.referral.add(k); return k;
 }
 /* ---------- 이미 제출된 축의대 설정서 PDF → 예식 안내문 (pdf.js · 브라우저에서만 읽음) ---------- */
 let GUIDE_IMPORT = []; // 일괄 불러오기 결과
+let GUIDE_PROG = null;   // {total, done, ok, current, saving}
+let GUIDE_FOLD = false;  // 완료 후 결과 접기
+const GUIDE_MAX = 100;   // 한 번에 불러올 수 있는 설정서 수
 function loadPdfJs(){
   if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
   if(loadPdfJs._p) return loadPdfJs._p;
@@ -9311,7 +9398,7 @@ function matchContractFor(date, names){
   if(hits.length>1) return {ok:false, error:`같은 날 같은 이름의 계약이 ${hits.length}건이에요 · 직접 선택해주세요`, cands: hits};
   return {ok:false, error: date ? `${date} 예식 중 ${want.join(' · ')||'해당'} 이름의 계약이 없어요` : '예식일 · 성함으로 계약을 찾지 못했어요', cands: pool};
 }
-async function importSettingsPdf(file, recordId){
+async function importSettingsPdf(file, recordId, opt){
   const fi = settingsFileInfo(file.name);
   let found = null;
   try{ found = settingsDataFromText(await pdfToText(file)); }catch(e){ found = null; }
@@ -9328,15 +9415,32 @@ async function importSettingsPdf(file, recordId){
   if(!rec){ const m = matchContractFor(date, names); if(!m.ok) return Object.assign({ok:false, error: m.error, candIds: (m.cands||[]).map(r=>r.id)}, info); rec = m.rec; }
   const r = applySettingsGuide(RECORDS, ensurePdb(), Object.assign({}, payload, {recordId: rec.id}), 'pdf');
   if(!r.ok) return Object.assign({ok:false, error: r.error}, info);
-  pDirty.referral.add('guide:'+r.recordId); await savePartnerDb();
+  pDirty.referral.add('guide:'+r.recordId); if(!(opt && opt.noSave)) await savePartnerDb();
   return Object.assign({ok:true, recordId: r.recordId, items: r.items}, info);
 }
+function guideProgHTML(){
+  const g = GUIDE_PROG, pct = g.total ? Math.round(g.done / g.total * 100) : 0;
+  return `<div class="cu-gprog ${g.finished?'done':''}" id="cuGProg">
+    <div class="cu-gprog-top"><b>${g.finished ? '✅ 완료' : g.saving ? '💾 서버에 저장 중…' : '⏳ 불러오는 중…'} <span class="pct">${pct}%</span></b>
+      <span>${g.done} / ${g.total}개 · 연결 ${g.ok}개${g.done-g.ok? ` · 확인 필요 ${g.done-g.ok}개`:''}</span></div>
+    <div class="cu-gprog-bar"><i style="width:${pct}%"></i></div>
+    ${!g.finished && g.current ? `<div class="cu-gprog-cur">${esc(g.current)}</div>` : ''}
+  </div>`;
+}
+function updateGuideProg(){ const el = document.getElementById('cuGProg'); if(el && GUIDE_PROG) el.outerHTML = guideProgHTML(); }
 function guideImportHTML(){
   const done = activeContracts().filter(r=> guideOf(r)).length;
   return `<div class="cu-gimport">
     <div class="cu-gimport-h"><b>📋 설정서 PDF로 예식 안내문 불러오기</b><span>이미 제출된 축의대 설정서 PDF를 한 번에 여러 개 올리면, 예식일 · 성함으로 계약을 찾아 안내문을 자동으로 채워요 · 안내문 등록 ${done}건</span>
-      <label class="btn btn-sm btn-primary">PDF 선택 (여러 개 가능)<input type="file" accept="application/pdf" multiple data-cu="gimport" hidden></label></div>
-    ${GUIDE_IMPORT.length? `<div class="cu-gimport-list">${GUIDE_IMPORT.map((x,i)=>{
+      <label class="btn btn-sm btn-primary ${GUIDE_PROG && !GUIDE_PROG.finished ? 'disabled' : ''}">PDF 선택 (한 번에 최대 ${GUIDE_MAX}개)<input type="file" accept="application/pdf" multiple data-cu="gimport" hidden ${GUIDE_PROG && !GUIDE_PROG.finished ? 'disabled' : ''}></label></div>
+    ${(()=>{ const busy = GUIDE_PROG && !GUIDE_PROG.finished, has = GUIDE_PROG || GUIDE_IMPORT.length;
+      if(!has) return '';
+      const pending = GUIDE_IMPORT.filter(x=> !x.ok && !x.busy).length;
+      const bar = busy ? '' : `<div class="cu-gimport-fold"><span>${GUIDE_PROG ? `최근 불러오기 ${GUIDE_PROG.total}개 · 연결 ${GUIDE_IMPORT.filter(x=>x.ok).length}개${pending? ` · <b>확인 필요 ${pending}개</b>`:''}` : ''}</span>
+        <button type="button" class="btn btn-sm" data-cu="gfold">${GUIDE_FOLD ? '펼치기 ▼' : '접기 ▲'}</button>${GUIDE_FOLD ? '' : '<button type="button" class="btn btn-sm btn-ghost" data-cu="gclear">결과 지우기</button>'}</div>`;
+      return bar + (GUIDE_FOLD && !busy ? '' : (GUIDE_PROG ? guideProgHTML() : ''));
+    })()}
+    ${GUIDE_IMPORT.length && !(GUIDE_FOLD && !(GUIDE_PROG && !GUIDE_PROG.finished))? `<div class="cu-gimport-list">${GUIDE_IMPORT.map((x,i)=>{
       const rec = x.recordId ? recordById(x.recordId) : null;
       if(x.busy) return `<div class="busy">⏳ ${esc(x.file)} 읽는 중…</div>`;
       if(x.ok) return `<div class="ok">✅ <b>${esc(rec? rec.clientName : '')}</b> ${rec? fmtDate(rec.weddingDate):''} · 안내 항목 ${x.items}개 <small>${esc(x.file)} · ${esc(x.via)}</small></div>`;
@@ -9455,6 +9559,7 @@ function renderCustomerTab(){
   const sec = document.getElementById('tab-customers'); const root = document.getElementById('custTabRoot');
   if(!sec || !root || !sec.classList.contains('active') || !PDB) return;
   if(root.contains(document.activeElement) && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) && document.activeElement.type!=='file') return; // 입력 · 선택 중에는 다시 그리지 않음
+  const keep = root.querySelector('#cpTabBox[data-dirty]');   // 저장 안 한 편집 칸은 다시 그려도 그대로 유지
   const t = todayStr();
   const upc = activeContracts().filter(r=> r.weddingDate && r.weddingDate >= t);
   const issued = activeContracts().filter(r=>{ const c = clientOf(r); return c && c.code; });
@@ -9494,13 +9599,17 @@ function renderCustomerTab(){
       }).join('') : '<tr><td colspan="9" style="padding:26px;text-align:center;color:var(--slate);">해당하는 계약이 없어요</td></tr>'}</tbody>
     </table></div></div>
     ${customerSettingsHTML()}`;
-  if(CUST_STATE.open){ const rec = recordById(CUST_STATE.open); if(rec) renderClientBox(rec, document.getElementById('cpTabBox')); }
+  if(CUST_STATE.open){ const nb = document.getElementById('cpTabBox');
+    if(keep && nb && keep.dataset.rid===CUST_STATE.open) nb.replaceWith(keep);
+    else { const rec = recordById(CUST_STATE.open); if(rec) renderClientBox(rec, nb); } }
 }
 document.addEventListener('click', async (ev)=>{
   const el = ev.target.closest('#custTabRoot [data-cu]'); if(!el || el.tagName==='SELECT' || el.tagName==='INPUT') return;
   if(el.tagName==='A') ev.preventDefault();
   const a = el.dataset.cu, rec = el.dataset.id ? recordById(el.dataset.id) : null;
   if(a==='create' && rec){ await saveClient(rec, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}, `${rec.clientName}님 코드를 발급했어요`); CUST_STATE.open = rec.id; renderCustomerTab(); return; }
+  if(a==='gfold'){ GUIDE_FOLD = !GUIDE_FOLD; renderCustomerTab(); return; }
+  if(a==='gclear'){ if(GUIDE_IMPORT.some(x=> !x.ok && !x.busy) && !confirm('확인이 필요한 설정서가 남아 있어요. 결과를 지울까요?')) return; GUIDE_IMPORT = []; GUIDE_PROG = null; GUIDE_FOLD = false; renderCustomerTab(); return; }
   if(a==='gassign'){
     const i = Number(el.dataset.gi), x = GUIDE_IMPORT[i], sel = document.querySelector(`#custTabRoot select[data-gi="${i}"]`);
     if(!x || !x.payload || !sel || !sel.value){ showToast('적용할 계약을 선택해주세요'); return; }
@@ -9513,7 +9622,10 @@ document.addEventListener('click', async (ev)=>{
   if(a==='copy'){ ev.preventDefault(); copyText(el.dataset.code, `접속코드 ${el.dataset.code} 를 복사했어요`); return; }
   if(a==='invite' && rec){ copyText(customerInviteText(rec, clientOf(rec)), `${rec.clientName}님 초대 문구를 복사했어요`); return; }
   if(a==='preview' && rec){ openCustomerPreview(clientOf(rec).code); return; }
-  if(a==='edit' && rec){ CUST_STATE.open = CUST_STATE.open===rec.id ? null : rec.id; renderCustomerTab(); return; }
+  if(a==='edit' && rec){ const ob = document.getElementById('cpTabBox'), orec = ob && recordById(ob.dataset.rid);
+    if(ob && orec && !(await cpResolveDirty(orec, ob))) return;
+    if(ob) delete ob.dataset.dirty;
+    CUST_STATE.open = CUST_STATE.open===rec.id ? null : rec.id; renderCustomerTab(); return; }
   if(a==='bulk'){
     const t = todayStr(); const list = activeContracts().filter(r=> r.weddingDate && r.weddingDate>=t && !((clientOf(r)||{}).code));
     if(!list.length || !confirm(`예정 예식 ${list.length}건에 고객 코드를 한 번에 발급할까요?`)) return;
@@ -9529,14 +9641,23 @@ document.addEventListener('change', async (ev)=>{
   if(st){ pSet()[st.dataset.key] = st.value.trim(); pDirty.settings = true; showToast('고객 페이지 설정을 저장했어요'); await savePartnerDb(); return; }
   const el = ev.target.closest('#custTabRoot [data-cu]'); if(!el) return;
   if(el.dataset.cu==='gimport'){
-    const files = [...(el.files||[])]; el.value = ''; if(!files.length) return;
-    GUIDE_IMPORT = files.map(f=>({file:f.name, busy:true})); renderCustomerTab();
+    let files = [...(el.files||[])].filter(f=> /\.pdf$/i.test(f.name) || f.type==='application/pdf'); el.value = ''; if(!files.length) return;
+    if(GUIDE_PROG && !GUIDE_PROG.finished){ showToast('이전 불러오기가 끝난 뒤 다시 선택해주세요'); return; }
+    if(files.length > GUIDE_MAX){ alert(`한 번에 최대 ${GUIDE_MAX}개까지 불러올 수 있어요.\n앞의 ${GUIDE_MAX}개만 먼저 불러오고, 나머지는 끝난 뒤 다시 선택해주세요.`); files = files.slice(0, GUIDE_MAX); }
+    GUIDE_IMPORT = files.map(f=>({file:f.name, busy:true})); GUIDE_FOLD = false;
+    GUIDE_PROG = {total: files.length, done: 0, ok: 0, current: files[0].name, finished: false, saving: false};
+    renderCustomerTab();
     for(let i=0;i<files.length;i++){
-      try{ GUIDE_IMPORT[i] = await importSettingsPdf(files[i]); GUIDE_IMPORT[i]._f = files[i]; }
+      GUIDE_PROG.current = `${i+1}번째 · ${files[i].name}`; updateGuideProg();
+      try{ GUIDE_IMPORT[i] = await importSettingsPdf(files[i], null, {noSave:true}); }
       catch(err){ GUIDE_IMPORT[i] = {ok:false, file:files[i].name, error: err.message||String(err)}; }
-      renderCustomerTab();
+      GUIDE_PROG.done = i+1; GUIDE_PROG.ok = GUIDE_IMPORT.filter(x=>x.ok).length; updateGuideProg();
+      if((i+1) % 10 === 0 && i+1 < files.length) renderCustomerTab(); // 결과 목록은 10개마다 새로 그림
     }
-    const okN = GUIDE_IMPORT.filter(x=>x.ok).length; showToast(`설정서 ${files.length}개 중 ${okN}개 안내문을 불러왔어요`); return;
+    GUIDE_PROG.saving = true; updateGuideProg();
+    try{ await savePartnerDb(); }catch(e){}
+    GUIDE_PROG.saving = false; GUIDE_PROG.finished = true; renderCustomerTab();
+    showToast(`설정서 ${files.length}개 중 ${GUIDE_PROG.ok}개 안내문을 불러왔어요`); return;
   }
   if(el.dataset.cu==='filter'){ CUST_STATE.filter = el.value; CUST_STATE.open = null; renderCustomerTab(); }
 });
@@ -9545,6 +9666,46 @@ document.addEventListener('input', (ev)=>{
   CUST_STATE.q = el.value; clearTimeout(renderCustomerTab._t);
   renderCustomerTab._t = setTimeout(()=>{ const pos = el.selectionStart; el.blur(); renderCustomerTab(); const n = document.querySelector('#custTabRoot [data-cu="q"]'); if(n){ n.focus(); try{ n.setSelectionRange(pos,pos); }catch(_){} } }, 250);
 });
+
+/* ---------- 자동 업데이트(다시 그리기) 때 화면 위치 유지 ----------
+   서버에서 받아오는 동안 사용자가 스크롤해도, 다시 그리는 그 순간의 위치를 기억했다가 그대로 되돌림 */
+(function keepScrollOnRender(){
+  if(typeof renderAll!=='function' || renderAll.__keepScroll) return;
+  const orig = renderAll;
+  const wrapped = function(){
+    const x = window.scrollX, y = window.scrollY;
+    const ov = document.querySelector('.overlay.active'), ovTop = ov ? ov.scrollTop : 0;
+    const boxes = [...document.querySelectorAll('.section.active [id]')].filter(el=> el.scrollTop>0 || el.scrollLeft>0).map(el=> [el.id, el.scrollTop, el.scrollLeft]);
+    const r = orig.apply(this, arguments);
+    const restore = ()=>{
+      if(Math.abs(window.scrollY - y) > 1 || Math.abs(window.scrollX - x) > 1) window.scrollTo(x, y);
+      if(ov && document.body.contains(ov) && ov.scrollTop !== ovTop) ov.scrollTop = ovTop;
+      boxes.forEach(([id, t, l])=>{ const el = document.getElementById(id); if(el){ el.scrollTop = t; el.scrollLeft = l; } });
+    };
+    restore(); requestAnimationFrame(restore);
+    return r;
+  };
+  wrapped.__keepScroll = true;
+  try{ renderAll = wrapped; }catch(e){}
+})();
+
+/* ---------- 저장 안 한 고객 페이지 편집 보호 ---------- */
+(function guardClientBox(){
+  const modalBox = ()=>{ const b = document.getElementById('cpAdminBox'); return b && b.dataset.dirty ? b : null; };
+  const recOfBox = b=> b.id==='cpAdminBox' ? (typeof editingId!=='undefined' && editingId ? recordById(editingId) : null) : recordById(b.dataset.rid);
+  // 계약 창 [저장]: 고객 페이지 칸의 변경사항도 함께 저장
+  const sb = document.getElementById('saveBtn');
+  if(sb) sb.addEventListener('click', ()=>{ const b = modalBox(), r = b && recOfBox(b); if(r) saveClientBoxAll(r, b, {noRender:true}); }, true);
+  // 계약 창 닫기 · 취소 · 바깥 클릭
+  const stopIfDirty = e=>{ const b = modalBox(); if(!b) return;
+    if(e.type==='click' && e.currentTarget.classList && e.currentTarget.classList.contains('overlay') && e.target!==e.currentTarget) return;
+    const r = recOfBox(b);
+    if(confirm('저장하지 않은 고객 페이지 변경사항이 있어요.\n\n[확인] 저장하고 닫기\n[취소] 돌아가서 계속 편집')){ if(r) saveClientBoxAll(r, b, {noRender:true}); }
+    else { e.stopImmediatePropagation(); e.preventDefault(); } };
+  ['modalClose','cancelBtn'].forEach(id=>{ const el = document.getElementById(id); if(el) el.addEventListener('click', stopIfDirty, true); });
+  const ov = document.getElementById('modalBody') && document.getElementById('modalBody').closest('.overlay'); if(ov) ov.addEventListener('click', stopIfDirty, true);
+  window.addEventListener('beforeunload', e=>{ if(cpDirtyBox()){ e.preventDefault(); e.returnValue = ''; } });
+})();
 
 /* ---------- 로그인 ---------- */
 const LOGIN_ID_STORAGE = 'mw_saved_login_id';
