@@ -4028,14 +4028,14 @@ function pvDefaultWorkflow(){
     {id:'w01', title:'출발 보고 (대표)', when:'예식장 출발할 때', at:null, detail:'예식장으로 출발하면서 출발 보고를 카카오톡 톡방에 공유해요.', msgs:['m_depart']},
     {id:'w02', title:'예식장 도착', at:-90, detail:'예식 시작 1시간 30분 전까지 도착해요. 도착하면 현장 도착 체크인을 눌러주세요.', checkin:true},
     {id:'w03', title:'도착 보고 (대표)', at:-90, detail:'예식장에 도착하면 도착 보고를 카카오톡 톡방에 공유해요.', msgs:['m_arrive']},
-    {id:'w04', title:'예식장 전경 · 내부 사진 촬영', at:-85, photo:true, detail:'예식장 외부 전경과 로비·홀 내부를 촬영해요.'},
-    {id:'w05', title:'빈 축의대 사진 촬영', at:-80, photo:true, detail:'셋팅 전 빈 축의대를 촬영해요.'},
-    {id:'w06', title:'식권전달자 연락 · 식권 수령', at:-80, detail:'파트너 안내카드에 적힌 식권전달자 분께 연락해 식권을 수령하고, 수령 보고를 카카오톡 톡방에 공유해요.', msgs:['m_ticket']},
-    {id:'w07', title:'축의대 셋팅', at:-75, detail:'방명록, 노트북, 필기구, 고무줄, 축의봉투함, 클립 등 기본 셋팅을 해요.'},
-    {id:'w08', title:'동영상 촬영 셋팅', at:-60, detail:'예식 1시간 전부터 동영상 촬영을 시작해요. 녹화 중인지 꼭 확인!'},
-    {id:'w09', title:'식권 실수량 카운팅', at:-55, detail:'받은 식권을 대인 · 소인으로 나눠 실수량을 세고, 수량을 입력해 카카오톡 톡방에 보고해요.', msgs:['m_ticketcount']},
-    {id:'w10', title:'화환 · 웨딩포토존 사진 촬영', at:-50, photo:true, detail:'화환과 웨딩포토존을 촬영해요.'},
-    {id:'w11', title:'축의대 운영 시작', at:-45, detail:'하객 맞이를 시작해요. 밝은 인사와 함께 방명록·축의금 접수를 안내해요.'},
+    {id:'w04', title:'예식장 전경 · 내부 사진 촬영', at:-88, photo:true, detail:'예식장 외부 전경과 로비·홀 내부를 촬영해요.'},
+    {id:'w05', title:'빈 축의대 사진 촬영', at:-84, photo:true, detail:'셋팅 전 빈 축의대를 촬영해요.'},
+    {id:'w06', title:'식권전달자 연락 · 식권 수령', at:-84, detail:'파트너 안내카드에 적힌 식권전달자 분께 연락해 식권을 수령하고, 수령 보고를 카카오톡 톡방에 공유해요.', msgs:['m_ticket']},
+    {id:'w07', title:'축의대 셋팅', at:-80, detail:'방명록, 노트북, 필기구, 고무줄, 축의봉투함, 클립 등 기본 셋팅을 해요.'},
+    {id:'w08', title:'동영상 촬영 셋팅', at:-72, detail:'축의대 운영을 시작하기 전에 동영상 촬영을 시작해요. 녹화 중인지 꼭 확인!'},
+    {id:'w09', title:'식권 실수량 카운팅', at:-68, detail:'받은 식권을 대인 · 소인으로 나눠 실수량을 세고, 수량을 입력해 카카오톡 톡방에 보고해요.', msgs:['m_ticketcount']},
+    {id:'w10', title:'화환 · 웨딩포토존 사진 촬영', at:-64, photo:true, detail:'화환과 웨딩포토존을 촬영해요.'},
+    {id:'w11', title:'축의대 운영 시작', at:-60, detail:'하객 맞이를 시작해요. 밝은 인사와 함께 방명록·축의금 접수를 안내해요.'},
     {id:'w12', title:'A · B조 역할에 따라 운영', at:null, when:'운영 중', detail:'A조·B조 역할에 맞춰 운영해요. 역할은 대표 안내(전달사항)를 확인해주세요.'},
     {id:'w13', title:'중간 특이사항 보고', at:null, when:'운영 중 수시로', detail:'특이사항이 생기면 카카오톡 톡방에 바로 보고해요. 아래 "특이사항 보고" 양식을 이용하세요.', msgs:['m_mid'], report:true},
     {id:'w14', title:'축의대 마감', at:null, when:'하객 입장 마무리 후', detail:'하객 접수가 끝나면 축의대를 마감해요.'},
@@ -5153,6 +5153,15 @@ function normalizePdb(db){
     if(Array.isArray(db.settings.msgTemplates) && !db.settings.msgTemplates.some(m=> m.id==='m_ticketcount')) db.settings.msgTemplates.splice(2, 0, JSON.parse(JSON.stringify(dm)));
     if(Array.isArray(db.settings.workflow)){ const st = db.settings.workflow.find(x=> x.id==='w09'); if(st && !(st.msgs||[]).length){ st.msgs = ['m_ticketcount']; st.detail = pvDefaultWorkflow().find(x=>x.id==='w09').detail; } }
     db.settings.msgModel = 3; pdbMigrated = true;
+  }
+  if(Number(db.settings.wfModel||1) < 2){ // 축의대 운영 시작 = 예식 60분 전 (앞 업무 간격 조정 · 직접 고치지 않은 순서에만 적용)
+    if(Array.isArray(db.settings.workflow)){
+      const OLD = {w04:-85,w05:-80,w06:-80,w07:-75,w08:-60,w09:-55,w10:-50,w11:-45}, wf = db.settings.workflow;
+      if(Object.keys(OLD).every(id=>{ const st = wf.find(x=>x.id===id); return st && Number(st.at)===OLD[id]; })){
+        const nd = pvDefaultWorkflow(); Object.keys(OLD).forEach(id=>{ const st = wf.find(x=>x.id===id), d = nd.find(x=>x.id===id); st.at = d.at; if(id==='w08') st.detail = d.detail; });
+      }
+    }
+    db.settings.wfModel = 2; pdbMigrated = true;
   }
   if(Number(db.settings.slotModel||1) < 3){
     db.settings.slotsByProduct = Object.assign({}, db.settings.slotsByProduct, {'양측':4, '한측':2}); db.settings.slotModel = 3; pdbMigrated = true;
@@ -8768,11 +8777,11 @@ const CustomerPortal = (function(){
           <div class="ic">📺</div><b>${e(view.client.contractName||view.client.name)}님 결혼식<br>유튜브 라이브</b>${liveStart()? `<span>⏰ ${fdate(view.wedding.date)} ${liveStart()}부터 시청 가능</span>`:''}
           <em>▶ 유튜브에서 라이브 보기</em></a>
         <button class="cp-btn primary wide" data-cp="shareLive">🔗 라이브 링크 공유하기</button>
-        <p class="cp-note">⏰ 유튜브 라이브는 <b>예식 당일 1시간 전${liveStart()? `(${liveStart()})`:''}부터</b> 중계가 시작돼요.<br>🔗 라이브 링크를 공유하면 오시지 못하는 분들도 예식을 함께 보실 수 있어요 💐</p>`
+        <p class="cp-note">⏰ 유튜브 라이브는 <b>예식 당일 1시간 전${liveStart()? `(${liveStart()})`:''}부터</b> 중계가 시작돼요.<br>🔗 라이브 링크를 공유하면 축의대 라이브 영상을 함께 보실 수 있어요 💐</p>`
         : (n!==null && n<0 ? `<div class="cp-empty">라이브 영상이 등록되지 않았어요</div>`
           : `<div class="cp-live-wait"><div class="ic">📺</div><b>유튜브 라이브는 예식 당일<br>1시간 전부터 중계가 시작돼요</b>${liveStart()? `<span>⏰ ${fdate(view.wedding.date)} ${liveStart()}부터 시청 가능</span>`:''}<small>중계가 시작되면 이 자리에서 바로 보실 수 있어요 🎥</small></div>
         <button class="cp-btn primary wide" data-cp="shareLive">🔗 라이브 안내 공유하기</button>
-        <p class="cp-note">🔗 라이브 링크는 예식 전에 등록되며, 공유하면 오시지 못하는 분들도 예식을 함께 보실 수 있어요 💐</p>`)}
+        <p class="cp-note">🔗 라이브 링크는 예식 전에 등록되며, 공유하면 축의대 라이브 영상을 함께 보실 수 있어요 💐</p>`)}
     </section>`;
   }
   let giftCodeOpen = false;
