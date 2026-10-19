@@ -812,6 +812,10 @@ details.pp-past summary{cursor:pointer;font-size:13px;font-weight:700;color:var(
 .pp-vip table{width:100%;border-collapse:collapse;font-size:12px;}
 .pp-vip th{background:#f3efe2;font-weight:700;text-align:left;padding:5px 7px;border:1px solid #e3d8bb;white-space:nowrap;}
 .pp-vip td{padding:5px 7px;border:1px solid #eee6d3;vertical-align:top;}
+
+.pp-cb-tels{margin-top:4px;font-size:13px;line-height:1.6;font-weight:600}.pp-cb-tels .pp-tel{font-weight:800}
+
+.pp-url{color:#2563eb;text-decoration:underline;word-break:break-all;font-weight:700}
 /* ================= 접속 메인화면 (모먼트웍스 로고) ================= */
 .mw-entry{position:fixed;inset:0;z-index:500;overflow-y:auto;background:#F7F5F0;background-image:radial-gradient(ellipse at 50% 38%, #FFFFFF 0%, #F7F5F0 55%, #EFEBE3 100%);color:#1A1618;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;display:flex;align-items:center;justify-content:center;padding:56px 22px;box-sizing:border-box;}
@@ -4692,7 +4696,7 @@ const PartnerPortal = (function(){
 
   /* ---------- 파트너 예식 안내카드 양식 (축의대 설정서 값 매칭) ---------- */
   const JMAP = {
-    groom_name:'groom', bride_name:'bride', contract_package:'package', contract_half_side:'halfside',
+    groom_name:'groom', bride_name:'bride', groom_phone:'groom_phone', bride_phone:'bride_phone', groom_contact:'groom_phone', bride_contact:'bride_phone', groom_tel:'groom_phone', bride_tel:'bride_phone', contract_package:'package', contract_half_side:'halfside',
     wedding_date:'date', wedding_time:'time', venue_region:'region', venue_name:'venue', hall_name:'hall',
     groom_guest_count:'guest_g', bride_guest_count:'guest_b', groom_side_name:'parents_g', bride_side_name:'parents_b',
     relation_type:'relation', relation_type_etc:'relation_etc', money_op:'money_way', transfer_yn:'transfer_yn',
@@ -4703,7 +4707,7 @@ const PartnerPortal = (function(){
     ticket_reissue_way:'tk_extra', ticket_reissue_way_etc:'tk_extra_etc',
     gift_yn:'gift', gift_type:'gift_type', gift_place:'gift_place', gift_target:'gift_target', gift_criteria:'gift_criteria', gift_script:'gift_script',
     info_parking_way:'parking', info_parking_time:'parking_free', info_atm:'atm', info_hall:'hallpos', info_bride_room:'waiting', info_meal_time:'meal',
-    vip_yn:'vip_flag',
+    vip_yn:'vip_flag', family_aware:'aware', aware_family:'aware', family_awareness:'aware', family_notice:'aware', family_know:'aware', family_known:'aware', vendor_aware:'aware', aware_yn:'aware', family_aware_yn:'aware', aware_notice:'aware',
     handover_relation_groom:'hand_g_rel', handover_name_groom:'hand_g_name', handover_phone_groom:'hand_g_phone',
     handover_relation_bride:'hand_b_rel', handover_name_bride:'hand_b_name', handover_phone_bride:'hand_b_phone',
     handover_report_email_groom:'email_g', handover_report_email_bride:'email_b',
@@ -4728,6 +4732,8 @@ const PartnerPortal = (function(){
     // 1) 설정서 원본 키(groom_name…) 2) 카드 항목 키(groom…) 3) 한글 라벨
     Object.keys(JMAP).forEach(jk=>{ const k = JMAP[jk]; if(lowM[jk]!==undefined) E[k] = lowM[jk]; else if(lowM[k]!==undefined) E[k] = lowM[k]; });
     Object.keys(m).forEach(lb=>{ const k = kolab[String(lb).replace(/\s+/g,'')]; if(k && E[k]===undefined) E[k] = m[lb]; });
+    // 키 이름이 달라도: '인지' / aware 가 들어간 항목은 가족 인지 여부로
+    if(E.aware===undefined || E.aware===''){ const ak = Object.keys(m).find(k=> /aware|인지/i.test(String(k)) && String(m[k]||'').trim()!==''); if(ak) E.aware = m[ak]; }
     // 부족한 값은 계약 · 안내문 정보로 보충
     const fb = (k, v)=>{ if((E[k]===undefined || E[k]==='') && v!==undefined && v!==null && String(v)!=='') E[k] = String(v); };
     fb('groom', inf.groomName); fb('bride', inf.brideName); fb('date', ev.date); fb('time', ev.weddingTime); fb('region', ev.region);
@@ -4763,7 +4769,11 @@ const PartnerPortal = (function(){
   Object.keys(JMAP).forEach(k=>{ CARD_USED.add(k); CARD_USED.add(JMAP[k]); });
   ['vip_name','vip_relation','vip_contact','vip_memo','vip_ticket','vip_tickets','guide','e1_all','e2_all','package','halfside'].forEach(k=> CARD_USED.add(k));
   function linkPhones(v){
-    return e(v).replace(/\n/g,'<br>').replace(/(0\d{1,2})[-.\s]?(\d{3,4})[-.\s]?(\d{4})/g, (mm,a,b,c)=> `<a class="pp-tel" href="tel:${a}${b}${c}">${mm}</a>`);
+    const ph = s=> s.replace(/(0\d{1,2})[-.\s]?(\d{3,4})[-.\s]?(\d{4})/g, (mm,a,b,c)=> `<a class="pp-tel" href="tel:${a}${b}${c}">${mm}</a>`);
+    return String(v==null?'':v).split(/((?:https?:\/\/|www\.)[^\s<>"'()]+)/i).map((seg,i)=>{
+      if(i%2){ const href = /^www\./i.test(seg) ? 'https://'+seg : seg; return `<a class="pp-url" href="${e(href)}" target="_blank" rel="noopener noreferrer">${e(seg)}</a>`; }
+      return ph(e(seg).replace(/\n/g,'<br>'));
+    }).join('');
   }
   function cardHTML(ev){
     const {E, m} = cardEntries(ev), o = cardCompose(E);
@@ -4775,6 +4785,7 @@ const PartnerPortal = (function(){
     const qc = (l,k)=> `<div class="pp-qcell"><span>${l}</span>${val(k)}</div>`;
     const head = `<div class="pp-card-brief">
       <div class="pp-cb-names">${e(o.groom||'신랑')} <i>&amp;</i> ${e(o.bride||'신부')}</div>
+      ${(o.groom_phone||o.bride_phone)? `<div class="pp-cb-tels">${o.groom_phone? `<div>신랑 연락처 ${linkPhones(o.groom_phone)}</div>`:''}${o.bride_phone? `<div>신부 연락처 ${linkPhones(o.bride_phone)}</div>`:''}</div>`:''}
       ${pack? `<div class="pp-cb-pack">${e(pack)}</div>`:''}
       <div class="pp-cb-when">예식일 <b>${e(dstr)}</b> | 시작 <b>${e(o.time||'-')}</b><br>${o.region? e(o.region)+'<br>':''}${e(o.venue||'')}${o.hall? ' · '+e(o.hall):''}</div>
     </div>
@@ -4787,7 +4798,7 @@ const PartnerPortal = (function(){
       return `<div class="pp-vip"><table><thead><tr><th>성함(업체명)</th><th>관계</th><th>연락처</th><th>지급 식권</th></tr></thead><tbody>${rows.map(r=>`<tr>${r.map(x=>`<td>${linkPhones(x||'')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
     };
     const secs = CARD_SECTIONS.map(([t, rs])=>`<div class="pp-info-sec"><h4>${t}</h4>${rs==='vip' ? vipHTML() : `<div class="pp-info-kv">${rs.map(([l,k])=>`<div><span>${l}</span>${val(k)}</div>`).join('')}</div>`}</div>`).join('');
-    const rest = (ev.info.rows||[]).filter(r=> !CARD_USED.has(String(r.key||'').toLowerCase()) && !CARD_USED.has(r.key));
+    const rest = (ev.info.rows||[]).filter(r=> !CARD_USED.has(String(r.key||'').toLowerCase()) && !CARD_USED.has(r.key) && !(E.aware && /aware|인지/i.test(String(r.key||''))));
     const restHTML = rest.length ? `<div class="pp-info-sec"><h4>그 밖의 내용</h4><div class="pp-info-kv">${rest.map(r=>`<div><span>${e(rowLabel(r))}</span><b>${linkPhones(r.value)}</b></div>`).join('')}</div></div>` : '';
     const nt = ev.info.notes || {};
     const notes = (nt.groom||nt.bride) ? `<div class="pp-info-sec"><h4>하객 안내 메모</h4>${nt.groom? `<p class="pp-info-note">🤵 신랑측 안내 · ${e(nt.groom)}</p>`:''}${nt.bride? `<p class="pp-info-note">👰 신부측 안내 · ${e(nt.bride)}</p>`:''}</div>` : '';
@@ -9737,7 +9748,7 @@ function guideAdminHTML(rec){
 /* ---------- 파트너 안내카드 (축의대 설정서 전체 내용 · 파트너스오피스 예식정보에 표시) ---------- */
 const CARD_OPEN = new Set();
 const CARD_SECS = [
-  ['예식 기본정보', ['groom','bride','package','halfside','date','time','region','venue','hall','guest_g','guest_b','parents_g','parents_b','aware','relation','relation_etc']],
+  ['예식 기본정보', ['groom','groom_phone','bride','bride_phone','package','halfside','date','time','region','venue','hall','guest_g','guest_b','parents_g','parents_b','aware','relation','relation_etc']],
   ['축의금 정리방식', ['money_way','transfer_yn','acc_g','acc_b','refund','refund_etc']],
   ['식권 운영', ['tk_g_a','tk_g_c','tk_b_a','tk_b_c','tk_contact','tk_invite','tk_cross','tk_out','tk_place','tk_age','tk_child_swap','tk_extra','tk_extra_etc']],
   ['하객 안내사항', ['parking','parking_free','atm','hallpos','waiting','meal']],
@@ -9746,16 +9757,34 @@ const CARD_SECS = [
   ['당일 일정 · 긴급연락', ['arrival','e1_rel','e1_name','e1_phone','e2_rel','e2_name','e2_phone']],
   ['사진 · 영상 · 답례품 · 안내문', ['photo_agree','photo_cam','cam_rel','cam_name','cam_phone','gift','gift_type','gift_place','gift_target','gift_criteria','gift_script','link_g','link_b','signage']]
 ];
-const CARD_EXTRA_LAB = {relation_etc:'관계 설정(기타)', refund_etc:'반환 요청 대응(기타)', gift_type:'답례품 종류', gift_place:'답례품 수령 장소', gift_target:'답례품 대상', gift_criteria:'답례품 지급 기준', gift_script:'답례품 안내 멘트',
+const CARD_EXTRA_LAB = {groom_phone:'신랑 연락처', bride_phone:'신부 연락처', relation_etc:'관계 설정(기타)', refund_etc:'반환 요청 대응(기타)', gift_type:'답례품 종류', gift_place:'답례품 수령 장소', gift_target:'답례품 대상', gift_criteria:'답례품 지급 기준', gift_script:'답례품 안내 멘트',
   vip_name:'VIP 성함(업체명)', vip_relation:'VIP 관계', vip_contact:'VIP 연락처', vip_tickets:'VIP 지급 식권', package:'계약 패키지', halfside:'계약 측'};
 function cardLab(k){ const l = SPDF.LABELS.find(x=> x.k===k && x.p); return CARD_EXTRA_LAB[k] || (l && l.p) || k; }
 function cardRevKey(){ const rev = {}; Object.keys(SPDF.JSON_MAP).forEach(jk=>{ rev[SPDF.JSON_MAP[jk]] = jk; }); return rev; }
 function cardAdminHTML(rec){
   const rp = ensurePdb().referralPay || {}, c = rp['card:'+rec.id] || {}, rows = c.rows || [], rev = cardRevKey();
-  const byKey = {}; rows.forEach(r=>{ byKey[String(r.key).toLowerCase()] = r; });
-  const get = k=>{ const jk = rev[k] || k; const r = byKey[String(jk).toLowerCase()] || byKey[k]; return r ? String(r.value||'') : ''; };
-  const used = new Set(); CARD_SECS.forEach(([t, ks])=> ks.forEach(k=>{ used.add(String(rev[k]||k).toLowerCase()); used.add(k); }));
-  const extra = rows.filter(r=> !used.has(String(r.key).toLowerCase()));
+  const nk = s=> String(s==null?'':s).toLowerCase().replace(/[^0-9a-z가-힣]/g,'');
+  const byKey = {}, byLab = {}; rows.forEach(r=>{ byKey[nk(r.key)] = r; if(r.label) byLab[nk(r.label)] = r; });
+  const ALIAS = {aware:['family_aware','family_awareness','aware_family','family_notice','family_know','family_known','vendor_aware','aware_yn','family_aware_yn','축의업체인지사항','가족인지여부','가족인지','인지사항'],
+    groom_phone:['groom_contact','groom_tel','신랑연락처'], bride_phone:['bride_contact','bride_tel','신부연락처'],
+    date:['weddingdate','예식일자','예식일'], time:['weddingtime','예식시작시간','예식시간'], venue:['venue','weddingvenue','예식장'], hall:['hall','홀','홀이름'],
+    parents_g:['groomparents','신랑측혼주'], parents_b:['brideparents','신부측혼주']};
+  const FZ = {aware:/aware|인지|family.?know/i, parking:/parking|주차/i, atm:/atm|인출/i, hallpos:/연회|banquet|info_?hall/i, waiting:/대기실|bride_?room/i, meal:/meal|식사/i,
+    tk_invite:/invitation|청첩장/i, email_g:/email.*groom|groom.*email|이메일.*신랑/i, email_b:/email.*bride|bride.*email|이메일.*신부/i};
+  const hit = new Set();
+  const find = k=>{
+    const jk = rev[k] || k, cands = [jk, k, cardLab(k)].concat(ALIAS[k]||[]).map(nk);
+    for(const c of cands){ const r = byKey[c] || byLab[c]; if(r) return r; }
+    if(FZ[k]){ const r = rows.find(x=> !hit.has(x) && (FZ[k].test(String(x.key)) || FZ[k].test(String(x.label||'')))); if(r) return r; }
+    return null;
+  };
+  const guide = rp['guide:'+rec.id] || {}, gi = guide.items || {};
+  const FB = {groom:guide.groomName, bride:guide.brideName, date:rec.weddingDate, time:rec.weddingTime, venue:rec.venueName, hall:rec.hallName, guest_g:rec.groomGuests, guest_b:rec.brideGuests,
+    parking:gi.parking, atm:gi.atm, hallpos:gi.banquet, waiting:gi.bridalRoom, meal:gi.mealTime, tk_age:gi.childTicket};
+  const keyOf = {}; // 카드 항목 → 실제로 저장할 행 키
+  CARD_SECS.forEach(([t, ks])=> ks.forEach(k=>{ const r = find(k); if(r){ hit.add(r); keyOf[k] = r.key; } }));
+  const get = k=>{ const r = keyOf[k] !== undefined ? rows.find(x=> x.key===keyOf[k]) : null; if(r) return String(r.value||''); const f = FB[k]; return (f!==undefined && f!==null) ? String(f) : ''; };
+  const extra = rows.filter(r=> !hit.has(r));
   const filled = rows.length, when = c.updatedAt ? new Date(c.updatedAt) : null;
   const st = !filled ? '<span class="cp-gd-st none">아직 없음 · 설정서가 제출되거나 PDF를 올리면 채워져요</span>'
     : `<span class="cp-gd-st ${c.source==='admin'?'admin':'form'}">${c.source==='admin'?'✏️ 직접 입력':'📝 설정서 연동'} · 항목 ${filled}개${when? ` · ${when.getMonth()+1}/${when.getDate()} ${String(when.getHours()).padStart(2,'0')}:${String(when.getMinutes()).padStart(2,'0')}`:''}</span>`;
@@ -9763,7 +9792,7 @@ function cardAdminHTML(rec){
     return `<label>${esc(lab)}${multi? `<textarea data-cpc="${esc(jk)}" rows="${Math.min(5, Math.max(2, String(val).split('\n').length))}">${esc(val)}</textarea>` : `<input data-cpc="${esc(jk)}" value="${esc(val)}">`}</label>`; };
   return `<details class="cp-gd-admin cp-card-admin" data-cardrid="${rec.id}" ${CARD_OPEN.has(rec.id)?'open':''}><summary><b>🗂 파트너 안내카드</b> ${st}</summary>
     <div class="cp-admin-hint" style="margin:6px 0 8px;">파트너스오피스 「예식정보」에 배정된 파트너에게만 보이는 설정서 요약이에요 (계좌 · 연락처 포함). 고객 페이지에는 나오지 않아요. 값을 지우고 저장하면 그 항목은 빠져요.</div>
-    ${CARD_SECS.map(([t, ks])=>`<div class="cp-card-sec"><h5>${esc(t)}</h5><div class="cp-admin-grid">${ks.map(k=> field(k, cardLab(k), get(k), rev[k]||k)).join('')}</div></div>`).join('')}
+    ${CARD_SECS.map(([t, ks])=>`<div class="cp-card-sec"><h5>${esc(t)}</h5><div class="cp-admin-grid">${ks.map(k=> field(k, cardLab(k), get(k), keyOf[k]||rev[k]||k)).join('')}</div></div>`).join('')}
     ${extra.length? `<div class="cp-card-sec"><h5>그 밖의 항목</h5><div class="cp-admin-grid">${extra.map(r=> field(r.key, r.label && r.label!==r.key ? r.label : r.key, String(r.value||''), r.key)).join('')}</div></div>`:''}
   </details>`;
 }
