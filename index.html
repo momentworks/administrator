@@ -1483,6 +1483,13 @@ html,body{overflow-anchor:none;}
 tr.mw-new-row>td{background:#FFF6D6 !important;}
 tr.mw-new-row>td:first-child{box-shadow:inset 4px 0 0 #E0A526;}
 .mw-new-tag{display:inline-block;margin-left:4px;padding:1px 6px;border-radius:999px;background:#E0A526;color:#fff;font-size:10px;font-weight:800;letter-spacing:.03em;vertical-align:middle;}
+
+.cp-side-main{font-size:11.5px;color:#7a2e3a;background:#f6e8ea;border-radius:999px;padding:2px 9px;font-weight:600;}
+.cp-main-pick{margin-left:auto;font-size:12px;display:flex;align-items:center;gap:6px;}
+.cp-main-pick select{padding:3px 8px;font-size:12.5px;}
+
+.cp-card-sec{margin-top:10px;} .cp-card-sec h5{margin:0 0 6px;font-size:12px;color:var(--wine,#7a2e3a);border-bottom:1px solid var(--line,#e7dfd3);padding-bottom:4px;}
+.cp-card-admin textarea{min-height:40px;}
 /* ===== 고객 전용 페이지 ===== */
 .cp{--cp-ink:#1F1A1C;--cp-soft:#5E5750;--cp-paper:#F4F1EA;--cp-card:#FFFFFF;--cp-line:#E2DBCD;--cp-wine:#5C1F29;--cp-gold:#A9823C;--cp-gold-s:#F2E7CF;--cp-sage:#4F6F52;--cp-coral:#B0432E;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--cp-ink);background:var(--cp-paper);min-height:100vh;font-variant-numeric:tabular-nums;max-width:640px;margin:0 auto;position:relative;}
@@ -9430,44 +9437,54 @@ function giftSet(c){
 }
 function sidesHTML(rec, c){
   if(!sideEligible(rec)) return '';
-  const sides = c.sides || {};
+  const sides = c.sides || {}, main = mainSideOf(rec, c), extra = OTHER_SIDE[main];
   const card = sk=>{
-    const sd = sides[sk] || {}, has = !!sd.code, off = sd.active===false;
+    const sd = sides[sk] || {}, isMain = sk===main, has = !isMain && !!sd.code, off = sd.active===false;
     return `<div class="cp-side-card ${sk}">
-      <div class="cp-side-h"><b>${SIDE_LABEL[sk]}측</b>${has? `<span class="cp-side-code ${off?'off':''}">${esc(sd.code)}</span><button type="button" class="btn btn-sm btn-ghost cu-copy" data-cpsa="copy" data-sk="${sk}" title="접속코드 복사">📋</button>${off?'<span class="badge badge-cancelled">사용 중지</span>':''}` : ''}</div>
-      <div class="cp-admin-grid">
+      <div class="cp-side-h"><b>${SIDE_LABEL[sk]}측</b>${isMain? `<span class="cp-side-main">주계약자 · 위 접속코드로 접속</span>` : has? `<span class="cp-side-code ${off?'off':''}">${esc(sd.code)}</span><button type="button" class="btn btn-sm btn-ghost cu-copy" data-cpsa="copy" data-sk="${sk}" title="접속코드 복사">📋</button>${off?'<span class="badge badge-cancelled">사용 중지</span>':''}` : ''}</div>
+      ${isMain ? `<div class="cp-admin-hint" style="padding:6px 2px;">주계약자는 위쪽 계약자 설정(라이브 · 축의 현황판 코드 · 안내)을 그대로 사용해요. 양측 안내문은 신랑 · 신부 탭으로 모두 보여요.</div>` : `      <div class="cp-admin-grid">
         <label>${SIDE_LABEL[sk]} 이름<input data-cps="${sk}" data-f="name" value="${esc(sd.name||'')}" placeholder="${SIDE_LABEL[sk]} 이름"></label>
         <label>${SIDE_LABEL[sk]} 연락처<input data-cps="${sk}" data-f="phone" value="${esc(sd.phone||'')}" placeholder="010-0000-0000"></label>
         <label>${SIDE_LABEL[sk]}측 축의 현황판 코드<input data-cps="${sk}" data-f="giftCode" value="${esc(sd.giftCode||'')}" placeholder="${c.giftCode? '비우면 공통 코드 '+esc(c.giftCode) : '축의 관리 시스템의 현황판 코드'}" autocomplete="off"></label>
-        <label>${SIDE_LABEL[sk]}에게만 보이는 안내<input data-cps="${sk}" data-f="memo" value="${esc(sd.memo||'')}" placeholder="예: 신랑측 축의대는 로비 왼쪽이에요"></label>
-      </div>
-      <div class="cp-admin-foot">${has? `<button type="button" class="btn btn-sm btn-primary" data-cpsa="invite" data-sk="${sk}">초대 문구 복사</button><button type="button" class="btn btn-sm" data-cpsa="preview" data-sk="${sk}">미리보기</button><button type="button" class="btn btn-sm btn-ghost" data-cpsa="regen" data-sk="${sk}">재발급</button><button type="button" class="btn btn-sm btn-ghost ${off?'':'btn-danger'}" data-cpsa="toggle" data-sk="${sk}">${off?'다시 사용':'사용 중지'}</button>` : `<button type="button" class="btn btn-sm btn-primary" data-cpsa="create" data-sk="${sk}">${SIDE_LABEL[sk]} 코드 추가 발급</button>`}</div>
+        <label>${SIDE_LABEL[sk]}에게만 보이는 안내<input data-cps="${sk}" data-f="memo" value="${esc(sd.memo||'')}" placeholder="예: ${SIDE_LABEL[sk]}측 축의대는 로비 ${sk==='groom'?'왼쪽':'오른쪽'}이에요"></label>
+      </div>`}
+      ${isMain ? '' : `<div class="cp-admin-foot">${has? `<button type="button" class="btn btn-sm btn-primary" data-cpsa="invite" data-sk="${sk}">초대 문구 복사</button><button type="button" class="btn btn-sm" data-cpsa="preview" data-sk="${sk}">미리보기</button><button type="button" class="btn btn-sm btn-ghost" data-cpsa="regen" data-sk="${sk}">재발급</button><button type="button" class="btn btn-sm btn-ghost ${off?'':'btn-danger'}" data-cpsa="toggle" data-sk="${sk}">${off?'다시 사용':'사용 중지'}</button>` : `<button type="button" class="btn btn-sm btn-primary" data-cpsa="create" data-sk="${sk}">${SIDE_LABEL[sk]} 코드 추가 발급</button>`}</div>`}
     </div>`;
   };
-  return `<div class="cp-sides"><div class="cp-sides-h"><b>👰🤵 신랑 · 신부 따로 관리</b><span>${esc(rec.productType)} 계약 · 각자 전용 코드로 접속하면 이름 · ${rec.productType==='양측'?'각 측 ':''}축의 현황 · 안내가 따로 보여요</span>
-    ${!(sides.groom&&sides.groom.code) && !(sides.bride&&sides.bride.code) ? `<button type="button" class="btn btn-sm btn-primary" data-cpsa="both">신랑 · 신부 코드 함께 발급</button>`:''}</div>
+  return `<div class="cp-sides"><div class="cp-sides-h"><b>👰🤵 접속코드 2개 운영</b><span>${esc(rec.productType)} 계약 · 주계약자 코드 + ${SIDE_LABEL[extra]} 추가 코드</span>
+    <label class="cp-main-pick">주계약자 <select data-cpmain><option value="groom" ${main==='groom'?'selected':''}>신랑</option><option value="bride" ${main==='bride'?'selected':''}>신부</option></select></label></div>
     <div class="cp-sides-grid">${card('groom')}${card('bride')}</div></div>`;
 }
-
-/* 계약자가 신랑/신부 중 누구인지: 안내문 · 신랑/신부 이름과 계약자명 비교 (모르면 '') */
-function contractorSideOf(rec){
+/* 양측 · 통합 계약은 코드를 2개만 운영: 주계약자 코드(c.code) + 상대방(신랑/신부) 추가 코드 1개 */
+function detectContractorSide(rec){   // 안내문 · 신랑/신부 이름과 계약자명을 비교 (모르면 '')
   const nm = x=> String(x||'').replace(/[^가-힣a-zA-Z]/g,''), me = nm(rec.clientName); if(!me) return '';
   const g = (ensurePdb().referralPay||{})['guide:'+rec.id] || {}, c = clientOf(rec) || {}, sd = c.sides || {};
   const gn = nm(g.groomName || (sd.groom||{}).name), bn = nm(g.brideName || (sd.bride||{}).name);
   if(gn && gn===me) return 'groom'; if(bn && bn===me) return 'bride';
   return '';
 }
-/* 양측 · 통합 계약: 계약자 코드는 기본, 계약자가 신부면 신랑 코드 · 신랑이면 신부 코드를 추가 (누군지 모르면 둘 다) */
-function sidesWithCodes(rec, cur){
-  if(!sideEligible(rec)) return null;
-  const cs = contractorSideOf(rec), targets = cs ? [cs==='groom'?'bride':'groom'] : ['groom','bride'];
-  const sides = Object.assign({}, (cur||{}).sides||{}); let add = 0; const now = new Date().toISOString();
-  targets.forEach(sk=>{ if(!(sides[sk] && sides[sk].code)){ sides[sk] = Object.assign({}, sides[sk]||{}, {code: genClientCode(), active:true, createdAt: now, auto:true}); add++; } });
-  return add ? sides : null;
+const OTHER_SIDE = {groom:'bride', bride:'groom'};
+function mainSideOf(rec, cur){
+  cur = cur || clientOf(rec) || {};
+  if(cur.mainSide==='groom' || cur.mainSide==='bride') return cur.mainSide;
+  const d = detectContractorSide(rec); if(d) return d;
+  const sd = cur.sides || {}, hg = !!(sd.groom && sd.groom.code), hb = !!(sd.bride && sd.bride.code);
+  if(hg && !hb) return 'bride'; if(hb && !hg) return 'groom';
+  return 'bride';   // 구분할 수 없으면 신부 계약자로 보고 신랑 코드를 추가 (관리 화면에서 바꿀 수 있어요)
+}
+/* → {mainSide, sides, changed}: 주계약자 쪽 추가 코드는 지우고, 상대방 코드가 없으면 만든다 */
+function planSides(rec, cur){
+  cur = cur || {};
+  const main = mainSideOf(rec, cur), extra = OTHER_SIDE[main], now = new Date().toISOString();
+  const sides = Object.assign({}, cur.sides||{});
+  let changed = cur.mainSide !== main;
+  if(sides[main] && sides[main].code){ const m0 = Object.assign({}, sides[main]); delete m0.code; sides[main] = m0; changed = true; }
+  if(!(sides[extra] && sides[extra].code)){ sides[extra] = Object.assign({}, sides[extra]||{}, {code: genClientCode(), active:true, createdAt: now, auto:true}); changed = true; }
+  return {mainSide: main, sides, changed};
 }
 function newClientData(rec){
   const now = new Date().toISOString(), d = {code: genClientCode(), active:true, createdAt: now};
-  const sd = sidesWithCodes(rec, {}); if(sd){ d.sides = sd; d.sidesAuto = true; }
+  if(sideEligible(rec)){ const pl = planSides(rec, {}); d.mainSide = pl.mainSide; d.sides = pl.sides; d.sidesNorm = true; }
   return d;
 }
 function genClientCode(){
@@ -9480,11 +9497,14 @@ function autoIssueClientCodes(){
   if(!PDB || !Array.isArray(RECORDS) || pSet().autoClientCode===false || window.MW_NO_AUTO_CODE) return 0;
   const t = todayStr();
   const list = activeContracts().filter(r=> r.id && (!r.weddingDate || r.weddingDate >= t) && !clientOf(r));
-  const back = activeContracts().filter(r=>{ const c = clientOf(r); return r.id && sideEligible(r) && (!r.weddingDate || r.weddingDate >= t) && c && c.code && !c.sidesAuto && !(((c.sides||{}).groom||{}).code && ((c.sides||{}).bride||{}).code); });
+  const back = activeContracts().filter(r=>{ const c = clientOf(r); return r.id && sideEligible(r) && c && c.code && !c.sidesNorm; });
   if(back.length){
-    const db0 = ensurePdb(); let n0 = 0;
-    back.forEach(r=>{ const k = clientKey(r), c = db0.referralPay[k], sd = sidesWithCodes(r, c); if(sd){ db0.referralPay[k] = Object.assign({}, c, {sides: sd, sidesAuto:true, updatedAt:new Date().toISOString()}); pDirty.referral.add(k); n0++; } else { db0.referralPay[k] = Object.assign({}, c, {sidesAuto:true}); pDirty.referral.add(k); } });
-    if(n0){ showToast(`양측 · 통합 계약 ${n0}건의 신랑/신부 접속코드를 자동 발급했어요`); savePartnerDb(); }
+    const db0 = ensurePdb(); let fixed = 0, made = 0;
+    back.forEach(r=>{ const k = clientKey(r), c = db0.referralPay[k], hadBoth = !!(((c.sides||{}).groom||{}).code && ((c.sides||{}).bride||{}).code), hadNone = !(((c.sides||{}).groom||{}).code || ((c.sides||{}).bride||{}).code);
+      const pl = planSides(r, c); db0.referralPay[k] = Object.assign({}, c, {mainSide: pl.mainSide, sides: pl.sides, sidesNorm:true, updatedAt:new Date().toISOString()}); pDirty.referral.add(k);
+      if(hadBoth) fixed++; else if(hadNone && (!r.weddingDate || r.weddingDate >= t)) made++; });
+    if(fixed || made){ showToast(`양측 · 통합 코드 정리: 신랑·신부 코드가 모두 있던 ${fixed}건은 상대방 코드 1개만 남기고, ${made}건은 추가 코드를 새로 만들었어요`); }
+    savePartnerDb();
   }
   if(!list.length) return back.length;
   const db = ensurePdb(); db.referralPay = db.referralPay || {};
@@ -9560,13 +9580,14 @@ function renderClientBox(rec, boxEl){
       </div>
       ${sidesHTML(rec, c)}
       ${guideAdminHTML(rec)}
+      ${cardAdminHTML(rec)}
       <div class="cp-admin-foot">${c.contractUrl? '<button type="button" class="btn btn-sm" data-cpa="filecheck">📥 계약서 다운로드 점검</button>' : ''}<button type="button" class="btn btn-sm btn-ghost" data-cpa="regen">코드 재발급</button><button type="button" class="btn btn-sm btn-ghost ${off?'':'btn-danger'}" data-cpa="toggle">${off? '다시 사용' : '사용 중지'}</button>
         ${String(pSet().customerUrl||'').trim()? '' : '<span class="cp-admin-warn">파트너스 → 분리 운영 · 설정에서 고객 페이지 주소를 넣으면 초대 문구에 링크가 함께 들어가요</span>'}</div>`;
   }
   box.querySelectorAll('[data-cpa]').forEach(b=> b.addEventListener('click', async ()=>{
     const a = b.dataset.cpa, cur = clientOf(rec)||{};
     if(['create','regen','toggle'].includes(a) && !(await cpResolveDirty(rec, box))) return;
-    if(a==='create'){ await saveClient(rec, newClientData(rec), sideEligible(rec) ? '고객 접속코드와 신랑 · 신부 코드를 만들었어요' : '고객 접속코드를 만들었어요'); renderClientBox(rec, box); custTabRefresh(); return; }
+    if(a==='create'){ await saveClient(rec, newClientData(rec), sideEligible(rec) ? '주계약자 코드와 추가 코드(2개)를 만들었어요' : '고객 접속코드를 만들었어요'); renderClientBox(rec, box); custTabRefresh(); return; }
     if(a==='invite'){ copyText(customerInviteText(rec, cur), '초대 문구를 복사했어요 · 고객님께 카톡으로 보내주세요'); return; }
     if(a==='preview'){ openCustomerPreview(cur.code); return; }
     if(a==='filecheck'){ checkContractFile(cur.code, b); return; }
@@ -9576,9 +9597,8 @@ function renderClientBox(rec, boxEl){
   }));
   box.querySelectorAll('[data-cpsa]').forEach(b=> b.addEventListener('click', async ()=>{
     const a = b.dataset.cpsa, sk = b.dataset.sk;
-    if(['both','create','regen','toggle'].includes(a) && !(await cpResolveDirty(rec, box))) return;
+    if(['create','regen','toggle'].includes(a) && !(await cpResolveDirty(rec, box))) return;
     const cur = clientOf(rec)||{}, sd = (cur.sides||{})[sk] || {};
-    if(a==='both'){ const sides = Object.assign({}, cur.sides||{}); ['groom','bride'].forEach(k=>{ sides[k] = Object.assign({}, sides[k]||{}, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}); }); await saveClient(rec, {sides}, '신랑 · 신부 코드를 발급했어요'); }
     if(a==='create'){ await saveSide(rec, sk, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}, `${SIDE_LABEL[sk]} 코드를 발급했어요`); }
     if(a==='invite'){ copyText(sideInviteText(rec, sk, sd), `${SIDE_LABEL[sk]} 초대 문구를 복사했어요`); return; }
     if(a==='copy'){ copyText(sd.code, `${SIDE_LABEL[sk]} 접속코드 ${sd.code} 를 복사했어요`); return; }
@@ -9587,9 +9607,21 @@ function renderClientBox(rec, boxEl){
     if(a==='toggle'){ await saveSide(rec, sk, {active: sd.active===false}, sd.active===false? '다시 사용해요' : '접속을 중지했어요'); }
     renderClientBox(rec, box); custTabRefresh();
   }));
+  box.querySelectorAll('[data-cpmain]').forEach(sel=> sel.addEventListener('change', async ()=>{
+    if(!(await cpResolveDirty(rec, box))){ renderClientBox(rec, box); return; }
+    const cur = clientOf(rec)||{}, oldMain = mainSideOf(rec, cur), nm = sel.value; if(nm===oldMain) return;
+    const sides = Object.assign({}, cur.sides||{}), oldExtra = OTHER_SIDE[oldMain], newExtra = OTHER_SIDE[nm];
+    const src = sides[oldExtra] || {};
+    sides[newExtra] = Object.assign({}, sides[newExtra]||{}, {code: src.code || genClientCode(), active: src.active!==false, createdAt: src.createdAt || new Date().toISOString()});
+    if(sides[nm]){ const m0 = Object.assign({}, sides[nm]); delete m0.code; sides[nm] = m0; }
+    if(oldExtra!==newExtra && sides[oldExtra]){ const o0 = Object.assign({}, sides[oldExtra]); delete o0.code; sides[oldExtra] = o0; }
+    await saveClient(rec, {mainSide: nm, sides, sidesNorm:true}, `주계약자를 ${SIDE_LABEL[nm]}으로 바꿨어요 · 추가 코드는 ${SIDE_LABEL[newExtra]}에게`);
+    renderClientBox(rec, box); custTabRefresh();
+  }));
+  box.querySelectorAll('details[data-cardrid]').forEach(d=> d.addEventListener('toggle', ()=>{ if(d.open) CARD_OPEN.add(d.dataset.cardrid); else CARD_OPEN.delete(d.dataset.cardrid); }));
   box.querySelectorAll('details[data-gdrid]').forEach(d=> d.addEventListener('toggle', ()=>{ if(d.open) GUIDE_OPEN.add(d.dataset.gdrid); else GUIDE_OPEN.delete(d.dataset.gdrid); }));
   /* 입력은 바로 저장하지 않고, [💾 저장]을 눌러 한 번에 저장 */
-  const fields = ()=> [...box.querySelectorAll('[data-cpf],[data-cps],[data-cpg]')];
+  const fields = ()=> [...box.querySelectorAll('[data-cpf],[data-cps],[data-cpg],[data-cpc]')];
   const refresh = ()=>{
     const all = fields(), ch = all.filter(f=> f.value !== f.defaultValue);
     all.forEach(f=> f.classList.toggle('cp-changed', f.value !== f.defaultValue));
@@ -9610,7 +9642,7 @@ function renderClientBox(rec, boxEl){
   refresh();
 }
 /* 고객 박스 전체 저장: 계약서 · 라이브 · 현황판 코드 · 안내 · 신랑/신부 · 예식 안내문을 한 번에 */
-function cpBoxChanges(box){ return box ? [...box.querySelectorAll('[data-cpf],[data-cps],[data-cpg]')].filter(f=> f.value !== f.defaultValue) : []; }
+function cpBoxChanges(box){ return box ? [...box.querySelectorAll('[data-cpf],[data-cps],[data-cpg],[data-cpc]')].filter(f=> f.value !== f.defaultValue) : []; }
 function cpDirtyBox(){ return document.querySelector('.cp-admin[data-dirty]'); }
 async function saveClientBoxAll(rec, box, opt){
   opt = opt || {};
@@ -9640,6 +9672,16 @@ async function saveClientBoxAll(rec, box, opt){
     box.querySelectorAll('[data-cpg]').forEach(f=>{ const n = f.dataset.cpg, v = f.value.trim();
       if(n==='groomName'||n==='brideName') gp[n] = v; else if(n.startsWith('n:')) gp.notes[n.slice(2)] = v; else gp.items[n] = v; });
     applyGuidePatch(rec, gp);
+  }
+  if(has('[data-cpc]')){
+    const ck = 'card:'+rec.id, prev = db.referralPay[ck] || {}, rows = (prev.rows||[]).map(r=> Object.assign({}, r));
+    changed.filter(f=> f.dataset.cpc).forEach(f=>{
+      const key = f.dataset.cpc, v = f.value.trim().slice(0,1500), i = rows.findIndex(r=> String(r.key).toLowerCase()===key.toLowerCase());
+      if(i>=0){ if(v) rows[i].value = v; else rows.splice(i,1); }
+      else if(v){ const lab = f.closest('label'); rows.push({key, label: lab ? lab.firstChild.textContent.trim() : key, value: v}); }
+    });
+    db.referralPay[ck] = {rows: rows.slice(0,200), updatedAt: new Date().toISOString(), source:'admin'};
+    pDirty.referral.add(ck);
   }
   changed.forEach(f=> f.defaultValue = f.value);   // 저장한 값이 새 기준값
   delete box.dataset.dirty;
@@ -9692,6 +9734,39 @@ function guideAdminHTML(rec){
     <div class="cp-admin-hint" style="margin-top:6px;">칸 안에서 <b>Enter</b>로 줄을 나누면 안내문에도 줄이 나뉘어 보여요 · 전화번호 · 계좌번호 같은 민감한 정보는 저장할 때 자동으로 빠져요. 고객 페이지 · 하객 공유에는 위 항목만 보여요.</div>
   </details>`;
 }
+/* ---------- 파트너 안내카드 (축의대 설정서 전체 내용 · 파트너스오피스 예식정보에 표시) ---------- */
+const CARD_OPEN = new Set();
+const CARD_SECS = [
+  ['예식 기본정보', ['groom','bride','package','halfside','date','time','region','venue','hall','guest_g','guest_b','parents_g','parents_b','aware','relation','relation_etc']],
+  ['축의금 정리방식', ['money_way','transfer_yn','acc_g','acc_b','refund','refund_etc']],
+  ['식권 운영', ['tk_g_a','tk_g_c','tk_b_a','tk_b_c','tk_contact','tk_invite','tk_cross','tk_out','tk_place','tk_age','tk_child_swap','tk_extra','tk_extra_etc']],
+  ['하객 안내사항', ['parking','parking_free','atm','hallpos','waiting','meal']],
+  ['VIP 명단 (줄마다 한 명 · 칸 순서 맞춰 입력)', ['vip_flag','vip_name','vip_relation','vip_contact','vip_tickets']],
+  ['축의금 인계 · 이메일', ['hand_g_rel','hand_g_name','hand_g_phone','hand_b_rel','hand_b_name','hand_b_phone','hand_disclose','hand_method','email_g','email_b']],
+  ['당일 일정 · 긴급연락', ['arrival','e1_rel','e1_name','e1_phone','e2_rel','e2_name','e2_phone']],
+  ['사진 · 영상 · 답례품 · 안내문', ['photo_agree','photo_cam','cam_rel','cam_name','cam_phone','gift','gift_type','gift_place','gift_target','gift_criteria','gift_script','link_g','link_b','signage']]
+];
+const CARD_EXTRA_LAB = {relation_etc:'관계 설정(기타)', refund_etc:'반환 요청 대응(기타)', gift_type:'답례품 종류', gift_place:'답례품 수령 장소', gift_target:'답례품 대상', gift_criteria:'답례품 지급 기준', gift_script:'답례품 안내 멘트',
+  vip_name:'VIP 성함(업체명)', vip_relation:'VIP 관계', vip_contact:'VIP 연락처', vip_tickets:'VIP 지급 식권', package:'계약 패키지', halfside:'계약 측'};
+function cardLab(k){ const l = SPDF.LABELS.find(x=> x.k===k && x.p); return CARD_EXTRA_LAB[k] || (l && l.p) || k; }
+function cardRevKey(){ const rev = {}; Object.keys(SPDF.JSON_MAP).forEach(jk=>{ rev[SPDF.JSON_MAP[jk]] = jk; }); return rev; }
+function cardAdminHTML(rec){
+  const rp = ensurePdb().referralPay || {}, c = rp['card:'+rec.id] || {}, rows = c.rows || [], rev = cardRevKey();
+  const byKey = {}; rows.forEach(r=>{ byKey[String(r.key).toLowerCase()] = r; });
+  const get = k=>{ const jk = rev[k] || k; const r = byKey[String(jk).toLowerCase()] || byKey[k]; return r ? String(r.value||'') : ''; };
+  const used = new Set(); CARD_SECS.forEach(([t, ks])=> ks.forEach(k=>{ used.add(String(rev[k]||k).toLowerCase()); used.add(k); }));
+  const extra = rows.filter(r=> !used.has(String(r.key).toLowerCase()));
+  const filled = rows.length, when = c.updatedAt ? new Date(c.updatedAt) : null;
+  const st = !filled ? '<span class="cp-gd-st none">아직 없음 · 설정서가 제출되거나 PDF를 올리면 채워져요</span>'
+    : `<span class="cp-gd-st ${c.source==='admin'?'admin':'form'}">${c.source==='admin'?'✏️ 직접 입력':'📝 설정서 연동'} · 항목 ${filled}개${when? ` · ${when.getMonth()+1}/${when.getDate()} ${String(when.getHours()).padStart(2,'0')}:${String(when.getMinutes()).padStart(2,'0')}`:''}</span>`;
+  const field = (k, lab, val, jk)=>{ const multi = /^vip_|tk_contact|tk_extra|tk_out|parking$|refund|hand_method|gift_script|relation|aware/.test(k) || String(val).length>40 || String(val).indexOf('\n')>=0;
+    return `<label>${esc(lab)}${multi? `<textarea data-cpc="${esc(jk)}" rows="${Math.min(5, Math.max(2, String(val).split('\n').length))}">${esc(val)}</textarea>` : `<input data-cpc="${esc(jk)}" value="${esc(val)}">`}</label>`; };
+  return `<details class="cp-gd-admin cp-card-admin" data-cardrid="${rec.id}" ${CARD_OPEN.has(rec.id)?'open':''}><summary><b>🗂 파트너 안내카드</b> ${st}</summary>
+    <div class="cp-admin-hint" style="margin:6px 0 8px;">파트너스오피스 「예식정보」에 배정된 파트너에게만 보이는 설정서 요약이에요 (계좌 · 연락처 포함). 고객 페이지에는 나오지 않아요. 값을 지우고 저장하면 그 항목은 빠져요.</div>
+    ${CARD_SECS.map(([t, ks])=>`<div class="cp-card-sec"><h5>${esc(t)}</h5><div class="cp-admin-grid">${ks.map(k=> field(k, cardLab(k), get(k), rev[k]||k)).join('')}</div></div>`).join('')}
+    ${extra.length? `<div class="cp-card-sec"><h5>그 밖의 항목</h5><div class="cp-admin-grid">${extra.map(r=> field(r.key, r.label && r.label!==r.key ? r.label : r.key, String(r.value||''), r.key)).join('')}</div></div>`:''}
+  </details>`;
+}
 async function saveGuide(rec, patch){ applyGuidePatch(rec, patch); showToast('예식 안내문을 저장했어요'); await savePartnerDb(); }
 function applyGuidePatch(rec, patch){
   const db = ensurePdb(); db.referralPay = db.referralPay || {};
@@ -9738,11 +9813,273 @@ async function pdfToText(file){
   }
   return out;
 }
+/* ---------- 안내카드(index.html)와 같은 설정서 PDF 해석기: 표형 · 글머리형 글자 PDF → 항목별 값 ---------- */
+const SPDF = (function(){
+'use strict';
+const LABELS = [
+  // 01 예식 기본정보
+  {k:'groom',   p:'신랑 성함'},
+  {k:'bride',   p:'신부 성함'},
+  {k:'package', p:'계약 패키지'},
+  {k:'halfside',re:'\\S{0,4}\\s*계약\\s*-\\s*계약\\s*측'},   // "한측 계약 - 계약 측"
+  {k:'date',    p:'예식일'},
+  {k:'time',    p:'예식 시작시간'},
+  {k:'region',  p:'지역'},
+  {k:'venue',   p:'예식장명'},
+  {k:'hall',    p:'홀 이름'},
+  {k:'guest_g', p:'신랑측 예상 하객 수'},
+  {k:'guest_b', p:'신부측 예상 하객 수'},
+  // 02 양가 정보
+  {k:'parents_g', p:'[신랑측] 혼주 성함'},
+  {k:'parents_b', p:'[신부측] 혼주 성함'},
+  // 03 관계 설정
+  {k:'aware',   p:'축의업체 인지사항(가족 인지 여부)'},
+  {k:'relation',p:'관계 설정'},
+  // 04 축의금 정리방식
+  {k:'money_way', p:'축의금 정리 방식'},
+  {k:'transfer_yn', p:'계좌이체 받을 예정'},
+  {k:'acc_g',   p:'신랑 계좌'},
+  {k:'acc_b',   p:'신부 계좌'},
+  {k:'refund',  p:'축의금 반환 요청 시 대응 방법'},
+  // 05 식권 운영
+  {k:'tk_g_a',  p:'배정 식권수량(신랑측 대인)'},
+  {k:'tk_g_c',  p:'배정 식권수량(신랑측 소인)'},
+  {k:'tk_b_a',  p:'배정 식권수량(신부측 대인)'},
+  {k:'tk_b_c',  p:'배정 식권수량(신부측 소인)'},
+  {k:'tk_contact', p:'축의금 계좌이체 하객 응대 방법'},
+  {k:'tk_invite',  p:'모바일 청첩장 주소'},
+  {k:'tk_cross',   p:'식권 교차 사용 가능 여부'},
+  {k:'tk_out',     p:'식권 소진 시 대응 방법'},
+  {k:'tk_place',   p:'식권 소진 시 추가 수령 장소'},
+  {k:'tk_age',     p:'소인 식권의 나이 기준'},
+  {k:'tk_child_swap', p:'소인 식권 소진 시 대인 식권 사용 가능 여부'},
+  // 라벨이 두 줄로 꺾여 "…사용 가능 [값] / 여부" 로 읽히는 경우
+  {k:'tk_child_swap', p:'소인 식권 소진 시 대인 식권 사용 가능', wrapped:true},
+  {k:'tk_extra',     p:'식권 추가 지급 요청 시 대응 방법'},
+  {k:'tk_extra_etc', p:'식권 추가 지급 대응(기타)'},
+  // 06 답례품
+  {k:'gift',        p:'답례품 제공 여부'},
+  // 07 하객 안내사항
+  {k:'parking',     p:'주차 등록 방법'},
+  {k:'parking_free',p:'무료 주차 시간'},
+  {k:'atm',         p:'ATM 위치'},
+  {k:'hallpos',     p:'연회장 위치'},
+  {k:'waiting',     p:'신부대기실 위치'},
+  {k:'meal',        p:'식사 가능 시간'},
+  // 08 VIP
+  {k:'vip_flag',    p:'VIP 명단 작성 여부'},
+  // 09 축의금 인계
+  {k:'hand_g_rel',  p:'인계 받으실 분(신랑측) - 관계'},
+  {k:'hand_g_name', p:'인계 받으실 분(신랑측) - 성함'},
+  {k:'hand_g_phone',p:'인계 받으실 분(신랑측) - 연락처'},
+  {k:'hand_b_rel',  p:'인계 받으실 분(신부측) - 관계'},
+  {k:'hand_b_name', p:'인계 받으실 분(신부측) - 성함'},
+  {k:'hand_b_phone',p:'인계 받으실 분(신부측) - 연락처'},
+  {k:'hand_disclose',p:'축의금 인계시, 축의금 내역 노출 여부'},
+  {k:'hand_method', p:'축의금 전체 세부내역 전달 방식'},
+  {k:'email_g',     p:'축의금 정리내역 전달 이메일(신랑측)'},
+  {k:'email_b',     p:'축의금 정리내역 전달 이메일(신부측)'},
+  {k:'email',       p:'축의금 정리내역 전달 이메일'},
+  // 10 당일 일정
+  {k:'arrival',     p:'신랑,신부님 웨딩홀 도착 예상 시간'},
+  // 11 긴급상황 대응
+  {k:'e1_rel',  p:'비상연락 1순위 - 관계'},
+  {k:'e1_name', p:'비상연락 1순위 - 성함'},
+  {k:'e1_phone',p:'비상연락 1순위 - 연락처'},
+  {k:'e2_rel',  p:'비상연락 2순위 - 관계'},
+  {k:'e2_name', p:'비상연락 2순위 - 성함'},
+  {k:'e2_phone',p:'비상연락 2순위 - 연락처'},
+  {k:'e1_all',  p:'비상연락 1순위'},
+  {k:'e2_all',  p:'비상연락 2순위'},
+  // 12 사진 및 영상촬영
+  {k:'photo_agree', p:'서비스 전 과정 촬영 동의'},
+  {k:'photo_cam',   p:'추가 촬영용 카메라 제공 여부'},
+  {k:'cam_rel',     p:'추가 카메라 전달자 - 관계'},
+  {k:'cam_name',    p:'추가 카메라 전달자 - 성함'},
+  {k:'cam_phone',   p:'추가 카메라 전달자 - 연락처'},
+  {k:'link_g',      p:'링크 받으실 분(신랑측)'},
+  {k:'link_b',      p:'링크 받으실 분(신부측)'},
+  // 13·14
+  {k:'signage',     p:'예식 안내문 제작 여부'},
+  {k:'contractor',  p:'계약자 성함'},
+];
+
+const SECTION_TITLES = {
+  '01':'예식 기본정보','02':'양가 정보','03':'관계 설정','04':'축의금 정리방식',
+  '05':'식권 운영','06':'답례품','07':'하객 안내사항','08':'VIP 명단',
+  '09':'축의금 인계','10':'당일 일정','11':'긴급상황 대응','12':'사진 및 영상촬영',
+  '13':'예식 안내문 제작 여부','14':'동의 및 확인'
+};
+
+const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const patToRe = p => p.trim().split(/\s+/).map(esc).join('\\s*');
+
+// 긴 라벨이 먼저 시도되도록 정렬 ("비상연락 1순위 - 관계" 가 "비상연락 1순위" 보다 먼저)
+const COMPILED = LABELS.map(l => ({
+  k: l.k, wrapped: !!l.wrapped,
+  src: l.re || patToRe(l.p),
+  len: (l.p || l.re).length
+})).sort((a,b) => b.len - a.len)
+  .map(l => Object.assign(l, {
+    start: new RegExp('^\\s*(?:' + l.src + ')(?=\\s|$|:)\\s*:?\\s*'),
+    exact: new RegExp('^\\s*(?:' + l.src + ')\\s*$')
+  }));
+
+const ALL_LABEL_SRC = COMPILED.map(l => l.src).join('|');
+// "…요청- 식권 소진 시…" 처럼 항목 두 개가 붙어 나온 글머리 줄을 분리
+// (구분용 '-' 는 지우지 않고 그 앞에서만 자른다)
+const GLUED_BULLET = new RegExp('(?<=\\S)(?=-\\s*(?:' + ALL_LABEL_SRC + ')\\s*:)');
+
+const NOISE = [
+  /^\s*MOMENT\s*WORKS\b/i,
+  /^\s*M\s*O\s*M\s*E\s*N\s*T\s+W\s*O\s*R\s*K\s*S\s*$/,
+  /작성해\s*주셔서\s*감사합니다/,
+  /위\s*내용은\s*사실과\s*다름없으며/,
+  /본\s*문서는\s*모먼트웍스/,
+  /축의대\s*대행\s*운영\s*설정서/,
+  /두\s*분의\s*결혼식을\s*위하여/,
+];
+const FOOTER_RE = /MOMENT\s*WORKS\s*\d\s*\/\s*\d/g;   // 쪽번호는 항상 한 자리 (예: "1 / 4")
+
+function matchSection(t){
+  // "01   예식 기본정보" 또는 "■ 01. 예식 기본정보"
+  let m = t.match(/^\s*(?:■\s*)?(\d{2})\s*\.?\s+(.+?)\s*$/);
+  if(m && SECTION_TITLES[m[1]] && m[2].replace(/\s+/g,'') === SECTION_TITLES[m[1]].replace(/\s+/g,'')) return m[1];
+  if(/^\s*■\s*동의\s*여부/.test(t)) return 'end';
+  return null;
+}
+
+function matchLabel(t){
+  for(const l of COMPILED){
+    const m = t.match(l.start);
+    if(m) return { k:l.k, wrapped:l.wrapped, rest:t.slice(m[0].length).trim() };
+  }
+  return null;
+}
+
+/* ───────────── 복원 데이터형 ───────────── */
+const JSON_MAP = {
+  groom_name:'groom', bride_name:'bride', contract_package:'package', contract_half_side:'halfside',
+  wedding_date:'date', wedding_time:'time', venue_region:'region', venue_name:'venue', hall_name:'hall',
+  groom_guest_count:'guest_g', bride_guest_count:'guest_b',
+  groom_side_name:'parents_g', bride_side_name:'parents_b',
+  relation_type:'relation', relation_type_etc:'relation_etc',
+  money_op:'money_way', transfer_yn:'transfer_yn', groom_account:'acc_g', bride_account:'acc_b',
+  refund_way:'refund', refund_way_etc:'refund_etc',
+  ticket_adult_groom:'tk_g_a', ticket_child_groom:'tk_g_c', ticket_adult_bride:'tk_b_a', ticket_child_bride:'tk_b_c',
+  transfer_check_way:'tk_contact', mobile_invitation_url:'tk_invite', ticket_cross_use:'tk_cross',
+  ticket_out_way:'tk_out', ticket_out_place:'tk_place', child_ticket_age:'tk_age',
+  child_to_adult_ticket:'tk_child_swap', ticket_reissue_way:'tk_extra', ticket_reissue_way_etc:'tk_extra_etc',
+  gift_yn:'gift', gift_type:'gift_type', gift_place:'gift_place', gift_target:'gift_target',
+  gift_criteria:'gift_criteria', gift_script:'gift_script',
+  info_parking_way:'parking', info_parking_time:'parking_free', info_atm:'atm', info_hall:'hallpos',
+  info_bride_room:'waiting', info_meal_time:'meal',
+  vip_yn:'vip_flag',
+  handover_relation_groom:'hand_g_rel', handover_name_groom:'hand_g_name', handover_phone_groom:'hand_g_phone',
+  handover_relation_bride:'hand_b_rel', handover_name_bride:'hand_b_name', handover_phone_bride:'hand_b_phone',
+  handover_report_email_groom:'email_g', handover_report_email_bride:'email_b',
+  final_report_visibility:'hand_disclose', detail_delivery_way:'hand_method',
+  sch_mw_arrive:'arrival',
+  emg_1_relation:'e1_rel', emg_1_name:'e1_name', emg_1_phone:'e1_phone',
+  emg_2_relation:'e2_rel', emg_2_name:'e2_name', emg_2_phone:'e2_phone',
+  photo_consent:'photo_agree', extra_camera:'photo_cam',
+  camera_deliverer_relation:'cam_rel', camera_deliverer_name:'cam_name', camera_deliverer_phone:'cam_phone',
+  link_receiver_groom:'link_g', link_receiver_bride:'link_b',
+  guide_doc:'signage', contractor_name:'contractor'
+};
+
+/* ───────────── 텍스트형 (표형·글머리형 공통) ───────────── */
+const VIP_BULLET = /^-?\s*(.+?)\s*\/\s*관계\s*:\s*(.*?)\s*\/\s*연락처\s*:\s*(.*?)\s*\/\s*지급\s*식권\s*수량\s*:\s*(.*)$/;
+
+function parseText(raw){
+  const bullet = /■\s*01\s*\./.test(raw);
+  const lines = raw.split(/\r?\n/)
+    .map(l => l.replace(FOOTER_RE, ' ').replace(/ /g, ' ').replace(/\s+$/, ''))
+    .filter(l => l.trim());
+
+  const entries = {}, unknown = [], vipRows = [];
+  let section = null, cur = null;
+
+  const begin = (key, rest, extra) => {
+    cur = { key, parts: rest ? [rest] : [], unknownLabel: extra && extra.unknownLabel, skipYeobu: extra && extra.wrapped };
+    list.push(cur);
+  };
+  const list = [];
+
+  for(const line of lines){
+    const t = line.trim();
+    const sec = matchSection(t);
+    if(sec){ section = sec; cur = null; continue; }
+    if(section === null || section === 'end') continue;   // 01 이전(표지)·동의 이후는 무시
+    if(NOISE.some(re => re.test(t))) continue;
+
+    if(section === '08'){
+      const lm = matchLabel(t);
+      if(lm && lm.k === 'vip_flag'){ entries.vip_flag = lm.rest; continue; }
+      if(/성함\s*\(?업체명\)?/.test(t) && /지급/.test(t)) continue;           // 표 머리글
+      const bm = t.match(VIP_BULLET);
+      if(bm){ vipRows.push([bm[1], bm[2], bm[3], bm[4]].map(s => s.trim())); continue; }
+      const cells = line.trim().split(/\s{2,}/);
+      if(cells.length >= 3) vipRows.push([cells[0], cells[1], cells[2], cells.slice(3).join(' ')].map(s => (s||'').trim()));
+      continue;
+    }
+
+    // ── 글머리형: "- 라벨: 값" (붙어 나온 항목은 먼저 분리)
+    if(bullet){
+      for(const seg of t.split(GLUED_BULLET)){
+        const bm = seg.match(/^-?\s*([^:]{1,60}?)\s*:\s*(.*)$/);
+        if(/^\s*-/.test(seg) && bm){
+          const lab = matchLabelExact(bm[1]);
+          if(lab) begin(lab.k, bm[2].trim());
+          else { begin(null, bm[2].trim(), {unknownLabel: bm[1].trim()}); }
+        }else if(cur){
+          cur.parts.push(seg.trim());
+        }
+      }
+      continue;
+    }
+
+    // ── 표형: "라벨   값" (값이 다음 줄로 이어질 수 있음)
+    const lm = matchLabel(t);
+    if(lm){ begin(lm.k, lm.rest, {wrapped: lm.wrapped}); continue; }
+    if(cur && cur.skipYeobu && /^여부$/.test(t)){ cur.skipYeobu = false; continue; }   // 꺾인 라벨의 꼬리
+    if(/\S\s{2,}\S/.test(line.trim())){                         // 사전에 없는 새 항목 → 앞 항목에 섞지 않는다
+      const cells = line.trim().split(/\s{2,}/);
+      begin(null, cells.slice(1).join(' '), {unknownLabel: cells[0]});
+      continue;
+    }
+    if(cur) cur.parts.push(t);                                   // 이어지는 값
+  }
+
+  for(const c of list){
+    const v = c.parts.join(' ').replace(/\s+/g, ' ').trim();
+    if(c.key){ if(!(c.key in entries)) entries[c.key] = v; }
+    else unknown.push({label:c.unknownLabel, value:v});
+  }
+  return { format: bullet ? '글머리형 텍스트' : '표형 텍스트', entries, vip: vipRows, unknown };
+}
+
+function matchLabelExact(s){
+  for(const l of COMPILED) if(l.exact.test(s)) return { k:l.k };
+  return null;
+}
+
+return {parseText, JSON_MAP, LABELS};
+})();
 /* 설정서 PDF 텍스트 → 운영설정서와 같은 형식의 데이터 (숨은 데이터 블록 우선, 없으면 항목명으로 찾기) */
 function settingsDataFromText(text){
   const m = text.match(/--MW-DATA-START--([\s\S]*?)--MW-DATA-END--/);
   if(m){ try{ const b64 = m[1].replace(/\s+/g,''); const bin = atob(b64), bytes = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
     const o = JSON.parse(new TextDecoder('utf-8').decode(bytes)); if(o && typeof o==='object') return {data:o, via:'숨은 데이터'}; }catch(e){} }
+  // 1순위: 안내카드 해석기(표형 · 글머리형) → 설정서 원본 항목 이름(groom_name …)으로 되돌려 담기
+  try{
+    const pr = SPDF.parseText(text), rev = {}; Object.keys(SPDF.JSON_MAP).forEach(jk=>{ rev[SPDF.JSON_MAP[jk]] = jk; });
+    const o = {}, en = pr.entries || {};
+    Object.keys(en).forEach(k=>{ const v = String(en[k]==null?'':en[k]).trim(); if(!v) return; o[rev[k] || k] = v; });
+    if(pr.vip && pr.vip.length){ o.vip_name = pr.vip.map(r=> r[0]||''); o.vip_relation = pr.vip.map(r=> r[1]||''); o.vip_contact = pr.vip.map(r=> r[2]||''); o.vip_tickets = pr.vip.map(r=> r[3]||''); }
+    (pr.unknown||[]).forEach(u=>{ if(u && u.label && u.value && o[u.label]===undefined) o[u.label] = u.value; });
+    if(Object.keys(o).length>=4) return {data:o, via: pr.format};
+  }catch(e){ /* 아래 기존 방식으로 */ }
   const DEF = [['info_parking_way',['주차 등록 방법','주차등록 방법','주차 등록']],['info_parking_time',['무료 주차 시간','무료주차 시간','무료 주차']],['info_atm',['ATM 위치','ATM']],
     ['info_hall',['연회장 위치','연회장']],['info_bride_room',['신부대기실 위치','신부 대기실 위치','신부대기실']],['info_meal_time',['식사 가능 시간','식사 가능시간','식사시간']],
     ['child_ticket_age',['소인 식권의 나이 기준','소인식권 나이 기준','소인 식권 나이','소인식권']],['groom_name',['신랑 성함']],['bride_name',['신부 성함']],['wedding_date',['예식일']],['contractor_name',['계약자 성함']]];
@@ -9988,7 +10325,7 @@ function renderCustomerTab(){
           <td><span class="cu-when">${fmtDate(r.weddingDate)}${r.weddingTime? ` <b>${esc(r.weddingTime)}</b>`:''}</span>${dd && dd.diff>=0 ? ` <span class="badge ${dd.diff<=7?'badge-urgent':'badge-normal'}">${dd.label}</span>`:''}</td>
           <td><b>${esc(r.clientName)}</b>${isNewRec(r)?' <span class="mw-new-tag">NEW</span>':''}<div class="cu-sub">${esc(r.contractCode||'')}</div></td>
           <td>${esc(r.productType||'-')}<div class="cu-sub">${esc(r.venueName||'')}</div></td>
-          <td>${has? `<b class="cu-code ${off?'off':''}">${esc(c.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(c.code)}" title="접속코드 복사">📋</button>${off?'<div class="cu-sub">사용 중지</div>':''}${sideEligible(r)? ['groom','bride'].map(sk=>{ const sd=(c.sides||{})[sk]; return sd&&sd.code? `<div class="cu-sub">${SIDE_LABEL[sk]} <b class="cu-code ${sd.active===false?'off':''}">${esc(sd.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(sd.code)}" title="${SIDE_LABEL[sk]} 접속코드 복사">📋</button></div>` : ''; }).join('') + (!((c.sides||{}).groom||{}).code || !((c.sides||{}).bride||{}).code ? `<div class="cu-sub"><a href="#" data-cu="edit" data-id="${r.id}">+ 신랑·신부 코드</a></div>` : '') : ''}` : `<button class="btn btn-sm btn-primary" data-cu="create" data-id="${r.id}">코드 발급</button>`}</td>
+          <td>${has? `<b class="cu-code ${off?'off':''}">${esc(c.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(c.code)}" title="접속코드 복사">📋</button>${off?'<div class="cu-sub">사용 중지</div>':''}${sideEligible(r)? `<div class="cu-sub">주계약자(${SIDE_LABEL[mainSideOf(r, c)]})</div>` + ['groom','bride'].map(sk=>{ const sd=(c.sides||{})[sk]; return sd&&sd.code? `<div class="cu-sub">${SIDE_LABEL[sk]} <b class="cu-code ${sd.active===false?'off':''}">${esc(sd.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(sd.code)}" title="${SIDE_LABEL[sk]} 접속코드 복사">📋</button></div>` : ''; }).join('') + (!((c.sides||{}).groom||{}).code && !((c.sides||{}).bride||{}).code ? `<div class="cu-sub"><a href="#" data-cu="edit" data-id="${r.id}">+ 추가 코드 (${SIDE_LABEL[OTHER_SIDE[mainSideOf(r, c)]]})</a></div>` : '') : ''}` : `<button class="btn btn-sm btn-primary" data-cu="create" data-id="${r.id}">코드 발급</button>`}</td>
           <td>${yes(c.contractUrl)}</td><td>${yes(liveSet(c))}${c.youtubeGroom&&c.youtubeBride?'<div class="cu-sub">신랑·신부</div>':''}</td><td>${yes(giftSet(c))}</td><td>${yes(guideOf(r))}</td>
           <td class="cu-acts">${has? `<button class="btn btn-sm" data-cu="invite" data-id="${r.id}">초대 문구</button><button class="btn btn-sm" data-cu="preview" data-id="${r.id}">미리보기</button>`:''}<button class="btn btn-sm ${open?'btn-primary':''}" data-cu="edit" data-id="${r.id}">${open?'닫기':'편집'}</button></td>
         </tr>${open? `<tr class="cu-edit"><td colspan="9"><div id="cpTabBox" class="cp-admin" data-rid="${r.id}"></div></td></tr>`:''}`;
@@ -10011,7 +10348,7 @@ document.addEventListener('click', async (ev)=>{
   const el = ev.target.closest('#custTabRoot [data-cu]'); if(!el || el.tagName==='SELECT' || el.tagName==='INPUT') return;
   if(el.tagName==='A') ev.preventDefault();
   const a = el.dataset.cu, rec = el.dataset.id ? recordById(el.dataset.id) : null;
-  if(a==='create' && rec){ await saveClient(rec, newClientData(rec), `${rec.clientName}님 코드를 발급했어요${sideEligible(rec)?' (신랑 · 신부 코드 포함)':''}`); CUST_STATE.open = rec.id; renderCustomerTab(); return; }
+  if(a==='create' && rec){ await saveClient(rec, newClientData(rec), `${rec.clientName}님 코드를 발급했어요${sideEligible(rec)?' (추가 코드 1개 포함)':''}`); CUST_STATE.open = rec.id; renderCustomerTab(); return; }
   if(a==='gfold'){ GUIDE_FOLD = !GUIDE_FOLD; renderCustomerTab(); return; }
   if(a==='gclear'){ if(GUIDE_IMPORT.some(x=> !x.ok && !x.busy) && !confirm('확인이 필요한 설정서가 남아 있어요. 결과를 지울까요?')) return; GUIDE_IMPORT = []; GUIDE_PROG = null; GUIDE_FOLD = false; renderCustomerTab(); return; }
   if(a==='gassign'){
@@ -10032,7 +10369,7 @@ document.addEventListener('click', async (ev)=>{
     if(!list.length || !confirm(`예정 예식 ${list.length}건에 고객 코드를 한 번에 발급할까요?`)) return;
     const db = ensurePdb(); db.referralPay = db.referralPay || {};
     list.forEach(r=>{ const k = clientKey(r); db.referralPay[k] = Object.assign({}, db.referralPay[k]||{}, Object.assign(newClientData(r), {key: recordKey(r), updatedAt:new Date().toISOString()})); pDirty.referral.add(k); });
-    renderCustomerTab(); showToast(`${list.length}건 코드를 발급했어요 (양측 · 통합은 신랑 · 신부 코드 포함)`); await savePartnerDb(); return;
+    renderCustomerTab(); showToast(`${list.length}건 코드를 발급했어요 (양측 · 통합은 주계약자 + 추가 코드 1개)`); await savePartnerDb(); return;
   }
 });
 async function runGuideImport(list){
