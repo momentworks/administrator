@@ -780,6 +780,38 @@ details.pp-past summary{cursor:pointer;font-size:13px;font-weight:700;color:var(
 .pp-ct-btn{flex:none;text-decoration:none;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:700;border:1px solid var(--pp-line,#d9d0c2);color:var(--pp-ink,#222);background:#faf6ee;}
 .pp-ct-btn.call{background:var(--pp-wine,#7a2e3a);border-color:var(--pp-wine,#7a2e3a);color:#fff;}
 .pp-ct-none{font-size:11.5px;color:var(--pp-slate);}
+
+.pp-info-h{padding:11px 14px 4px;font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px;}
+.pp-info-h small{font-weight:500;color:var(--pp-slate);font-size:11px;}
+.pp-info-top{margin:2px 0 12px;font-size:13px;line-height:1.6;}
+.pp-info-top .pp-dday{margin-right:8px;}
+
+.pp-info-intro{font-size:12px;color:var(--pp-slate);margin:2px 0 12px;}
+.pp-info-event{margin-bottom:26px;padding-bottom:6px;border-bottom:2px dashed var(--pp-line,#e7dfd3);}
+.pp-info-event:last-child{border-bottom:0;}
+.pp-info-top{padding:10px 12px;border-radius:12px;background:#2a2622;color:#fff;margin-bottom:10px;}
+.pp-info-top .pp-dday{color:#d9b56a;}
+.pp-sum{border-top:1px solid var(--pp-line,#e7dfd3);margin-top:4px;}
+.pp-sum-h{padding:12px 14px 2px;font-weight:700;font-size:13px;}
+.pp-sum-h small{font-weight:500;color:var(--pp-slate);font-size:11px;margin-left:6px;}
+.pp-info-more{padding:4px 14px 14px;}
+
+/* 파트너 안내카드 양식 */
+.pp-card-brief{margin:4px 14px 10px;padding:12px 14px;border-radius:12px;background:#f6f1e4;border:1px solid #e3d8bb;}
+.pp-cb-names{font-size:17px;font-weight:800;letter-spacing:.01em;}
+.pp-cb-names i{font-style:normal;color:#9a7b2f;margin:0 4px;}
+.pp-cb-pack{font-size:12px;color:#6f5a20;margin-top:2px;}
+.pp-cb-when{font-size:12.5px;line-height:1.7;margin-top:8px;color:#3b372f;}
+.pp-qgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 14px 6px;}
+.pp-qcell{border:1px solid var(--pp-line,#e7dfd3);border-radius:10px;padding:8px 10px;background:#fff;}
+.pp-qcell span{display:block;font-size:11px;color:var(--pp-slate);margin-bottom:2px;}
+.pp-qcell b{font-size:13px;}
+.pp-nil{color:#b9b2a1!important;font-weight:400!important;}
+.pp-tel{color:var(--pp-wine,#7a2e3a);text-decoration:underline;text-underline-offset:2px;}
+.pp-vip{overflow-x:auto;}
+.pp-vip table{width:100%;border-collapse:collapse;font-size:12px;}
+.pp-vip th{background:#f3efe2;font-weight:700;text-align:left;padding:5px 7px;border:1px solid #e3d8bb;white-space:nowrap;}
+.pp-vip td{padding:5px 7px;border:1px solid #eee6d3;vertical-align:top;}
 /* ================= 접속 메인화면 (모먼트웍스 로고) ================= */
 .mw-entry{position:fixed;inset:0;z-index:500;overflow-y:auto;background:#F7F5F0;background-image:radial-gradient(ellipse at 50% 38%, #FFFFFF 0%, #F7F5F0 55%, #EFEBE3 100%);color:#1A1618;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;display:flex;align-items:center;justify-content:center;padding:56px 22px;box-sizing:border-box;}
@@ -1426,6 +1458,31 @@ html,body{overflow-anchor:none;}
 .cp-savebar.on .cp-save-st b{color:#b86e00;}
 .cp-savebar .btn-primary:disabled{opacity:.45;cursor:not-allowed;}
 .cp-admin .cp-changed{border-color:#f0b44c !important;background:#fffaf0 !important;box-shadow:0 0 0 2px rgba(240,180,76,.18);}
+
+/* 고객페이지 관리: 저장 버튼 상단 · 행 클릭 · PDF 드롭존 · 신규 계약 */
+.cp-admin-h{position:sticky;top:0;z-index:6;background:#FFFDF8;padding:8px 2px;margin:-2px 0 8px;border-bottom:1px solid var(--line,#e7dfd3);}
+.cp-admin-h .cp-savebar{position:static;margin:0 0 0 auto;padding:5px 8px;border-radius:10px;flex-wrap:nowrap;box-shadow:none;}
+.cp-admin-h .cp-savebar .cp-save-st{flex:none;font-size:12px;white-space:nowrap;}
+.cp-admin-h .cp-savebar.on{box-shadow:0 2px 10px rgba(240,160,40,.25);}
+.cp-admin-h .cp-savebar .btn-primary{min-width:76px;}
+.cu-table tr.cu-row{cursor:pointer;transition:background .12s;}
+.cu-table tr.cu-row:hover td{background:#F6EFE0 !important;}
+.cu-drop{display:flex;flex-direction:column;align-items:center;gap:3px;margin-top:10px;padding:20px 14px;border:2px dashed #cdbd95;border-radius:12px;background:#FFFBF1;cursor:pointer;text-align:center;transition:all .15s;}
+.cu-drop:hover,.cu-drop.over{border-color:#b8892b;background:#FFF3D6;}
+.cu-drop.over{transform:scale(1.01);box-shadow:0 0 0 4px rgba(184,137,43,.18);}
+.cu-drop.disabled{opacity:.55;pointer-events:none;}
+.cu-drop .cu-drop-ic{font-size:26px;} .cu-drop b{font-size:14px;} .cu-drop small{color:var(--slate,#7a7a85);font-size:11.5px;}
+#mwNewBanner{position:sticky;top:0;z-index:300;background:linear-gradient(90deg,#7a2e3a,#a14656);color:#fff;box-shadow:0 2px 12px rgba(0,0,0,.18);}
+#mwNewBanner .mw-nb-in{max-width:1320px;margin:0 auto;padding:9px 16px;display:flex;align-items:center;gap:12px;}
+#mwNewBanner .mw-nb-ic{font-size:18px;}
+#mwNewBanner .mw-nb-t{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;font-size:13px;}
+#mwNewBanner .mw-nb-t span{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12.5px;opacity:.95;}
+#mwNewBanner a{color:#ffe9b8;text-decoration:underline;text-underline-offset:2px;}
+#mwNewBanner .mw-nb-x{background:rgba(255,255,255,.18);border:0;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;}
+#mwNewBanner .mw-nb-x:hover{background:rgba(255,255,255,.32);}
+tr.mw-new-row>td{background:#FFF6D6 !important;}
+tr.mw-new-row>td:first-child{box-shadow:inset 4px 0 0 #E0A526;}
+.mw-new-tag{display:inline-block;margin-left:4px;padding:1px 6px;border-radius:999px;background:#E0A526;color:#fff;font-size:10px;font-weight:800;letter-spacing:.03em;vertical-align:middle;}
 /* ===== 고객 전용 페이지 ===== */
 .cp{--cp-ink:#1F1A1C;--cp-soft:#5E5750;--cp-paper:#F4F1EA;--cp-card:#FFFFFF;--cp-line:#E2DBCD;--cp-wine:#5C1F29;--cp-gold:#A9823C;--cp-gold-s:#F2E7CF;--cp-sage:#4F6F52;--cp-coral:#B0432E;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--cp-ink);background:var(--cp-paper);min-height:100vh;font-variant-numeric:tabular-nums;max-width:640px;margin:0 auto;position:relative;}
@@ -4100,7 +4157,7 @@ function pvDefaultMessages(){
    운영설정서 항목의 이름(키/라벨)으로 찾아 맞추고, 값에서 이름과 전화번호를 나눠 통화·문자 버튼으로 씀 */
 function partnerContacts(rows){
   var GROUPS = [
-    {id:'ticket', title:'식권 전달자', icon:'🎫', re:/ticket|meal_?coupon|식권/i, not:/child|소인|수량|매수|count|age|나이/i},
+    {id:'ticket', title:'식권 전달자', icon:'🎫', re:/ticket|meal_?coupon|식권/i, not:/child|adult|소인|대인|수량|매수|count|age|나이|cross|교차|swap|reissue|invite|청첩|out|소진|응대|check|way|place|transfer|이체/i},
     {id:'handover', title:'축의금 인계받는 분', icon:'💌', re:/hand_?over|take_?over|receiv|인계|인수/i, not:/시간|방법|장소/},
     {id:'emergency', title:'비상연락망', icon:'🚨', re:/emerg|urgent|비상|긴급/i, not:null}
   ];
@@ -4123,7 +4180,7 @@ function partnerContacts(rows){
         });
         if(!added) found.forEach(function(ph){ people.push({name:'', phone: ph.replace(/[^0-9+]/g,''), shown: ph}); });
         used[m.i] = true;
-      } else if(v.length<=24 && !/\d{4,}/.test(v)){ names.push({v:v, i:m.i}); }
+      } else if(v.length<=24 && !/\d{4,}/.test(v) && /name|성함|이름|person|holder|deliver|전달|담당|인수|인계/i.test(String(m.r.key||'')+' '+String(m.r.label||''))){ names.push({v:v, i:m.i}); }
     });
     // 이름 칸과 전화번호 칸이 따로 있을 때 순서대로 짝짓기
     if(names.length){
@@ -4204,7 +4261,8 @@ function buildPartnerView(records, db, code, todayStr){
         var g = (db.referralPay||{})['guide:'+recordId] || {}, c = (db.referralPay||{})['card:'+recordId] || {};
         if(!g.items && !g.groomName && !g.brideName && !(c.rows||[]).length) return null;
         var ct = partnerContacts(c.rows||[]);
-        return {groomName: g.groomName||'', brideName: g.brideName||'', items: g.items||{}, notes: g.notes||{}, rows: ct.rest, contacts: ct.groups};
+        var cardMap = {}; (c.rows||[]).forEach(function(r){ if(r && r.key) cardMap[r.key] = r.value; });
+        return {groomName: g.groomName||'', brideName: g.brideName||'', items: g.items||{}, notes: g.notes||{}, rows: ct.rest, contacts: ct.groups, card: cardMap};
       })(),
       checkinAt: resp.checkinAt || '',
       checks: resp.checks || {},
@@ -4306,6 +4364,7 @@ function guideNormalize(input){
   ];
   var key = function(x){ return String(x||'').toLowerCase().replace(/[\s·\-_:()]/g,''); };
   var clean = function(v){
+    if(v && typeof v==='object'){ var fl = function(x, d){ if(x===undefined||x===null||d>4) return ''; if(Array.isArray(x)) return x.map(function(y){ return fl(y,d+1); }).filter(Boolean).join(', '); if(typeof x==='object') return Object.keys(x).map(function(q){ return fl(x[q],d+1); }).filter(Boolean).join(' '); return String(x); }; v = fl(v, 0); }
     v = String(v===undefined||v===null ? '' : v).replace(/\r/g,'').trim();
     v = v.replace(/01[016789][\s.\-]?\d{3,4}[\s.\-]?\d{4}/g, '')          // 휴대폰 번호
          .replace(/\d{2,6}[\s\-]\d{2,6}[\s\-]\d{2,8}([\s\-]\d{1,6})?/g, '')   // 계좌번호 형식
@@ -4327,6 +4386,24 @@ function guideNormalize(input){
     var v = src[f[0]];
     if(v===undefined){ var c = [f[1]].concat(f[2]); for(var i=0;i<c.length && v===undefined;i++){ if(flat[key(c[i])]!==undefined) v = flat[key(c[i])]; } }
     v = clean(v); if(v) items[f[0]] = v;
+  });
+  // 이름이 달라도 찾기: 항목 이름(키 · 라벨)에 핵심 단어가 들어 있으면 자동 매칭 (값이 목록 · 표여도 글로 펼침)
+  var FUZZ = {parking:/주차|parking/i, atm:/atm|현금인출|인출기/i, banquet:/연회|식당|피로연|banquet|buffet|hall(?!_?name)/i,
+    bridalRoom:/대기실|bride_?room|bridal/i, mealTime:/식사.{0,6}(시간|가능)|meal/i, childTicket:/소인|어린이|child/i};
+  var txt = function(v, d){
+    d = d||0; if(v===undefined || v===null || d>4) return '';
+    if(Array.isArray(v)) return v.map(function(x){ return txt(x, d+1); }).filter(function(x){ return x; }).join(', ');
+    if(typeof v==='object') return Object.keys(v).map(function(k2){ return txt(v[k2], d+1); }).filter(function(x){ return x; }).join(' ');
+    return String(v).replace(/\r/g,'').trim();
+  };
+  FIELDS.forEach(function(f){
+    if(items[f[0]]) return;
+    var parts = [];
+    Object.keys(src).forEach(function(k){
+      if(/^(guide|groom|bride|note|pdf|signature|image)/i.test(k) || /name|이름|성함|phone|연락|tel/i.test(k)) return;
+      if(FUZZ[f[0]].test(k) || FUZZ[f[0]].test(String(k).replace(/_/g,' '))){ var t = clean(txt(src[k])); if(t && parts.indexOf(t)<0) parts.push(t); }
+    });
+    var v2 = parts.join('\n').slice(0,120); if(v2) items[f[0]] = v2;
   });
   var nm = function(x){ return String(x||'').replace(/[^가-힣a-zA-Z\s]/g,'').trim().slice(0,20); };
   var pick = function(keys){ for(var i=0;i<keys.length;i++){ if(input[keys[i]]!==undefined && input[keys[i]]!==null && input[keys[i]]!=='') return input[keys[i]]; var f2 = flat[key(keys[i])]; if(f2!==undefined && f2!=='') return f2; } return ''; };
@@ -4368,14 +4445,23 @@ function applySettingsGuide(records, db, payload, trusted){
     source: trusted==='admin' ? 'admin' : trusted==='pdf' ? 'pdf' : 'form', key: hit.contractCode ? 'C:'+hit.contractCode : '', updatedAt: new Date().toISOString(), submittedAt: new Date().toISOString()};
   // 파트너 안내카드용: 운영설정서의 나머지 입력 항목(라벨 → 값). 파트너스오피스의 배정된 파트너에게만 보임
   var LAB = {groom_name:'신랑 성함', bride_name:'신부 성함', contractor_name:'계약자', wedding_date:'예식일', wedding_time:'예식 시작시간', venue_name:'예식장', hall_name:'홀 이름', contact_phone:'연락처'};
-  var SKIP = /^(info_|child_ticket_age|note_groom|note_bride|noteGroom|noteBride|groom_name|bride_name|contractor_name|wedding_date|contract_?code|recordId|guide|pdf|signature|image|photo_data)/i;
+  var SKIP = /^(note_groom|note_bride|noteGroom|noteBride|contract_?code|contractCode|recordId|guide$|pdf|signature|image|photo_data)/i;
+  // 값이 목록 · 표(객체)여도 읽을 수 있는 글로 펼침: [{이름,번호}] → 줄마다 '이름 / 번호'
+  var flat = function(v, d){
+    d = d||0;
+    if(v===undefined || v===null) return '';
+    if(Array.isArray(v)) return v.map(function(x){ return flat(x, d+1); }).filter(function(x){ return x; }).join('\n');
+    if(typeof v==='object'){ var ks = Object.keys(v); return ks.map(function(k2){ var x = flat(v[k2], d+1); return x ? (d>0 && ks.length>1 && isNaN(k2) && !/^(name|phone|tel|role|relation|memo)$/i.test(k2) ? k2+': '+x : x) : ''; }).filter(function(x){ return x; }).join(d>0 ? ' / ' : '\n'); }
+    return String(v);
+  };
   var rows = [];
   Object.keys(payload).forEach(function(k){
-    var v = payload[k]; if(v===undefined || v===null || v==='' || typeof v==='object' || SKIP.test(k)) return;
-    v = String(v).replace(/\r/g,'').trim(); if(!v || v.length>600 || /^data:/.test(v)) return;
+    if(SKIP.test(k) || /^(신랑 ?성함|신부 ?성함|예식일|예식 ?시작시간|계약자)$/.test(String(k).trim())) return;
+    var v = /^vip_/i.test(k) && Array.isArray(payload[k]) ? payload[k].map(function(x){ return String(x==null ? '' : x).replace(/[\r\n]+/g,' ').trim(); }).join('\n') : flat(payload[k]).replace(/\r/g,'').trim(); // VIP 표는 빈 칸도 자리 유지
+    if(!v || !v.replace(/\n/g,'') || v.length>1500 || /^data:/.test(v)) return;
     rows.push({key: String(k), label: LAB[k] || String(k).replace(/_/g,' ').trim(), value: v});
   });
-  if(rows.length){ db.referralPay['card:'+hit.id] = {rows: rows.slice(0,80), updatedAt: new Date().toISOString()}; }
+  if(rows.length){ db.referralPay['card:'+hit.id] = {rows: rows.slice(0,200), updatedAt: new Date().toISOString()}; }
   return {ok:true, db:db, recordId: hit.id, contractCode: hit.contractCode||'', items: Object.keys(g.items).length};
 }
 
@@ -4495,7 +4581,7 @@ function buildCustomerView(records, db, code, todayStr, withFile){
 ============================================================================================== */
 const PartnerPortal = (function(){
   const WD = ['일','월','화','수','목','금','토'];
-  const TABS = [['home','홈'],['work','오늘 업무'],['schedule','내 일정'],['pay','근무·급여'],['avail','휴무 신청'],['notice','공지']];
+  const TABS = [['home','홈'],['work','오늘 업무'],['schedule','내 일정'],['info','예식정보'],['pay','근무·급여'],['avail','휴무 신청'],['notice','공지']];
   let workRid=null, sheet=null, root=null, view=null, H={}, tab='home', selRecord=null, calCursor=null, availCursor=null, payMonth=null, selDay=null, busy=false;
 
   const pd = n => String(n).padStart(2,'0');
@@ -4558,14 +4644,150 @@ const PartnerPortal = (function(){
 
   /* ---------- 예식 정보 (파트너 안내카드) ---------- */
   const INFO_ITEMS = [['parking','주차 정산'],['atm','ATM 위치'],['banquet','연회장 위치'],['bridalRoom','신부대기실'],['mealTime','식사 가능 시간'],['childTicket','소인식권']];
-  const infoOpen = new Set();
   function contactsHTML(ev){
     const gs = (ev.info && ev.info.contacts) || [];
     if(!gs.length) return '';
     const num = x=> String(x||'').replace(/[^0-9+]/g,'');
     return `<div class="pp-contacts"><div class="pp-contacts-h">📞 현장 연락처 <small>누르면 바로 통화 · 문자</small></div>${gs.map(g=>`<div class="pp-ct-group"><div class="pp-ct-title">${g.icon||''} ${e(g.title)}</div>${g.people.map(pp=>`<div class="pp-ct-row"><span class="pp-ct-name">${e(pp.name||'이름 미입력')}${pp.shown? `<small>${e(pp.shown)}</small>`:''}</span>${num(pp.phone)? `<a class="pp-ct-btn call" href="tel:${e(num(pp.phone))}" aria-label="${e(pp.name||g.title)} 통화">📞 통화</a><a class="pp-ct-btn sms" href="sms:${e(num(pp.phone))}" aria-label="${e(pp.name||g.title)} 문자">💬 문자</a>`:'<span class="pp-ct-none">연락처 없음</span>'}</div>`).join('')}</div>`).join('')}</div>`;
   }
-  function infoHTML(ev){
+  /* 운영 설정서 입력 항목 → 안내카드 구역으로 분류 + 영문 키는 한글로 */
+  const TOK = {ticket:'식권', tickets:'식권', meal:'식사', gift:'축의금', money:'축의금', envelope:'봉투', cash:'현금', transfer:'계좌이체', bank:'은행', account:'계좌', holder:'전달자', person:'담당자', handover:'인계', receiver:'인계받는 분', emergency:'비상', contact:'연락처', contacts:'연락처', phone:'연락처', tel:'연락처', name:'성함', time:'시간', method:'방법', way:'방법', place:'장소', location:'위치', note:'비고', memo:'메모', vip:'VIP', list:'명단', photo:'사진', photos:'사진', video:'영상', camera:'촬영', return:'답례', favor:'답례품', count:'수량', qty:'수량', total:'총', adult:'대인', child:'소인', guest:'하객', guests:'하객', groom:'신랑', bride:'신부', wedding:'예식', venue:'예식장', hall:'홀', date:'일자', start:'시작', end:'종료', type:'유형', mobile:'모바일', invitation:'청첩장', url:'주소', link:'링크', sort:'정리', way2:'방식', collect:'수합', parking:'주차', atm:'ATM', request:'요청', special:'특이', etc:'기타', address:'주소', relation:'관계', role:'역할', email:'이메일'};
+  function rowLabel(r){
+    const raw = String(r.label||'');
+    if(!/^[A-Za-z0-9 _\-]+$/.test(raw)) return raw;
+    const toks = raw.toLowerCase().split(/[ _\-]+/).filter(Boolean);
+    if(toks.length && toks.every(t=> TOK[t])) return toks.map(t=> TOK[t]).join(' ');
+    return raw;
+  }
+  const SECTIONS = [
+    ['vip','👑 VIP 명단', /vip/i],
+    ['photo','📸 사진 · 영상', /photo|video|camera|record|촬영|사진|영상/i],
+    ['favor','🎁 답례품', /return|favor|thank|답례/i],
+    ['ticket','🎫 식권 운영', /ticket|coupon|meal|식권|식사/i],
+    ['gift','💌 축의금 정리방식', /gift|money|envelope|cash|transfer|bank|account|pay|축의|봉투|정리|계좌|현금/i],
+    ['contact','📞 인계 · 연락', /hand_?over|take_?over|receiv|emerg|urgent|contact|phone|tel|인계|인수|비상|긴급|연락/i],
+    ['basic','💍 예식 기본정보', /wedding|groom|bride|venue|hall|region|contract|date|예식|신랑|신부|계약|지역|홀/i],
+    ['guide','🚪 하객 안내', /parking|atm|guest|guide|info|room|주차|하객|안내|대기실|연회/i]
+  ];
+  function summaryHTML(rows){
+    if(!rows.length) return '';
+    const kv = (k,v)=> `<div><span>${e(k)}</span><b>${e(v).replace(/\n/g,'<br>')}</b></div>`;
+    const buckets = {}; const other = [];
+    rows.forEach(r=>{
+      const t = (r.key||'')+' '+(r.label||'');
+      const s = SECTIONS.find(x=> x[2].test(t));
+      if(s){ (buckets[s[0]] = buckets[s[0]] || []).push(r); } else other.push(r);
+    });
+    const secs = SECTIONS.filter(s=> buckets[s[0]]).map(s=> [s[1], buckets[s[0]]]);
+    if(other.length) secs.push(['📝 그 밖의 내용', other]);
+    return `<div class="pp-sum"><div class="pp-sum-h">운영 설정서 요약 <small>제출한 모든 항목 · ${rows.length}개</small></div>${secs.map(([t,list])=>`<div class="pp-info-sec"><h4>${t}</h4><div class="pp-info-kv">${list.map(r=> kv(rowLabel(r), r.value)).join('')}</div></div>`).join('')}</div>`;
+  }
+
+  /* ---------- 파트너 예식 안내카드 양식 (축의대 설정서 값 매칭) ---------- */
+  const JMAP = {
+    groom_name:'groom', bride_name:'bride', contract_package:'package', contract_half_side:'halfside',
+    wedding_date:'date', wedding_time:'time', venue_region:'region', venue_name:'venue', hall_name:'hall',
+    groom_guest_count:'guest_g', bride_guest_count:'guest_b', groom_side_name:'parents_g', bride_side_name:'parents_b',
+    relation_type:'relation', relation_type_etc:'relation_etc', money_op:'money_way', transfer_yn:'transfer_yn',
+    groom_account:'acc_g', bride_account:'acc_b', refund_way:'refund', refund_way_etc:'refund_etc',
+    ticket_adult_groom:'tk_g_a', ticket_child_groom:'tk_g_c', ticket_adult_bride:'tk_b_a', ticket_child_bride:'tk_b_c',
+    transfer_check_way:'tk_contact', mobile_invitation_url:'tk_invite', ticket_cross_use:'tk_cross',
+    ticket_out_way:'tk_out', ticket_out_place:'tk_place', child_ticket_age:'tk_age', child_to_adult_ticket:'tk_child_swap',
+    ticket_reissue_way:'tk_extra', ticket_reissue_way_etc:'tk_extra_etc',
+    gift_yn:'gift', gift_type:'gift_type', gift_place:'gift_place', gift_target:'gift_target', gift_criteria:'gift_criteria', gift_script:'gift_script',
+    info_parking_way:'parking', info_parking_time:'parking_free', info_atm:'atm', info_hall:'hallpos', info_bride_room:'waiting', info_meal_time:'meal',
+    vip_yn:'vip_flag',
+    handover_relation_groom:'hand_g_rel', handover_name_groom:'hand_g_name', handover_phone_groom:'hand_g_phone',
+    handover_relation_bride:'hand_b_rel', handover_name_bride:'hand_b_name', handover_phone_bride:'hand_b_phone',
+    handover_report_email_groom:'email_g', handover_report_email_bride:'email_b',
+    final_report_visibility:'hand_disclose', detail_delivery_way:'hand_method', sch_mw_arrive:'arrival',
+    emg_1_relation:'e1_rel', emg_1_name:'e1_name', emg_1_phone:'e1_phone', emg_2_relation:'e2_rel', emg_2_name:'e2_name', emg_2_phone:'e2_phone',
+    photo_consent:'photo_agree', extra_camera:'photo_cam',
+    camera_deliverer_relation:'cam_rel', camera_deliverer_name:'cam_name', camera_deliverer_phone:'cam_phone',
+    link_receiver_groom:'link_g', link_receiver_bride:'link_b', guide_doc:'signage', contractor_name:'contractor'
+  };
+  const KOLAB = {groom:'신랑 성함', bride:'신부 성함', date:'예식일', time:'예식 시작시간', region:'지역', venue:'예식장명', hall:'홀 이름', guest_g:'신랑측 예상 하객 수', guest_b:'신부측 예상 하객 수',
+    parents_g:'[신랑측] 혼주 성함', parents_b:'[신부측] 혼주 성함', aware:'축의업체 인지사항(가족 인지 여부)', relation:'관계 설정', money_way:'축의금 정리 방식', transfer_yn:'계좌이체 받을 예정', acc_g:'신랑 계좌', acc_b:'신부 계좌', refund:'축의금 반환 요청 시 대응 방법',
+    tk_g_a:'배정 식권수량(신랑측 대인)', tk_g_c:'배정 식권수량(신랑측 소인)', tk_b_a:'배정 식권수량(신부측 대인)', tk_b_c:'배정 식권수량(신부측 소인)', tk_contact:'축의금 계좌이체 하객 응대 방법', tk_invite:'모바일 청첩장 주소', tk_cross:'식권 교차 사용 가능 여부', tk_out:'식권 소진 시 대응 방법', tk_place:'식권 소진 시 추가 수령 장소', tk_age:'소인 식권의 나이 기준', tk_child_swap:'소인 식권 소진 시 대인 식권 사용 가능 여부', tk_extra:'식권 추가 지급 요청 시 대응 방법', tk_extra_etc:'식권 추가 지급 대응(기타)',
+    gift:'답례품 제공 여부', parking:'주차 등록 방법', parking_free:'무료 주차 시간', atm:'ATM 위치', hallpos:'연회장 위치', waiting:'신부대기실 위치', meal:'식사 가능 시간', vip_flag:'VIP 명단 작성 여부',
+    hand_g_rel:'인계 받으실 분(신랑측) - 관계', hand_g_name:'인계 받으실 분(신랑측) - 성함', hand_g_phone:'인계 받으실 분(신랑측) - 연락처', hand_b_rel:'인계 받으실 분(신부측) - 관계', hand_b_name:'인계 받으실 분(신부측) - 성함', hand_b_phone:'인계 받으실 분(신부측) - 연락처',
+    hand_disclose:'축의금 인계시, 축의금 내역 노출 여부', hand_method:'축의금 전체 세부내역 전달 방식', email_g:'축의금 정리내역 전달 이메일(신랑측)', email_b:'축의금 정리내역 전달 이메일(신부측)', arrival:'신랑,신부님 웨딩홀 도착 예상 시간',
+    e1_rel:'비상연락 1순위 - 관계', e1_name:'비상연락 1순위 - 성함', e1_phone:'비상연락 1순위 - 연락처', e2_rel:'비상연락 2순위 - 관계', e2_name:'비상연락 2순위 - 성함', e2_phone:'비상연락 2순위 - 연락처',
+    photo_agree:'서비스 전 과정 촬영 동의', photo_cam:'추가 촬영용 카메라 제공 여부', cam_rel:'추가 카메라 전달자 - 관계', cam_name:'추가 카메라 전달자 - 성함', cam_phone:'추가 카메라 전달자 - 연락처', link_g:'링크 받으실 분(신랑측)', link_b:'링크 받으실 분(신부측)', signage:'예식 안내문 제작 여부', contractor:'계약자 성함'};
+  function cardEntries(ev){
+    const inf = ev.info || {}, m = inf.card || {}, it = inf.items || {}, E = {};
+    const lowM = {}; Object.keys(m).forEach(k=>{ lowM[String(k).toLowerCase()] = m[k]; });
+    const kolab = {}; Object.keys(KOLAB).forEach(k=>{ kolab[KOLAB[k].replace(/\s+/g,'')] = k; });
+    // 1) 설정서 원본 키(groom_name…) 2) 카드 항목 키(groom…) 3) 한글 라벨
+    Object.keys(JMAP).forEach(jk=>{ const k = JMAP[jk]; if(lowM[jk]!==undefined) E[k] = lowM[jk]; else if(lowM[k]!==undefined) E[k] = lowM[k]; });
+    Object.keys(m).forEach(lb=>{ const k = kolab[String(lb).replace(/\s+/g,'')]; if(k && E[k]===undefined) E[k] = m[lb]; });
+    // 부족한 값은 계약 · 안내문 정보로 보충
+    const fb = (k, v)=>{ if((E[k]===undefined || E[k]==='') && v!==undefined && v!==null && String(v)!=='') E[k] = String(v); };
+    fb('groom', inf.groomName); fb('bride', inf.brideName); fb('date', ev.date); fb('time', ev.weddingTime); fb('region', ev.region);
+    fb('venue', ev.venueName); fb('hall', ev.hallName); fb('guest_g', ev.groomGuests); fb('guest_b', ev.brideGuests);
+    fb('parking', it.parking); fb('atm', it.atm); fb('hallpos', it.banquet); fb('waiting', it.bridalRoom); fb('meal', it.mealTime); fb('tk_age', it.childTicket);
+    return {E:E, m:m};
+  }
+  function cardCompose(E){
+    const has = v=> v!==undefined && v!==null && String(v).trim()!=='';
+    const join = (a,sep)=> a.filter(has).join(sep);
+    const NA = '해당없음';
+    const person = (...p)=>{ const v = p.filter(has); if(v.length && v.every(x=> x===NA)) return NA; return v.join(' / '); };
+    const etc = (v, x)=> (v==='기타' && has(x)) ? x : join([v, x], ' — ');
+    const o = Object.assign({}, E);
+    o.relation = etc(E.relation, E.relation_etc); o.refund = etc(E.refund, E.refund_etc); o.tk_extra = etc(E.tk_extra, E.tk_extra_etc);
+    o.gift = (has(E.gift) && !/^없음/.test(E.gift)) ? join([E.gift, E.gift_type, E.gift_place, E.gift_target, E.gift_criteria, E.gift_script], ' / ') : (E.gift||'');
+    o.hand_g = person(E.hand_g_rel, E.hand_g_name, E.hand_g_phone); o.hand_b = person(E.hand_b_rel, E.hand_b_name, E.hand_b_phone);
+    o.emg1 = person(E.e1_rel, E.e1_name, E.e1_phone) || (E.e1_all||''); o.emg2 = person(E.e2_rel, E.e2_name, E.e2_phone) || (E.e2_all||'');
+    o.cam_person = person(E.cam_rel, E.cam_name, E.cam_phone);
+    return o;
+  }
+  const CARD_SECTIONS = [
+    ['예식 기본정보', [['신랑 성함','groom'],['신부 성함','bride'],['예식장명','venue'],['홀 이름','hall'],['신랑측 혼주','parents_g'],['신부측 혼주','parents_b'],['가족 인지 여부','aware']]],
+    ['축의금 정리방식', [['정리 방식','money_way'],['계좌이체 접수','transfer_yn'],['신랑 계좌','acc_g'],['신부 계좌','acc_b'],['반환 요청 대응','refund']]],
+    ['식권 운영', [['신랑측 대인','tk_g_a'],['신랑측 소인','tk_g_c'],['신부측 대인','tk_b_a'],['신부측 소인','tk_b_c'],['계좌이체 하객 응대','tk_contact'],['모바일 청첩장 주소','tk_invite'],['교차 사용','tk_cross'],['소진 시 대응','tk_out'],['소진 시 수령 장소','tk_place'],['소인 나이 기준','tk_age'],['소인→대인 사용','tk_child_swap'],['추가 지급 요청 대응','tk_extra']]],
+    ['하객 안내사항', [['주차 등록 방법','parking'],['무료 주차 시간','parking_free'],['ATM 위치','atm'],['연회장 위치','hallpos'],['신부대기실','waiting'],['식사 가능 시간','meal']]],
+    ['VIP 명단', 'vip'],
+    ['축의금 인계 & 긴급연락처', [['인계자(신랑측)','hand_g'],['인계자(신부측)','hand_b'],['내역 노출 방식','hand_disclose'],['세부내역 전달 방식','hand_method'],['정리내역 이메일(신랑측)','email_g'],['정리내역 이메일(신부측)','email_b'],['비상연락 1순위','emg1'],['비상연락 2순위','emg2']]],
+    ['사진·영상 / 답례품', [['전 과정 촬영 동의','photo_agree'],['추가 카메라 제공','photo_cam'],['카메라 전달자','cam_person'],['답례품','gift']]],
+    ['영상 링크 수신 / 안내문', [['링크 수신(신랑측)','link_g'],['링크 수신(신부측)','link_b'],['예식 안내문 제작','signage']]]
+  ];
+  const CARD_USED = new Set();
+  Object.keys(JMAP).forEach(k=>{ CARD_USED.add(k); CARD_USED.add(JMAP[k]); });
+  ['vip_name','vip_relation','vip_contact','vip_memo','vip_ticket','vip_tickets','guide','e1_all','e2_all','package','halfside'].forEach(k=> CARD_USED.add(k));
+  function linkPhones(v){
+    return e(v).replace(/\n/g,'<br>').replace(/(0\d{1,2})[-.\s]?(\d{3,4})[-.\s]?(\d{4})/g, (mm,a,b,c)=> `<a class="pp-tel" href="tel:${a}${b}${c}">${mm}</a>`);
+  }
+  function cardHTML(ev){
+    const {E, m} = cardEntries(ev), o = cardCompose(E);
+    const hasAny = Object.keys(m).length || (ev.info && (ev.info.groomName || ev.info.brideName || Object.keys(ev.info.items||{}).length));
+    if(!hasAny) return `<div class="pp-info-empty">${ev.settingsSubmitted? '운영 설정서는 제출됐지만 내용이 아직 연결되지 않았어요. 대표가 설정서를 불러오면 표시돼요.' : '운영 설정서가 제출되면 이곳에 예식 정보가 표시돼요.'}</div>`;
+    const val = k=> { const v = o[k]; return (v!==undefined && v!==null && String(v).trim()!=='') ? `<b>${linkPhones(v)}</b>` : '<b class="pp-nil">-</b>'; };
+    const dstr = o.date ? fdate(o.date, true) : '-';
+    const pack = [o.package || (ev.productType? '축의대 '+ev.productType : ''), o.halfside].filter(Boolean).join(' & ');
+    const qc = (l,k)=> `<div class="pp-qcell"><span>${l}</span>${val(k)}</div>`;
+    const head = `<div class="pp-card-brief">
+      <div class="pp-cb-names">${e(o.groom||'신랑')} <i>&amp;</i> ${e(o.bride||'신부')}</div>
+      ${pack? `<div class="pp-cb-pack">${e(pack)}</div>`:''}
+      <div class="pp-cb-when">예식일 <b>${e(dstr)}</b> | 시작 <b>${e(o.time||'-')}</b><br>${o.region? e(o.region)+'<br>':''}${e(o.venue||'')}${o.hall? ' · '+e(o.hall):''}</div>
+    </div>
+    <div class="pp-qgrid">${qc('신랑측 예상 하객','guest_g')}${qc('신부측 예상 하객','guest_b')}${qc('관계 설정','relation')}${qc('도착 예상 시간','arrival')}</div>`;
+    const vipHTML = ()=>{
+      const col = k=> String(m[k]!==undefined ? m[k] : '').split('\n');
+      const nm = col('vip_name'), rl = col('vip_relation'), ct = col('vip_contact'), tk = m.vip_ticket!==undefined ? col('vip_ticket') : col('vip_tickets'), mm2 = col('vip_memo');
+      const rows = nm.map((n,i)=> [n, rl[i], ct[i], tk[i] || mm2[i]]).filter(r=> r.some(x=> x && String(x).trim()));
+      if(!rows.length) return `<div class="pp-info-kv"><div><span>VIP 명단 작성 여부</span>${val('vip_flag')}</div></div>`;
+      return `<div class="pp-vip"><table><thead><tr><th>성함(업체명)</th><th>관계</th><th>연락처</th><th>지급 식권</th></tr></thead><tbody>${rows.map(r=>`<tr>${r.map(x=>`<td>${linkPhones(x||'')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    };
+    const secs = CARD_SECTIONS.map(([t, rs])=>`<div class="pp-info-sec"><h4>${t}</h4>${rs==='vip' ? vipHTML() : `<div class="pp-info-kv">${rs.map(([l,k])=>`<div><span>${l}</span>${val(k)}</div>`).join('')}</div>`}</div>`).join('');
+    const rest = (ev.info.rows||[]).filter(r=> !CARD_USED.has(String(r.key||'').toLowerCase()) && !CARD_USED.has(r.key));
+    const restHTML = rest.length ? `<div class="pp-info-sec"><h4>그 밖의 내용</h4><div class="pp-info-kv">${rest.map(r=>`<div><span>${e(rowLabel(r))}</span><b>${linkPhones(r.value)}</b></div>`).join('')}</div></div>` : '';
+    const nt = ev.info.notes || {};
+    const notes = (nt.groom||nt.bride) ? `<div class="pp-info-sec"><h4>하객 안내 메모</h4>${nt.groom? `<p class="pp-info-note">🤵 신랑측 안내 · ${e(nt.groom)}</p>`:''}${nt.bride? `<p class="pp-info-note">👰 신부측 안내 · ${e(nt.bride)}</p>`:''}</div>` : '';
+    return head + secs + notes + restHTML;
+  }
+  function infoHTML(ev, all){
+    if(all){ return `<section class="pp-info pp-card-form"><div class="pp-info-h">📋 파트너 안내카드 <small>축의대 설정서 요약</small></div>${cardHTML(ev)}</section>`; }
     const inf = ev.info || {}, items = inf.items || {}, rows = inf.rows || [];
     const names = (inf.groomName || inf.brideName) ? `${inf.groomName? '신랑 '+e(inf.groomName):''}${inf.groomName&&inf.brideName?' · ':''}${inf.brideName? '신부 '+e(inf.brideName):''}` : '';
     const has = names || Object.keys(items).length || rows.length || (inf.contacts||[]).length;
@@ -4581,9 +4803,21 @@ const PartnerPortal = (function(){
       </div></div>
       ${Object.keys(items).length? `<div class="pp-info-sec"><h4>하객 안내사항</h4><div class="pp-info-kv">${INFO_ITEMS.filter(x=> items[x[0]]).map(x=> kv(x[1], items[x[0]])).join('')}</div>
         ${(inf.notes&&inf.notes.groom)? `<p class="pp-info-note">🤵 신랑측 안내 · ${e(inf.notes.groom)}</p>`:''}${(inf.notes&&inf.notes.bride)? `<p class="pp-info-note">👰 신부측 안내 · ${e(inf.notes.bride)}</p>`:''}</div>`:''}
-      ${rows.length? `<div class="pp-info-sec"><h4>운영 설정서 내용</h4><div class="pp-info-kv">${rows.map(r=> kv(r.label, r.value)).join('')}</div></div>`:''}`
-      : `<div class="pp-info-empty">${ev.settingsSubmitted? '운영 설정서가 제출됐어요. 내용이 곧 표시돼요.' : '운영 설정서가 제출되면 이곳에 예식 정보가 표시돼요.'}</div>`;
-    return `<details class="pp-info" data-infoid="${e(ev.recordId)}" ${infoOpen.has(ev.recordId)?'open':''}><summary>📋 예식 정보 <small>파트너 안내카드</small></summary>${body}</details>`;
+      ${all ? summaryHTML(rows) : (rows.length? `<div class="pp-info-more"><button class="pp-btn" data-pp="tab" data-v="info">운영 설정서 전체 ${rows.length}개 항목 보기 →</button></div>`:'')}`
+      : `<div class="pp-info-empty">${ev.settingsSubmitted? '운영 설정서는 제출됐지만 내용이 아직 연결되지 않았어요. 대표가 설정서를 불러오면 표시돼요.' : '운영 설정서가 제출되면 이곳에 예식 정보가 표시돼요.'}</div>`;
+    return `<section class="pp-info"><div class="pp-info-h">📋 예식 정보 <small>파트너 안내카드</small></div>${body}</section>`;
+  }
+
+  /* ---------- 예식정보 메뉴: 배정된 예식별 예식 정보 + 현장 연락처 ---------- */
+  function infoPageHTML(){
+    const up = upcoming(), list = up.length ? up : pastEvents().slice(0,3);
+    if(!list.length) return '<div class="pp-empty">배정된 예식이 없어요</div>';
+    return `<div class="pp-info-intro">배정된 예식 ${list.length}건의 예식 정보예요. 아래로 스크롤해서 전체 일정을 확인하세요.</div>` + list.map(ev=>`
+      <article class="pp-info-event" id="info-${e(ev.recordId)}">
+        <div class="pp-info-top"><span class="pp-dday">${dLabel(ev.date)}</span><b>${fdate(ev.date,true)} ${e(ev.weddingTime||'')}</b><div>${e(ev.venueName||'예식장 미정')}${ev.hallName? ' · '+e(ev.hallName):''}</div></div>
+        ${contactsHTML(ev) || '<div class="pp-info-empty" style="margin-bottom:10px;">현장 연락처(식권 전달자 · 축의금 인계 · 비상연락망)는 운영 설정서 내용이 연결되면 표시돼요.</div>'}
+        ${infoHTML(ev, true)}
+      </article>`).join('');
   }
 
   /* ---------- 카드 ---------- */
@@ -4615,7 +4849,7 @@ const PartnerPortal = (function(){
       </div>
       ${team}
       ${full ? contactsHTML(ev) : ""}
-      ${infoHTML(ev)}
+      ${full ? infoHTML(ev) : ''}
       ${full && ev.note ? `<div class="pp-note">📌 ${e(ev.note)}</div>`:''}
       <div class="pp-card-actions">
         ${confirm}${checkin}
@@ -4959,7 +5193,7 @@ const PartnerPortal = (function(){
     if(!root || !view) return;
     if(H.onCache){ try{ H.onCache(view); }catch(e){} }
     const pendingCount = upcoming().filter(ev=>!ev.confirmed).length;
-    const body = tab==='home'?homeHTML(): tab==='work'?workHTML(): tab==='schedule'?scheduleHTML(): tab==='pay'?payHTML(): tab==='avail'?availHTML(): noticeHTML();
+    const body = tab==='home'?homeHTML(): tab==='work'?workHTML(): tab==='schedule'?scheduleHTML(): tab==='info'?infoPageHTML(): tab==='pay'?payHTML(): tab==='avail'?availHTML(): noticeHTML();
     const updated = view.generatedAt ? new Date(view.generatedAt) : new Date();
     root.innerHTML = `<div class="pp">
       ${busy?'<div class="pp-busy"></div>':''}
@@ -5118,15 +5352,13 @@ const PartnerPortal = (function(){
     root=el; view=v; H=handlers||{}; tab='home'; workRid=null; sheet=null;
     reapply();
     clearInterval(mount._t); mount._t = setInterval(()=>{ if(root && qGet().length) flushQueue(); }, 20000); if(qGet().length) setTimeout(flushQueue, 300); window.removeEventListener('online', flushQueue); window.addEventListener('online', flushQueue); selRecord=null; calCursor=null; availCursor=null; payMonth=null; selDay=null; busy=false;
-    root.addEventListener('toggle', onToggle, true);
     root.addEventListener('click', onClick);
     root.addEventListener('change', onChange);
     root.addEventListener('input', onInput);
     render();
   }
-  function onToggle(ev){ const d = ev.target; if(d && d.matches && d.matches('details.pp-info')){ if(d.open) infoOpen.add(d.dataset.infoid); else infoOpen.delete(d.dataset.infoid); } }
   function update(v){ view=v; reapply(); if(sheet && sheet.mode==='photo') return; softRender(); }
-  function unmount(){ if(root){ root.removeEventListener('toggle', onToggle, true); root.removeEventListener('click', onClick); root.removeEventListener('change', onChange); root.removeEventListener('input', onInput); root.innerHTML=''; } root=null; view=null; }
+  function unmount(){ if(root){ root.removeEventListener('click', onClick); root.removeEventListener('change', onChange); root.removeEventListener('input', onInput); root.innerHTML=''; } root=null; view=null; }
   return {mount, update, unmount, toast, buildIcs};
 })();
 
@@ -8799,7 +9031,6 @@ const CustomerPortal = (function(){
       <div class="cp-dsub">${sub}</div>
       <div class="cp-when"><b>${fdate(w.date, true)}</b>${w.time? ` · ${e(w.time)}` : ''}<br>${e(w.venue)} ${e(w.hall)}</div>
       <div class="cp-hero-acts">
-        <button class="cp-btn gold" data-cp="go" data-v="cp-alarm">🔔 운영서 제출 알림</button>
         <a class="cp-btn ghost" href="https://map.naver.com/v5/search/${encodeURIComponent(w.venue||'')}" target="_blank" rel="noopener">📍 길찾기</a>
       </div>
     </section>`;
@@ -8832,7 +9063,7 @@ const CustomerPortal = (function(){
   function contractHTML(){
     const c = view.contract, a = c.amounts;
     const row = (l, v, cls, sign)=> v ? `<div class="${cls||''}"><span>${l}</span><b>${sign||''}${won(v)}</b></div>` : '';
-    return `<section class="cp-card" id="cp-contract"><h2>📄 계약 정보</h2>
+    return `<section class="cp-card" id="cp-contract"><h2>💰 정산 관리</h2>
       <dl class="cp-dl"><div><dt>계약일</dt><dd>${c.date? fdate(c.date, true) : '-'}</dd></div><div><dt>계약 코드 · 짝꿍코드</dt><dd><b>${e(c.code)||'-'}</b></dd></div></dl>
       <div class="cp-money">
         ${row('기준 금액', a.base)}
@@ -8848,6 +9079,11 @@ const CustomerPortal = (function(){
         ${a.reviewDay? `<div class="minus"><span>본식후기 할인 (예식 후 페이백)</span><b>− ${won(a.reviewDay)}</b></div>`:''}
       </div>
       <p class="cp-note">${c.settled? '✓ 정산이 완료됐어요' : '금액은 예식 전 확정 내용에 따라 달라질 수 있어요. 궁금한 점은 언제든 문의해주세요.'}</p>
+    </section>`;
+  }
+  function contractDocHTML(){
+    const c = view.contract;
+    return `<section class="cp-card" id="cp-cdoc"><h2>📄 계약 정보</h2>
       ${c.hasFile? `<button type="button" class="cp-btn primary wide" data-cp="contractDownload">⬇ 계약서 다운로드 (PDF)</button><p class="cp-note">🔒 계약서는 본인 접속코드로만 받을 수 있어요.</p>` : '<div class="cp-empty">계약서 파일이 준비되면 여기서 바로 받을 수 있어요</div>'}
     </section>`;
   }
@@ -8937,10 +9173,19 @@ const CustomerPortal = (function(){
   function guideHTML(){
     const g = view.guide;
     if(!g || !g.items || !g.items.length){
-      const f = view.info && view.info.settingsFormUrl;
+      // 설정서 제출 전: 예시 안내문 + 안내 문구
+      const sample = [
+        {key:'parking', label:'주차 정산', value:'1층 로비에서 차량 등록\n무료주차 2시간'},
+        {key:'atm', label:'ATM 위치', value:'1층 로비'},
+        {key:'banquet', label:'연회장 위치', value:'2층'},
+        {key:'bridalRoom', label:'신부대기실', value:'홀 입구 왼편'},
+        {key:'mealTime', label:'식사 가능 시간', value:'예식 30분 전'},
+        {key:'childTicket', label:'소인식권', value:'6세 ~ 11세 (6세미만 무료)'}];
+      const sd0 = {key:'groom', label:'신랑', en:'GROOM SIDE · 신랑측', name:'김철수(예시)', note:''};
+      setTimeout(fitGuide, 0);
       return `<section class="cp-card" id="cp-guide"><h2>📋 예식 안내문</h2>
-        <div class="cp-empty">축의대 운영설정서를 제출하시면<br><b>하객 안내사항</b>으로 예식 안내문이 자동으로 만들어져요 ✨</div>
-        ${f && !view.wedding.settingsSubmitted ? `<a class="cp-btn primary wide" href="${e(f)}" target="_blank" rel="noopener">📝 운영설정서 작성하기</a>` : ''}
+        <div class="gd-a4wrap gd-sample" id="gdSheet">${guideSheetHTML(sd0, sample)}</div>
+        <div class="cp-empty" style="margin-top:12px;">축의대 운영설정서를 제출하시면<br><b>하객 안내사항</b>으로 예식 안내문이 자동으로 만들어져요 ✨</div>
       </section>`;
     }
     const sides = g.sides.length ? g.sides : [{key:'', label:'', en:'', name: view.client.contractName||view.client.name, note:''}];
@@ -9049,7 +9294,7 @@ const CustomerPortal = (function(){
   }
   function render(){
     if(!root || !view) return;
-    const nav = [['cp-wedding','예식'],['cp-guide','안내문'],['cp-contract','계약'],['cp-live','라이브'],['cp-gift','축의현황'],['cp-ref','짝꿍코드'],['cp-rec','추천하기']];
+    const nav = [['cp-cdoc','계약'],['cp-wedding','예식'],['cp-contract','정산'],['cp-guide','안내문'],['cp-live','라이브'],['cp-gift','축의현황'],['cp-ref','짝꿍코드'],['cp-rec','추천하기']];
     const up = view.generatedAt ? new Date(view.generatedAt) : new Date();
     root.innerHTML = `<div class="cp">
       ${busy? '<div class="cp-busy"></div>':''}
@@ -9068,11 +9313,11 @@ const CustomerPortal = (function(){
       <main class="cp-main">
         ${greetHTML()}
         ${heroHTML()}
+        ${contractDocHTML()}
         ${noticeHTML()}
-        ${alarmHTML()}
         ${weddingHTML()}
-        ${guideHTML()}
         ${contractHTML()}
+        ${guideHTML()}
         ${liveHTML()}
         ${giftHTML()}
         ${referralHTML()}
@@ -9204,6 +9449,27 @@ function sidesHTML(rec, c){
     <div class="cp-sides-grid">${card('groom')}${card('bride')}</div></div>`;
 }
 
+/* 계약자가 신랑/신부 중 누구인지: 안내문 · 신랑/신부 이름과 계약자명 비교 (모르면 '') */
+function contractorSideOf(rec){
+  const nm = x=> String(x||'').replace(/[^가-힣a-zA-Z]/g,''), me = nm(rec.clientName); if(!me) return '';
+  const g = (ensurePdb().referralPay||{})['guide:'+rec.id] || {}, c = clientOf(rec) || {}, sd = c.sides || {};
+  const gn = nm(g.groomName || (sd.groom||{}).name), bn = nm(g.brideName || (sd.bride||{}).name);
+  if(gn && gn===me) return 'groom'; if(bn && bn===me) return 'bride';
+  return '';
+}
+/* 양측 · 통합 계약: 계약자 코드는 기본, 계약자가 신부면 신랑 코드 · 신랑이면 신부 코드를 추가 (누군지 모르면 둘 다) */
+function sidesWithCodes(rec, cur){
+  if(!sideEligible(rec)) return null;
+  const cs = contractorSideOf(rec), targets = cs ? [cs==='groom'?'bride':'groom'] : ['groom','bride'];
+  const sides = Object.assign({}, (cur||{}).sides||{}); let add = 0; const now = new Date().toISOString();
+  targets.forEach(sk=>{ if(!(sides[sk] && sides[sk].code)){ sides[sk] = Object.assign({}, sides[sk]||{}, {code: genClientCode(), active:true, createdAt: now, auto:true}); add++; } });
+  return add ? sides : null;
+}
+function newClientData(rec){
+  const now = new Date().toISOString(), d = {code: genClientCode(), active:true, createdAt: now};
+  const sd = sidesWithCodes(rec, {}); if(sd){ d.sides = sd; d.sidesAuto = true; }
+  return d;
+}
 function genClientCode(){
   const used = new Set(allClientCodes().concat(ensurePdb().members.map(m=> String(m.code||'').replace(/[^A-Z0-9]/gi,'').toUpperCase())));
   let c; do{ c = genAccessCode(); }while(used.has(String(c).replace(/[^A-Z0-9]/gi,'').toUpperCase()));
@@ -9214,10 +9480,16 @@ function autoIssueClientCodes(){
   if(!PDB || !Array.isArray(RECORDS) || pSet().autoClientCode===false || window.MW_NO_AUTO_CODE) return 0;
   const t = todayStr();
   const list = activeContracts().filter(r=> r.id && (!r.weddingDate || r.weddingDate >= t) && !clientOf(r));
-  if(!list.length) return 0;
+  const back = activeContracts().filter(r=>{ const c = clientOf(r); return r.id && sideEligible(r) && (!r.weddingDate || r.weddingDate >= t) && c && c.code && !c.sidesAuto && !(((c.sides||{}).groom||{}).code && ((c.sides||{}).bride||{}).code); });
+  if(back.length){
+    const db0 = ensurePdb(); let n0 = 0;
+    back.forEach(r=>{ const k = clientKey(r), c = db0.referralPay[k], sd = sidesWithCodes(r, c); if(sd){ db0.referralPay[k] = Object.assign({}, c, {sides: sd, sidesAuto:true, updatedAt:new Date().toISOString()}); pDirty.referral.add(k); n0++; } else { db0.referralPay[k] = Object.assign({}, c, {sidesAuto:true}); pDirty.referral.add(k); } });
+    if(n0){ showToast(`양측 · 통합 계약 ${n0}건의 신랑/신부 접속코드를 자동 발급했어요`); savePartnerDb(); }
+  }
+  if(!list.length) return back.length;
   const db = ensurePdb(); db.referralPay = db.referralPay || {};
   const now = new Date().toISOString();
-  list.forEach(r=>{ const k = clientKey(r); db.referralPay[k] = {code: genClientCode(), active:true, key: recordKey(r), createdAt: now, updatedAt: now, auto: true}; pDirty.referral.add(k); });
+  list.forEach(r=>{ const k = clientKey(r); db.referralPay[k] = Object.assign(newClientData(r), {key: recordKey(r), createdAt: now, updatedAt: now, auto: true}); pDirty.referral.add(k); });
   showToast(list.length===1 ? `${list[0].clientName||'신규'}님 고객 접속코드를 자동 발급했어요` : `신규 계약 ${list.length}건 고객 접속코드를 자동 발급했어요`);
   savePartnerDb();
   return list.length;
@@ -9273,7 +9545,7 @@ function renderClientBox(rec, boxEl){
       <button type="button" class="btn btn-primary btn-sm" data-cpa="create">고객 접속코드 만들기</button>`;
   } else {
     const off = c.active===false;
-    box.innerHTML = `<div class="cp-admin-h"><b>💍 고객 전용 페이지</b>${off? '<span class="badge badge-cancelled">사용 중지</span>' : '<span class="badge badge-done">사용 중</span>'}</div>
+    box.innerHTML = `<div class="cp-admin-h"><b>💍 고객 전용 페이지</b>${off? '<span class="badge badge-cancelled">사용 중지</span>' : '<span class="badge badge-done">사용 중</span>'}<div class="cp-savebar" data-cpsavebar><span class="cp-save-st" data-cpst>변경사항 없음</span><button type="button" class="btn btn-sm btn-ghost" data-cpsave="revert" disabled>되돌리기</button><button type="button" class="btn btn-sm btn-primary" data-cpsave="save" disabled>💾 저장</button></div></div>
       <div class="cp-admin-code"><span>접속코드</span><b>${esc(c.code)}</b><button type="button" class="btn btn-sm" data-cpa="copycode" title="접속코드 복사">📋 복사</button>
         <button type="button" class="btn btn-sm btn-primary" data-cpa="invite">초대 문구 복사</button>
         <button type="button" class="btn btn-sm" data-cpa="preview">고객 화면 미리보기</button></div>
@@ -9288,14 +9560,13 @@ function renderClientBox(rec, boxEl){
       </div>
       ${sidesHTML(rec, c)}
       ${guideAdminHTML(rec)}
-      <div class="cp-savebar" data-cpsavebar><span class="cp-save-st" data-cpst>변경사항 없음</span><button type="button" class="btn btn-sm btn-ghost" data-cpsave="revert" disabled>되돌리기</button><button type="button" class="btn btn-sm btn-primary" data-cpsave="save" disabled>💾 저장</button></div>
       <div class="cp-admin-foot">${c.contractUrl? '<button type="button" class="btn btn-sm" data-cpa="filecheck">📥 계약서 다운로드 점검</button>' : ''}<button type="button" class="btn btn-sm btn-ghost" data-cpa="regen">코드 재발급</button><button type="button" class="btn btn-sm btn-ghost ${off?'':'btn-danger'}" data-cpa="toggle">${off? '다시 사용' : '사용 중지'}</button>
         ${String(pSet().customerUrl||'').trim()? '' : '<span class="cp-admin-warn">파트너스 → 분리 운영 · 설정에서 고객 페이지 주소를 넣으면 초대 문구에 링크가 함께 들어가요</span>'}</div>`;
   }
   box.querySelectorAll('[data-cpa]').forEach(b=> b.addEventListener('click', async ()=>{
     const a = b.dataset.cpa, cur = clientOf(rec)||{};
     if(['create','regen','toggle'].includes(a) && !(await cpResolveDirty(rec, box))) return;
-    if(a==='create'){ await saveClient(rec, {code: genClientCode(), active:true, createdAt: new Date().toISOString()}, '고객 접속코드를 만들었어요'); renderClientBox(rec, box); custTabRefresh(); return; }
+    if(a==='create'){ await saveClient(rec, newClientData(rec), sideEligible(rec) ? '고객 접속코드와 신랑 · 신부 코드를 만들었어요' : '고객 접속코드를 만들었어요'); renderClientBox(rec, box); custTabRefresh(); return; }
     if(a==='invite'){ copyText(customerInviteText(rec, cur), '초대 문구를 복사했어요 · 고객님께 카톡으로 보내주세요'); return; }
     if(a==='preview'){ openCustomerPreview(cur.code); return; }
     if(a==='filecheck'){ checkContractFile(cur.code, b); return; }
@@ -9317,16 +9588,6 @@ function renderClientBox(rec, boxEl){
     renderClientBox(rec, box); custTabRefresh();
   }));
   box.querySelectorAll('details[data-gdrid]').forEach(d=> d.addEventListener('toggle', ()=>{ if(d.open) GUIDE_OPEN.add(d.dataset.gdrid); else GUIDE_OPEN.delete(d.dataset.gdrid); }));
-  box.querySelectorAll('[data-cpgpdf]').forEach(inp=> inp.addEventListener('change', async ()=>{
-    const f = inp.files && inp.files[0]; inp.value = ''; if(!f) return;
-    if(!(await cpResolveDirty(rec, box))) return;
-    showToast('설정서를 읽는 중이에요…');
-    try{
-      const r = await importSettingsPdf(f, rec.id);
-      if(r.ok){ showToast(`✅ ${rec.clientName}님 예식 안내문을 불러왔어요 (${r.items}개 항목)`); renderClientBox(rec, box); custTabRefresh(); }
-      else alert('❌ ' + r.error);
-    }catch(err){ alert('설정서를 읽지 못했어요: ' + (err.message||err)); }
-  }));
   /* 입력은 바로 저장하지 않고, [💾 저장]을 눌러 한 번에 저장 */
   const fields = ()=> [...box.querySelectorAll('[data-cpf],[data-cps],[data-cpg]')];
   const refresh = ()=>{
@@ -9427,7 +9688,7 @@ function guideAdminHTML(rec){
       <label>신랑측 추가 안내 <span class="cp-admin-hint">신랑측 안내문에만</span><textarea data-cpg="n:groom" rows="2" placeholder="예: 답례품은 축의대에서 드려요">${esc((g.notes||{}).groom||'')}</textarea></label>
       <label>신부측 추가 안내 <span class="cp-admin-hint">신부측 안내문에만</span><textarea data-cpg="n:bride" rows="2" placeholder="">${esc((g.notes||{}).bride||'')}</textarea></label>
     </div>
-    <div class="cp-gd-pdf"><label class="btn btn-sm">📄 설정서 PDF에서 불러오기<input type="file" accept="application/pdf" data-cpgpdf hidden></label><span>이미 받은 축의대 설정서 PDF를 올리면 하객 안내사항이 자동으로 채워져요</span></div>
+    <div class="cp-admin-hint" style="margin-top:8px;">📄 설정서 PDF는 위쪽 「고객페이지」 목록 상단의 <b>PDF 드래그앤드롭</b> 칸에 끌어다 놓으면 예식 안내문 · 파트너 안내카드에 한꺼번에 자동 기입돼요.</div>
     <div class="cp-admin-hint" style="margin-top:6px;">칸 안에서 <b>Enter</b>로 줄을 나누면 안내문에도 줄이 나뉘어 보여요 · 전화번호 · 계좌번호 같은 민감한 정보는 저장할 때 자동으로 빠져요. 고객 페이지 · 하객 공유에는 위 항목만 보여요.</div>
   </details>`;
 }
@@ -9486,6 +9747,9 @@ function settingsDataFromText(text){
     ['info_hall',['연회장 위치','연회장']],['info_bride_room',['신부대기실 위치','신부 대기실 위치','신부대기실']],['info_meal_time',['식사 가능 시간','식사 가능시간','식사시간']],
     ['child_ticket_age',['소인 식권의 나이 기준','소인식권 나이 기준','소인 식권 나이','소인식권']],['groom_name',['신랑 성함']],['bride_name',['신부 성함']],['wedding_date',['예식일']],['contractor_name',['계약자 성함']]];
   const lines = text.split('\n').map(l=>l.trim()).filter(Boolean), out = {};
+  // 파트너 안내카드용: '라벨: 값' 으로 적힌 모든 항목을 그대로 모음
+  const extra = {};
+  lines.forEach(l=>{ const mm = l.match(/^[■●•·\-]?\s*(?:\d{1,2}[.)]\s*)?([^:：|]{2,30}?)\s*[:：]\s*(.{1,400})$/); if(mm){ const lb = mm[1].trim(), vv = mm[2].trim(); if(lb && vv && !/^https?$/i.test(lb) && !/^\d{1,2}$/.test(lb) && extra[lb]===undefined) extra[lb] = vv; } });
   DEF.forEach(([k, labels])=>{
     const ls = [...labels].sort((a,b)=> b.length-a.length); let v = '';
     for(let i=0;i<lines.length && !v;i++){ for(const lb of ls){ const ix = lines[i].indexOf(lb); if(ix<0) continue;
@@ -9496,7 +9760,7 @@ function settingsDataFromText(text){
       if(rest){ v = rest; break; } } }
     if(v) out[k] = v;
   });
-  return Object.keys(out).length ? {data:out, via:'항목명'} : null;
+  return Object.keys(out).length || Object.keys(extra).length ? {data:Object.assign({}, extra, out), via:'항목명'} : null;
 }
 /* 파일명에서 예식일 · 성함 읽기: "[모먼트웍스] 축의대 대행 운영설정서(20261024_1700)_이수민_김인애(충남 천안시).pdf" */
 function settingsFileInfo(name){
@@ -9526,6 +9790,8 @@ async function importSettingsPdf(file, recordId, opt){
   if(!found) return {ok:false, error:'설정서 내용을 읽지 못했어요 (이미지로만 된 PDF일 수 있어요 · 직접 입력해주세요)', file:file.name, date: fi.date, names: fi.names};
   const pick = ['groom_name','bride_name','contractor_name','wedding_date','info_parking_way','info_parking_time','info_atm','info_hall','info_bride_room','info_meal_time','child_ticket_age'];
   const payload = {}; pick.forEach(k=>{ if(found.data[k]!==undefined && found.data[k]!==null && String(found.data[k]).trim()!=='') payload[k] = String(found.data[k]).trim(); });
+  // 나머지 모든 항목도 함께 (파트너스오피스 예식정보 · 안내카드용) · 목록/표는 그대로 넘기면 서버가 읽기 좋게 펼쳐줌
+  Object.keys(found.data).forEach(k=>{ if(payload[k]!==undefined || /^(signature|image|photo_data|pdf)/i.test(k)) return; const v = found.data[k]; if(v===undefined || v===null || v==='') return; if(typeof v==='string' && (v.length>1500 || /^data:/.test(v))) return; payload[k] = v; });
   const date = fi.date || validYmd(payload.wedding_date);           // 파일명 날짜 우선
   if(date) payload.wedding_date = date; else delete payload.wedding_date;
   if(!payload.groom_name && fi.names[0]) payload.groom_name = fi.names[0];
@@ -9536,7 +9802,7 @@ async function importSettingsPdf(file, recordId, opt){
   if(!rec){ const m = matchContractFor(date, names); if(!m.ok) return Object.assign({ok:false, error: m.error, candIds: (m.cands||[]).map(r=>r.id)}, info); rec = m.rec; }
   const r = applySettingsGuide(RECORDS, ensurePdb(), Object.assign({}, payload, {recordId: rec.id}), 'pdf');
   if(!r.ok) return Object.assign({ok:false, error: r.error}, info);
-  pDirty.referral.add('guide:'+r.recordId); if(!(opt && opt.noSave)) await savePartnerDb();
+  pDirty.referral.add('guide:'+r.recordId); pDirty.referral.add('card:'+r.recordId); if(!(opt && opt.noSave)) await savePartnerDb();
   return Object.assign({ok:true, recordId: r.recordId, items: r.items}, info);
 }
 function guideProgHTML(){
@@ -9552,8 +9818,9 @@ function updateGuideProg(){ const el = document.getElementById('cuGProg'); if(el
 function guideImportHTML(){
   const done = activeContracts().filter(r=> guideOf(r)).length;
   return `<div class="cu-gimport">
-    <div class="cu-gimport-h"><b>📋 설정서 PDF로 예식 안내문 불러오기</b><span>이미 제출된 축의대 설정서 PDF를 한 번에 여러 개 올리면, 예식일 · 성함으로 계약을 찾아 안내문을 자동으로 채워요 · 안내문 등록 ${done}건</span>
-      <label class="btn btn-sm btn-primary ${GUIDE_PROG && !GUIDE_PROG.finished ? 'disabled' : ''}">PDF 선택 (한 번에 최대 ${GUIDE_MAX}개)<input type="file" accept="application/pdf" multiple data-cu="gimport" hidden ${GUIDE_PROG && !GUIDE_PROG.finished ? 'disabled' : ''}></label></div>
+    <div class="cu-gimport-h"><b>📋 설정서 PDF 일괄 매칭 · 예식 안내문 + 파트너 안내카드 자동 기입</b><span>이미 제출된 축의대 설정서 PDF를 끌어다 놓으면, 예식일 · 성함으로 계약을 찾아 예식 안내문과 파트너 안내카드를 한꺼번에 채워요 · 안내문 등록 ${done}건</span></div>
+    <label class="cu-drop ${GUIDE_PROG && !GUIDE_PROG.finished ? 'disabled' : ''}" data-cu-drop><input type="file" accept="application/pdf" multiple data-cu="gimport" hidden ${GUIDE_PROG && !GUIDE_PROG.finished ? 'disabled' : ''}>
+      <span class="cu-drop-ic">📄</span><b>설정서 PDF를 여기로 끌어다 놓으세요</b><small>여러 개 한 번에 · 최대 ${GUIDE_MAX}개 · 또는 눌러서 선택</small></label>
     ${(()=>{ const busy = GUIDE_PROG && !GUIDE_PROG.finished, has = GUIDE_PROG || GUIDE_IMPORT.length;
       if(!has) return '';
       const pending = GUIDE_IMPORT.filter(x=> !x.ok && !x.busy).length;
@@ -9596,11 +9863,19 @@ function sendGuideToMomentWorks(input) {
   try {
     var d = mwFindSettingsData_(input);
     if (!d) { Logger.log('모먼트웍스 연동: 운영설정서 데이터를 찾지 못했어요'); return { ok: false, error: '운영설정서 데이터를 찾지 못했어요' }; }
-    var pick = ['groom_name', 'bride_name', 'contractor_name', 'wedding_date', 'contract_code', 'contractCode', 'phone', 'client_phone', 'contact_phone', 'contractor_phone',
-                'info_parking_way', 'info_parking_time', 'info_atm', 'info_hall', 'info_bride_room', 'info_meal_time', 'child_ticket_age',
-                'note_groom', 'note_bride'];
+    // 안내문(하객 안내사항)용 항목 + 파트너 안내카드용으로 나머지 입력 항목도 함께 전달 (이미지 · 서명 같은 큰 값은 제외)
     var body = {};
-    pick.forEach(function (k) { if (d[k] !== undefined && d[k] !== null && d[k] !== '') body[k] = d[k]; });
+    Object.keys(d).forEach(function (k) {
+      var v = d[k];
+      if (v === undefined || v === null || v === '') return;
+      if (typeof v === 'object') {
+        try { if (JSON.stringify(v).length > 4000) return; } catch (e0) { return; }
+        body[k] = v; return;
+      }
+      v = String(v);
+      if (v.length > 1500 || /^data:/.test(v)) return;
+      body[k] = v;
+    });
     if (body.note_groom) { body.noteGroom = body.note_groom; delete body.note_groom; }
     if (body.note_bride) { body.noteBride = body.note_bride; delete body.note_bride; }
     var url = MW_SERVER_URL + '?action=settingsGuide' + (MW_ADMIN_KEY ? '&key=' + encodeURIComponent(MW_ADMIN_KEY) : '');
@@ -9709,9 +9984,9 @@ function renderCustomerTab(){
       <tbody>${rows.length? rows.map(r=>{
         const c = clientOf(r) || {}, has = !!c.code, off = c.active===false, open = CUST_STATE.open===r.id;
         const dd = ddayInfo(r.weddingDate);
-        return `<tr class="${open?'open':''}">
+        return `<tr class="cu-row ${open?'open':''} ${isNewRec(r)?'mw-new-row':''}" data-rid="${r.id}" title="${open?'눌러서 접기':'눌러서 편집'}">
           <td><span class="cu-when">${fmtDate(r.weddingDate)}${r.weddingTime? ` <b>${esc(r.weddingTime)}</b>`:''}</span>${dd && dd.diff>=0 ? ` <span class="badge ${dd.diff<=7?'badge-urgent':'badge-normal'}">${dd.label}</span>`:''}</td>
-          <td><b>${esc(r.clientName)}</b><div class="cu-sub">${esc(r.contractCode||'')}</div></td>
+          <td><b>${esc(r.clientName)}</b>${isNewRec(r)?' <span class="mw-new-tag">NEW</span>':''}<div class="cu-sub">${esc(r.contractCode||'')}</div></td>
           <td>${esc(r.productType||'-')}<div class="cu-sub">${esc(r.venueName||'')}</div></td>
           <td>${has? `<b class="cu-code ${off?'off':''}">${esc(c.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(c.code)}" title="접속코드 복사">📋</button>${off?'<div class="cu-sub">사용 중지</div>':''}${sideEligible(r)? ['groom','bride'].map(sk=>{ const sd=(c.sides||{})[sk]; return sd&&sd.code? `<div class="cu-sub">${SIDE_LABEL[sk]} <b class="cu-code ${sd.active===false?'off':''}">${esc(sd.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(sd.code)}" title="${SIDE_LABEL[sk]} 접속코드 복사">📋</button></div>` : ''; }).join('') + (!((c.sides||{}).groom||{}).code || !((c.sides||{}).bride||{}).code ? `<div class="cu-sub"><a href="#" data-cu="edit" data-id="${r.id}">+ 신랑·신부 코드</a></div>` : '') : ''}` : `<button class="btn btn-sm btn-primary" data-cu="create" data-id="${r.id}">코드 발급</button>`}</td>
           <td>${yes(c.contractUrl)}</td><td>${yes(liveSet(c))}${c.youtubeGroom&&c.youtubeBride?'<div class="cu-sub">신랑·신부</div>':''}</td><td>${yes(giftSet(c))}</td><td>${yes(guideOf(r))}</td>
@@ -9724,11 +9999,19 @@ function renderCustomerTab(){
     if(keep && nb && keep.dataset.rid===CUST_STATE.open) nb.replaceWith(keep);
     else { const rec = recordById(CUST_STATE.open); if(rec) renderClientBox(rec, nb); } }
 }
+async function toggleCustEdit(rec){
+  const ob = document.getElementById('cpTabBox'), orec = ob && recordById(ob.dataset.rid);
+  if(ob && orec && !(await cpResolveDirty(orec, ob))) return;
+  if(ob) delete ob.dataset.dirty;
+  CUST_STATE.open = CUST_STATE.open===rec.id ? null : rec.id; renderCustomerTab();
+}
 document.addEventListener('click', async (ev)=>{
+  const rowEl = ev.target.closest('#custTabRoot tr.cu-row');
+  if(rowEl && !ev.target.closest('button,a,input,select,textarea,label,.cu-copy')){ const rr = recordById(rowEl.dataset.rid); if(rr){ await toggleCustEdit(rr); return; } }
   const el = ev.target.closest('#custTabRoot [data-cu]'); if(!el || el.tagName==='SELECT' || el.tagName==='INPUT') return;
   if(el.tagName==='A') ev.preventDefault();
   const a = el.dataset.cu, rec = el.dataset.id ? recordById(el.dataset.id) : null;
-  if(a==='create' && rec){ await saveClient(rec, {code: genClientCode(), active:true, createdAt:new Date().toISOString()}, `${rec.clientName}님 코드를 발급했어요`); CUST_STATE.open = rec.id; renderCustomerTab(); return; }
+  if(a==='create' && rec){ await saveClient(rec, newClientData(rec), `${rec.clientName}님 코드를 발급했어요${sideEligible(rec)?' (신랑 · 신부 코드 포함)':''}`); CUST_STATE.open = rec.id; renderCustomerTab(); return; }
   if(a==='gfold'){ GUIDE_FOLD = !GUIDE_FOLD; renderCustomerTab(); return; }
   if(a==='gclear'){ if(GUIDE_IMPORT.some(x=> !x.ok && !x.busy) && !confirm('확인이 필요한 설정서가 남아 있어요. 결과를 지울까요?')) return; GUIDE_IMPORT = []; GUIDE_PROG = null; GUIDE_FOLD = false; renderCustomerTab(); return; }
   if(a==='gassign'){
@@ -9736,33 +10019,24 @@ document.addEventListener('click', async (ev)=>{
     if(!x || !x.payload || !sel || !sel.value){ showToast('적용할 계약을 선택해주세요'); return; }
     const r = applySettingsGuide(RECORDS, ensurePdb(), Object.assign({}, x.payload, {recordId: sel.value}), 'pdf');
     if(!r.ok){ alert(r.error); return; }
-    pDirty.referral.add('guide:'+r.recordId); GUIDE_IMPORT[i] = Object.assign({}, x, {ok:true, recordId:r.recordId, items:r.items});
+    pDirty.referral.add('guide:'+r.recordId); pDirty.referral.add('card:'+r.recordId); GUIDE_IMPORT[i] = Object.assign({}, x, {ok:true, recordId:r.recordId, items:r.items});
     renderCustomerTab(); showToast('예식 안내문을 적용했어요'); await savePartnerDb(); return;
   }
   if(a==='copySnippet'){ copyText(settingsGuideSnippet(), '연동 코드를 복사했어요 · 운영설정서 Apps Script에 붙여넣어 주세요'); return; }
   if(a==='copy'){ ev.preventDefault(); copyText(el.dataset.code, `접속코드 ${el.dataset.code} 를 복사했어요`); return; }
   if(a==='invite' && rec){ copyText(customerInviteText(rec, clientOf(rec)), `${rec.clientName}님 초대 문구를 복사했어요`); return; }
   if(a==='preview' && rec){ openCustomerPreview(clientOf(rec).code); return; }
-  if(a==='edit' && rec){ const ob = document.getElementById('cpTabBox'), orec = ob && recordById(ob.dataset.rid);
-    if(ob && orec && !(await cpResolveDirty(orec, ob))) return;
-    if(ob) delete ob.dataset.dirty;
-    CUST_STATE.open = CUST_STATE.open===rec.id ? null : rec.id; renderCustomerTab(); return; }
+  if(a==='edit' && rec){ await toggleCustEdit(rec); return; }
   if(a==='bulk'){
     const t = todayStr(); const list = activeContracts().filter(r=> r.weddingDate && r.weddingDate>=t && !((clientOf(r)||{}).code));
     if(!list.length || !confirm(`예정 예식 ${list.length}건에 고객 코드를 한 번에 발급할까요?`)) return;
     const db = ensurePdb(); db.referralPay = db.referralPay || {};
-    list.forEach(r=>{ const k = clientKey(r); db.referralPay[k] = Object.assign({}, db.referralPay[k]||{}, {code: genClientCode(), active:true, key: recordKey(r), createdAt:new Date().toISOString(), updatedAt:new Date().toISOString()}); pDirty.referral.add(k); });
-    renderCustomerTab(); showToast(`${list.length}건 코드를 발급했어요`); await savePartnerDb(); return;
+    list.forEach(r=>{ const k = clientKey(r); db.referralPay[k] = Object.assign({}, db.referralPay[k]||{}, Object.assign(newClientData(r), {key: recordKey(r), updatedAt:new Date().toISOString()})); pDirty.referral.add(k); });
+    renderCustomerTab(); showToast(`${list.length}건 코드를 발급했어요 (양측 · 통합은 신랑 · 신부 코드 포함)`); await savePartnerDb(); return;
   }
 });
-document.addEventListener('change', async (ev)=>{
-  const ac = ev.target.closest('#custTabRoot [data-act="autoCode"]');
-  if(ac){ pSet().autoClientCode = ac.checked; pDirty.settings = true; showToast(ac.checked? '신규 계약 자동 발급을 켰어요' : '자동 발급을 껐어요'); await savePartnerDb(); if(ac.checked && autoIssueClientCodes()) renderCustomerTab(); return; }
-  const st = ev.target.closest('#custTabRoot [data-act="setText"]');
-  if(st){ pSet()[st.dataset.key] = st.value.trim(); pDirty.settings = true; showToast('고객 페이지 설정을 저장했어요'); await savePartnerDb(); return; }
-  const el = ev.target.closest('#custTabRoot [data-cu]'); if(!el) return;
-  if(el.dataset.cu==='gimport'){
-    let files = [...(el.files||[])].filter(f=> /\.pdf$/i.test(f.name) || f.type==='application/pdf'); el.value = ''; if(!files.length) return;
+async function runGuideImport(list){
+  let files = list.filter(f=> /\.pdf$/i.test(f.name) || f.type==='application/pdf'); if(!files.length) return;
     if(GUIDE_PROG && !GUIDE_PROG.finished){ showToast('이전 불러오기가 끝난 뒤 다시 선택해주세요'); return; }
     if(files.length > GUIDE_MAX){ alert(`한 번에 최대 ${GUIDE_MAX}개까지 불러올 수 있어요.\n앞의 ${GUIDE_MAX}개만 먼저 불러오고, 나머지는 끝난 뒤 다시 선택해주세요.`); files = files.slice(0, GUIDE_MAX); }
     GUIDE_IMPORT = files.map(f=>({file:f.name, busy:true})); GUIDE_FOLD = false;
@@ -9778,8 +10052,29 @@ document.addEventListener('change', async (ev)=>{
     GUIDE_PROG.saving = true; updateGuideProg();
     try{ await savePartnerDb(); }catch(e){}
     GUIDE_PROG.saving = false; GUIDE_PROG.finished = true; renderCustomerTab();
-    showToast(`설정서 ${files.length}개 중 ${GUIDE_PROG.ok}개 안내문을 불러왔어요`); return;
-  }
+    showToast(`설정서 ${files.length}개 중 ${GUIDE_PROG.ok}개 안내문을 불러왔어요`); 
+}
+/* PDF 끌어다 놓기: 고객페이지 탭 어디에 놓아도 일괄 매칭 */
+(function(){
+  const inTab = e=> e.target && e.target.closest && e.target.closest('#tab-customers');
+  const hasFiles = e=> e.dataTransfer && [...(e.dataTransfer.types||[])].includes('Files');
+  const zone = ()=> document.querySelector('#custTabRoot [data-cu-drop]');
+  ['dragenter','dragover'].forEach(t=> document.addEventListener(t, e=>{ if(!inTab(e) || !hasFiles(e)) return; e.preventDefault(); const z = zone(); if(z) z.classList.add('over'); }));
+  document.addEventListener('dragleave', e=>{ if(e.relatedTarget && inTab(e)) return; const z = zone(); if(z) z.classList.remove('over'); });
+  document.addEventListener('drop', async e=>{
+    if(!inTab(e) || !hasFiles(e)) return; e.preventDefault();
+    const z = zone(); if(z) z.classList.remove('over');
+    const fl = [...e.dataTransfer.files]; if(!fl.some(f=> /\.pdf$/i.test(f.name) || f.type==='application/pdf')){ showToast('PDF 파일만 올릴 수 있어요'); return; }
+    await runGuideImport(fl);
+  });
+})();
+document.addEventListener('change', async (ev)=>{
+  const ac = ev.target.closest('#custTabRoot [data-act="autoCode"]');
+  if(ac){ pSet().autoClientCode = ac.checked; pDirty.settings = true; showToast(ac.checked? '신규 계약 자동 발급을 켰어요' : '자동 발급을 껐어요'); await savePartnerDb(); if(ac.checked && autoIssueClientCodes()) renderCustomerTab(); return; }
+  const st = ev.target.closest('#custTabRoot [data-act="setText"]');
+  if(st){ pSet()[st.dataset.key] = st.value.trim(); pDirty.settings = true; showToast('고객 페이지 설정을 저장했어요'); await savePartnerDb(); return; }
+  const el = ev.target.closest('#custTabRoot [data-cu]'); if(!el) return;
+  if(el.dataset.cu==='gimport'){ const fl = [...(el.files||[])]; el.value = ''; await runGuideImport(fl); return; }
   if(el.dataset.cu==='filter'){ CUST_STATE.filter = el.value; CUST_STATE.open = null; renderCustomerTab(); }
 });
 document.addEventListener('input', (ev)=>{
@@ -9826,6 +10121,46 @@ document.addEventListener('input', (ev)=>{
   ['modalClose','cancelBtn'].forEach(id=>{ const el = document.getElementById(id); if(el) el.addEventListener('click', stopIfDirty, true); });
   const ov = document.getElementById('modalBody') && document.getElementById('modalBody').closest('.overlay'); if(ov) ov.addEventListener('click', stopIfDirty, true);
   window.addEventListener('beforeunload', e=>{ if(cpDirtyBox()){ e.preventDefault(); e.returnValue = ''; } });
+})();
+
+/* ---------- 신규 계약 알림 (최상단 · 닫기 가능) + 하루 동안 목록 색 구분 ---------- */
+const NEW_WINDOW_MS = 24*60*60*1000;
+function isNewRec(r){
+  if(!r || r.type!=='contract' || r.cancelled || !r.createdAt) return false;
+  const t = new Date(r.createdAt).getTime(); return !isNaN(t) && Date.now() - t >= 0 && Date.now() - t < NEW_WINDOW_MS;
+}
+function newDismissed(){ try{ return JSON.parse(localStorage.getItem('mw_new_dismissed')||'[]'); }catch(_){ return []; } }
+function newDismiss(ids){ try{ const s = new Set(newDismissed().concat(ids)); localStorage.setItem('mw_new_dismissed', JSON.stringify([...s].slice(-300))); }catch(_){} }
+function renderNewBanner(){
+  if(!Array.isArray(RECORDS)) return;
+  let el = document.getElementById('mwNewBanner');
+  const dis = new Set(newDismissed()), list = RECORDS.filter(r=> isNewRec(r) && !dis.has(r.id));
+  if(!list.length){ if(el) el.remove(); return; }
+  if(!el){ el = document.createElement('div'); el.id = 'mwNewBanner'; document.body.insertBefore(el, document.body.firstChild); }
+  const sig = list.map(r=> r.id).join(',');
+  if(el.dataset.sig===sig) return; el.dataset.sig = sig;
+  el.innerHTML = `<div class="mw-nb-in"><span class="mw-nb-ic">🆕</span><div class="mw-nb-t"><b>신규 계약 ${list.length}건이 들어왔어요</b>
+    <span>${list.slice(0,6).map(r=>`<a href="#" data-newid="${r.id}">${esc(r.clientName||'이름 없음')}${r.weddingDate? ' · '+fmtDate(r.weddingDate):''}${r.productType? ' · '+esc(r.productType):''}</a>`).join('')}${list.length>6? ` 외 ${list.length-6}건`:''}</span></div>
+    <button type="button" class="mw-nb-x" data-newclose aria-label="알림 닫기" title="닫기">✕</button></div>`;
+}
+document.addEventListener('click', ev=>{
+  const x = ev.target.closest('#mwNewBanner [data-newclose]');
+  if(x){ const el = document.getElementById('mwNewBanner'); newDismiss([...el.querySelectorAll('[data-newid]')].map(a=> a.dataset.newid).concat(RECORDS.filter(isNewRec).map(r=> r.id))); el.remove(); return; }
+  const a = ev.target.closest('#mwNewBanner [data-newid]');
+  if(a){ ev.preventDefault(); if(typeof openModal==='function') openModal(a.dataset.newid); }
+});
+function markNewRows(){
+  document.querySelectorAll('tr[data-id]').forEach(tr=>{ const r = recordById(tr.dataset.id); const on = isNewRec(r); tr.classList.toggle('mw-new-row', on);
+    const td = tr.children[2]; if(td && !/cu-row/.test(tr.className)){ const tag = td.querySelector('.mw-new-tag'); if(on && !tag && /^TD$/i.test(td.tagName) && td.children.length===0) td.insertAdjacentHTML('beforeend',' <span class="mw-new-tag">NEW</span>'); if(!on && tag) tag.remove(); } });
+}
+(function newWatch(){
+  if(typeof renderAll!=='function') return;
+  const orig = renderAll;
+  const wrapped = function(){ const r = orig.apply(this, arguments); try{ renderNewBanner(); markNewRows(); }catch(e){} return r; };
+  wrapped.__keepScroll = orig.__keepScroll;
+  try{ renderAll = wrapped; }catch(e){}
+  setTimeout(()=>{ try{ renderNewBanner(); markNewRows(); }catch(e){} }, 800);
+  setInterval(()=>{ try{ renderNewBanner(); }catch(e){} }, 60000);
 })();
 
 /* ---------- 로그인 ---------- */
