@@ -852,6 +852,12 @@ details.pp-past summary{cursor:pointer;font-size:13px;font-weight:700;color:var(
 .pp-cf-btn{border:0;border-radius:8px;background:var(--pp-wine);color:#fff;font-weight:800;font-size:13px;padding:8px 12px;cursor:pointer;flex:none}
 .pp-cf-btn.ok{background:#E3F1E9;color:#2F7D57}
 .pp-cf-note{font-size:11.5px;color:var(--pp-soft);text-align:center;margin-top:14px}
+.pp-ar-url{font-size:13px;margin:8px 0 12px;word-break:break-all}.pp-ar-url a{color:var(--pp-brand,#2563eb);font-weight:700;text-decoration:underline}
+.pp-ar-ev{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:12px;margin-bottom:12px}
+.pp-ar-h{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:baseline;margin-bottom:8px}.pp-ar-h small{width:100%;color:#64748b}
+.pp-ar-side{border-top:1px dashed #e5e7eb;padding:8px 0}.pp-ar-code{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;font-size:13px}
+.pp-ar-code span{color:#64748b}.pp-ar-code b{font-size:16px;letter-spacing:.5px;user-select:all}.pp-ar-code em{color:#94a3b8;font-style:normal}
+.pp-ar-go{width:100%;padding:12px}.pp-ar-go[disabled]{opacity:.45}
 /* ================= 접속 메인화면 (모먼트웍스 로고) ================= */
 .mw-entry{position:fixed;inset:0;z-index:500;overflow-y:auto;background:#F7F5F0;background-image:radial-gradient(ellipse at 50% 38%, #FFFFFF 0%, #F7F5F0 55%, #EFEBE3 100%);color:#1A1618;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;display:flex;align-items:center;justify-content:center;padding:56px 22px;box-sizing:border-box;}
@@ -1550,6 +1556,7 @@ tr.mw-new-row>td:first-child{box-shadow:inset 4px 0 0 #E0A526;}
 .cp-vip td{padding:0;border:1px solid #E2DDD0}.cp-vip td input{width:100%;border:0;padding:7px 6px;box-sizing:border-box;background:transparent}
 .cp-card-admin input.cp-changed,.cp-card-admin textarea.cp-changed{background:#FFF8DC}
 @media (max-width:760px){.cp-fs-body{grid-template-columns:1fr}.cp-fgrp{grid-template-columns:1fr}}
+.cp-arrange{margin:10px 0;padding:10px;border:1px solid var(--border,#e5e7eb);border-radius:10px}.cp-arrange-h{font-weight:700;margin-bottom:6px}
 /* ===== 고객 전용 페이지 ===== */
 .cp{--cp-ink:#1F1A1C;--cp-soft:#5E5750;--cp-paper:#F4F1EA;--cp-card:#FFFFFF;--cp-line:#E2DBCD;--cp-wine:#5C1F29;--cp-gold:#A9823C;--cp-gold-s:#F2E7CF;--cp-sage:#4F6F52;--cp-coral:#B0432E;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--cp-ink);background:var(--cp-paper);min-height:100vh;font-variant-numeric:tabular-nums;max-width:640px;margin:0 auto;position:relative;}
@@ -4230,6 +4237,18 @@ function partnerContacts(rows){
   ];
   var PH = /(?:\+?82[\s\-.]?)?0?1[016789][\s\-.]?\d{3,4}[\s\-.]?\d{4}|0\d{1,2}[\s\-.]\d{3,4}[\s\-.]\d{4}/g;
   var used = {}, groups = [];
+  // 신랑 · 신부 연락처 (예식 기본정보) — 현장 연락처 맨 위에 둠
+  var couple = [], nm = {};
+  rows.forEach(function(r){ var k = String(r.key||''); if(k==='groom_name') nm.g = String(r.value||'').trim(); if(k==='bride_name') nm.b = String(r.value||'').trim(); });
+  [['g','신랑',/^(?:groom_(?:phone|contact|tel)|신랑\s*연락처)$/i],['b','신부',/^(?:bride_(?:phone|contact|tel)|신부\s*연락처)$/i]].forEach(function(d){
+    rows.forEach(function(r, i){
+      if(used[i]) return;
+      if(!(d[2].test(String(r.key||'').trim()) || d[2].test(String(r.label||'').trim()))) return;
+      var f = String(r.value||'').match(PH); used[i] = true;
+      if(f) couple.push({name: d[1] + (nm[d[0]] ? ' ' + nm[d[0]] : ''), phone: f[0].replace(/[^0-9+]/g,''), shown: f[0]});
+    });
+  });
+  if(couple.length) groups.push({id:'couple', title:'신랑 · 신부', icon:'💍', people: couple});
   GROUPS.forEach(function(G){
     var mine = [];
     rows.forEach(function(r, i){ var t = String(r.key||'')+' '+String(r.label||''); if(G.re.test(t) && !(G.not && G.not.test(t)) && !used[i]){ mine.push({r:r, i:i}); } });
@@ -4325,6 +4344,7 @@ function buildPartnerView(records, db, code, todayStr){
       team: team,
       note: a.note || '',
       confirmed: !!resp.confirmed, confirmedAt: resp.confirmedAt || '',
+      arrange: (function(){ var a = (db.referralPay||{})['arrange:'+recordId]; return (a && (a.groom || a.bride)) ? {groom: String(a.groom||''), bride: String(a.bride||'')} : null; })(),
       info: (function(){
         var g = (db.referralPay||{})['guide:'+recordId] || {}, c = (db.referralPay||{})['card:'+recordId] || {};
         if(!g.items && !g.groomName && !g.brideName && !(c.rows||[]).length) return null;
@@ -4649,7 +4669,7 @@ function buildCustomerView(records, db, code, todayStr, withFile){
 ============================================================================================== */
 const PartnerPortal = (function(){
   const WD = ['일','월','화','수','목','금','토'];
-  const TABS = [['home','홈'],['work','오늘 업무'],['schedule','내 일정'],['confirm','배정 확인'],['info','예식정보'],['pay','근무·급여'],['avail','휴무 신청'],['notice','공지']];
+  const TABS = [['home','홈'],['work','오늘 업무'],['schedule','내 일정'],['confirm','배정 확인'],['info','예식정보'],['arrange','축의대 내역정리'],['pay','근무·급여'],['avail','휴무 신청'],['notice','공지']];
   let workRid=null, sheet=null, root=null, view=null, H={}, tab='home', selRecord=null, calCursor=null, availCursor=null, payMonth=null, selDay=null, busy=false;
 
   const pd = n => String(n).padStart(2,'0');
@@ -5173,6 +5193,24 @@ const PartnerPortal = (function(){
   }
 
   let schedFilter = null;
+  const ARRANGE_URL = 'https://momentworks.github.io/arrange/';
+  function arrangeHTML(){
+    const up = upcoming().slice().sort((a,b)=> (a.date+(a.weddingTime||''))<(b.date+(b.weddingTime||''))?-1:1);
+    const side = (ev, k, lab)=>{
+      const c = ev.arrange && ev.arrange[k];
+      return `<div class="pp-ar-side"><div class="pp-ar-code"><span>${lab} 접속코드</span>${c? `<b>${e(c)}</b><button class="pp-btn" data-pp="arrCopy" data-rid="${e(ev.recordId)}" data-v="${k}">📋 코드 복사</button>` : '<em>아직 등록 전이에요</em>'}</div>
+        <button class="pp-btn primary pp-ar-go" data-pp="arrGo" data-rid="${e(ev.recordId)}" data-v="${k}" ${c?'':'disabled'}>${lab}측 내역정리 시작하기</button></div>`;
+    };
+    const card = ev=>{
+      const d = parseD(ev.date), dow = '일월화수목금토'[d.getDay()], inf = ev.info || {};
+      const nm = (inf.groomName||inf.brideName) ? `${inf.groomName? '신랑 '+e(inf.groomName):''}${inf.groomName&&inf.brideName?' · ':''}${inf.brideName? '신부 '+e(inf.brideName):''}` : '';
+      return `<section class="pp-ar-ev"><div class="pp-ar-h"><b>${pd(d.getMonth()+1)}.${pd(d.getDate())} (${dow}) ${e(ev.weddingTime||'')}</b> <span>${e(ev.venueName||'예식장 미정')}</span>${nm? `<small>${nm}</small>`:''}</div>${side(ev,'groom','신랑')}${side(ev,'bride','신부')}</section>`;
+    };
+    return `<div class="pp-cfhead"><div><b>축의대 내역정리</b> <small>배정된 예식의 정리 시트 접속코드</small></div></div>
+      <p class="pp-ar-url">내역정리 사이트: <a href="${ARRANGE_URL}" target="_blank" rel="noopener">${ARRANGE_URL}</a></p>
+      ${up.length? up.map(card).join('') : '<div class="pp-empty">배정된 예정 일정이 없어요</div>'}
+      <p class="pp-cf-note">「시작하기」를 누르면 접속코드가 복사되고 내역정리 사이트가 열려요. 코드 입력칸에 붙여넣어 주세요.</p>`;
+  }
   function confirmHTML(){
     const up = upcoming().slice().sort((a,b)=> (a.date+(a.weddingTime||''))<(b.date+(b.weddingTime||''))?-1:1);
     const pend = up.filter(ev=>!ev.confirmed), done = up.filter(ev=>ev.confirmed);
@@ -5315,7 +5353,7 @@ const PartnerPortal = (function(){
     computeNew();
     if(H.onCache){ try{ H.onCache(view); }catch(e){} }
     const pendingCount = upcoming().filter(ev=>!ev.confirmed).length;
-    const body = tab==='home'?homeHTML(): tab==='work'?workHTML(): tab==='schedule'?scheduleHTML(): tab==='confirm'?confirmHTML(): tab==='info'?infoPageHTML(): tab==='pay'?payHTML(): tab==='avail'?availHTML(): noticeHTML();
+    const body = tab==='home'?homeHTML(): tab==='work'?workHTML(): tab==='schedule'?scheduleHTML(): tab==='confirm'?confirmHTML(): tab==='info'?infoPageHTML(): tab==='arrange'?arrangeHTML(): tab==='pay'?payHTML(): tab==='avail'?availHTML(): noticeHTML();
     const updated = view.generatedAt ? new Date(view.generatedAt) : new Date();
     root.innerHTML = `<div class="pp">
       ${busy?'<div class="pp-busy"></div>':''}
@@ -5358,6 +5396,11 @@ const PartnerPortal = (function(){
     const el = ev.target.closest('[data-pp]'); if(!el) return;
     const act=el.dataset.pp, v=el.dataset.v, rid=el.dataset.rid;
     if(act==='pendingList'){ tab='confirm'; schedFilter=null; selDay=null; sheet=null; render(); window.scrollTo(0,0); return; }
+    if(act==='arrCopy' || act==='arrGo'){
+      const evn = view.events.find(x=>x.recordId===rid), c = evn && evn.arrange && evn.arrange[v]; if(!c) return;
+      const ok = await copyText(c); toast(ok? `${v==='groom'?'신랑':'신부'}측 접속코드를 복사했어요` : '복사하지 못했어요 · 코드를 직접 선택해 주세요');
+      if(act==='arrGo') window.open(ARRANGE_URL, '_blank', 'noopener'); return;
+    }
     if(act==='confirmAll'){
       const pend = upcoming().filter(ev=>!ev.confirmed); if(!pend.length) return;
       if(!confirm(`배정된 일정 ${pend.length}건을 모두 확정할까요?`)) return;
@@ -9707,6 +9750,9 @@ function renderClientBox(rec, boxEl){
       </div>
       ${sidesHTML(rec, c)}
       ${guideAdminHTML(rec)}
+      <div class="cp-arrange"><div class="cp-arrange-h">🧾 축의대 내역정리 시트 접속코드 <span class="cp-admin-hint">배정된 파트너가 파트너스오피스 「축의대 내역정리」 메뉴에서 보고 복사해요</span></div>
+        <div class="cp-admin-grid"><label>신랑측 접속코드<input data-cpr="groom" value="${esc(arrangeOf(rec).groom||'')}" placeholder="신랑측 내역정리 접속코드"></label>
+        <label>신부측 접속코드<input data-cpr="bride" value="${esc(arrangeOf(rec).bride||'')}" placeholder="신부측 내역정리 접속코드"></label></div></div>
       ${cardAdminHTML(rec)}
       <div class="cp-admin-foot">${c.contractUrl? '<button type="button" class="btn btn-sm" data-cpa="filecheck">📥 계약서 다운로드 점검</button>' : ''}<button type="button" class="btn btn-sm btn-ghost" data-cpa="regen">코드 재발급</button><button type="button" class="btn btn-sm btn-ghost ${off?'':'btn-danger'}" data-cpa="toggle">${off? '다시 사용' : '사용 중지'}</button>
         ${String(pSet().customerUrl||'').trim()? '' : '<span class="cp-admin-warn">파트너스 → 분리 운영 · 설정에서 고객 페이지 주소를 넣으면 초대 문구에 링크가 함께 들어가요</span>'}</div>`;
@@ -9749,7 +9795,7 @@ function renderClientBox(rec, boxEl){
   box.querySelectorAll('details[data-cardrid]').forEach(d=> d.addEventListener('toggle', ()=>{ if(d.open) CARD_CLOSED.delete(d.dataset.cardrid); else CARD_CLOSED.add(d.dataset.cardrid); }));
   box.querySelectorAll('details[data-gdrid]').forEach(d=> d.addEventListener('toggle', ()=>{ if(d.open) GUIDE_CLOSED.delete(d.dataset.gdrid); else GUIDE_CLOSED.add(d.dataset.gdrid); }));
   /* 입력은 바로 저장하지 않고, [💾 저장]을 눌러 한 번에 저장 */
-  const fields = ()=> [...box.querySelectorAll('[data-cpf],[data-cps],[data-cpg],[data-cpc]')];
+  const fields = ()=> [...box.querySelectorAll('[data-cpf],[data-cps],[data-cpg],[data-cpc],[data-cpr]')];
   const refresh = ()=>{
     const all = fields(), ch = all.filter(f=> f.value !== f.defaultValue);
     all.forEach(f=> f.classList.toggle('cp-changed', f.value !== f.defaultValue));
@@ -9786,7 +9832,8 @@ function renderClientBox(rec, boxEl){
   refresh();
 }
 /* 고객 박스 전체 저장: 계약서 · 라이브 · 현황판 코드 · 안내 · 신랑/신부 · 예식 안내문을 한 번에 */
-function cpBoxChanges(box){ return box ? [...box.querySelectorAll('[data-cpf],[data-cps],[data-cpg],[data-cpc]')].filter(f=> f.value !== f.defaultValue) : []; }
+function arrangeOf(rec){ return (ensurePdb().referralPay||{})['arrange:'+rec.id] || {}; }
+function cpBoxChanges(box){ return box ? [...box.querySelectorAll('[data-cpf],[data-cps],[data-cpg],[data-cpc],[data-cpr]')].filter(f=> f.value !== f.defaultValue) : []; }
 function cpDirtyBox(){ return document.querySelector('.cp-admin[data-dirty]'); }
 async function saveClientBoxAll(rec, box, opt){
   opt = opt || {};
@@ -9816,6 +9863,11 @@ async function saveClientBoxAll(rec, box, opt){
     box.querySelectorAll('[data-cpg]').forEach(f=>{ const n = f.dataset.cpg, v = f.value.trim();
       if(n==='groomName'||n==='brideName') gp[n] = v; else if(n.startsWith('n:')) gp.notes[n.slice(2)] = v; else gp.items[n] = v; });
     applyGuidePatch(rec, gp);
+  }
+  if(has('[data-cpr]')){
+    const ak = 'arrange:'+rec.id, g = val('[data-cpr="groom"]'), b = val('[data-cpr="bride"]');
+    if(g || b) db.referralPay[ak] = {groom: g, bride: b, updatedAt: new Date().toISOString()}; else delete db.referralPay[ak];
+    pDirty.referral.add(ak);
   }
   if(has('[data-cpc]')){
     const ck = 'card:'+rec.id, prev = db.referralPay[ck] || {}, rows = (prev.rows||[]).map(r=> Object.assign({}, r));
@@ -10077,6 +10129,12 @@ const LABELS = [
   {k:'tk_del_rel',  p:'본식 당일 식권 전달자 - 관계'},
   {k:'tk_del_name', p:'본식 당일 식권 전달자 - 성함'},
   {k:'tk_del_phone',p:'본식 당일 식권 전달자 - 연락처'},
+  {k:'tk_del_rel',  p:'본식 당일 식권 전달해주시는 분 - 관계'},
+  {k:'tk_del_name', p:'본식 당일 식권 전달해주시는 분 - 성함'},
+  {k:'tk_del_phone',p:'본식 당일 식권 전달해주시는 분 - 연락처'},
+  {k:'tk_del_rel',  p:'식권 전달자 - 관계'},
+  {k:'tk_del_name', p:'식권 전달자 - 성함'},
+  {k:'tk_del_phone',p:'식권 전달자 - 연락처'},
   {k:'tk_contact', p:'축의금 계좌이체 하객 응대 방법'},
   {k:'tk_invite',  p:'모바일 청첩장 주소'},
   {k:'tk_cross',   p:'식권 교차 사용 가능 여부'},
@@ -10239,7 +10297,18 @@ function parseText(raw){
   };
   const list = [];
 
-  for(const line of lines){
+  let grp = null;
+  const SUBK = {'관계':'tk_del_rel','성함':'tk_del_name','연락처':'tk_del_phone'};
+  const splitSub = str => {
+    const parts = (' ' + str).split(/\s(관계|성함|연락처)(?=\s|:|$)\s*:?\s*/);
+    for(let i = 1; i < parts.length; i += 2) begin(SUBK[parts[i]], (parts[i+1]||'').trim());
+  };
+  const SEC_PREFIX = new RegExp('^\\s*(?:■\\s*)?(\\d{2})\\s*\\.?\\s*(' + Object.keys(SECTION_TITLES).map(k => SECTION_TITLES[k].split('').join('\\s*')).join('|') + ')\\s+(?=\\S)');
+  for(const line0 of lines){
+    // 표의 '구분' 칸(예: "01. 예식 기본정보")이 첫 항목과 한 줄로 읽힌 경우 → 구분을 떼고 두 줄처럼 처리
+    const sp = line0.match(SEC_PREFIX);
+    if(sp && SECTION_TITLES[sp[1]] && sp[2].replace(/\s+/g,'') === SECTION_TITLES[sp[1]].replace(/\s+/g,'')){ section = sp[1]; cur = null; grp = null; }
+    const line = sp && section === sp[1] ? line0.slice(sp[0].length) : line0;
     const t = line.trim();
     const sec = matchSection(t);
     if(sec){ section = sec; cur = null; continue; }
@@ -10273,8 +10342,12 @@ function parseText(raw){
     }
 
     // ── 표형: "라벨   값" (값이 다음 줄로 이어질 수 있음)
+    // '본식 당일 식권 전달해주시는 분' 아래 관계/성함/연락처 칸이 따로 읽힌 경우
+    const gm = t.match(/^본식\s*당일\s*식권\s*전달\s*(?:자|해\s*주시는\s*분)(?!\s*[-–]\s*(?:관계|성함|연락처))\s*:?\s*(.*)$/);
+    if(gm){ grp = 'tk_del'; cur = null; if(gm[1]) splitSub(gm[1]); continue; }
+    if(grp === 'tk_del' && /^(관계|성함|연락처)(?=\s|:|$)/.test(t)){ splitSub(t); continue; }
     const lm = matchLabel(t);
-    if(lm){ begin(lm.k, lm.rest, {wrapped: lm.wrapped}); continue; }
+    if(lm){ grp = null; begin(lm.k, lm.rest, {wrapped: lm.wrapped}); continue; }
     if(cur && cur.skipYeobu && /^여부$/.test(t)){ cur.skipYeobu = false; continue; }   // 꺾인 라벨의 꼬리
     if(/\S\s{2,}\S/.test(line.trim())){                         // 사전에 없는 새 항목 → 앞 항목에 섞지 않는다
       const cells = line.trim().split(/\s{2,}/);
@@ -10284,11 +10357,27 @@ function parseText(raw){
     if(cur) cur.parts.push(t);                                   // 이어지는 값
   }
 
+  // 값 뒤에 다음 항목 이름('신랑 연락처 신부 연락처' 등)이 딸려 온 경우 그 앞에서 자름
+  const TAIL_LABEL = new RegExp('\\s+(?:' + COMPILED.filter(l => l.len >= 5).map(l => l.src).join('|') + ')(?=\\s|$|:).*$');
+  // 잘려 나간 꼬리에 '신랑 연락처 010-… 신부 연락처 010-…' 처럼 값이 함께 있으면 그 값은 살린다
+  const tailEntries = {};
+  const salvage = tail => {
+    const hits = [];
+    for(let i = 0; i < tail.length; i++){
+      if(i && !/\s/.test(tail[i-1])) continue;
+      const sub = tail.slice(i);
+      for(const l of COMPILED){ const m = sub.match(l.start); if(m){ hits.push({k:l.k, at:i, end:i + m[0].length}); i += m[0].length - 1; break; } }
+    }
+    hits.forEach((h, n) => { const val = tail.slice(h.end, n + 1 < hits.length ? hits[n+1].at : undefined).trim(); if(val && !(h.k in tailEntries)) tailEntries[h.k] = val; });
+  };
   for(const c of list){
-    const v = c.parts.join(' ').replace(/\s+/g, ' ').trim();
+    let v = c.parts.join(' ').replace(/\s+/g, ' ').trim();
+    const tm = v.match(TAIL_LABEL);
+    if(tm){ salvage(tm[0].trim()); v = v.slice(0, tm.index).trim(); }
     if(c.key){ if(!(c.key in entries)) entries[c.key] = v; }
     else unknown.push({label:c.unknownLabel, value:v});
   }
+  Object.keys(tailEntries).forEach(k => { if(!entries[k]) entries[k] = tailEntries[k]; });
   return { format: bullet ? '글머리형 텍스트' : '표형 텍스트', entries, vip: vipRows, unknown };
 }
 
