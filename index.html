@@ -10297,7 +10297,7 @@ function parseText(raw){
   };
   const list = [];
 
-  let grp = null;
+  let grp = null; const vipLines = [];
   const SUBK = {'관계':'tk_del_rel','성함':'tk_del_name','연락처':'tk_del_phone'};
   const splitSub = str => {
     const parts = (' ' + str).split(/\s(관계|성함|연락처)(?=\s|:|$)\s*:?\s*/);
@@ -10316,13 +10316,15 @@ function parseText(raw){
     if(NOISE.some(re => re.test(t))) continue;
 
     if(section === '08'){
-      const lm = matchLabel(t);
-      if(lm && lm.k === 'vip_flag'){ entries.vip_flag = lm.rest; continue; }
+      let lm = matchLabel(t.replace(/^[-•·]\s*/, '').replace(/^(VIP\s*명단\s*작성\s*여부)\s*:/, '$1 '));
+      if(lm && lm.k === 'vip_flag'){
+        const fm = lm.rest.match(/^(있음|없음|예|아니오)\s*(.*)$/);
+        entries.vip_flag = fm ? fm[1] : lm.rest;
+        if(fm && fm[2]) vipLines.push(fm[2]);
+        continue;
+      }
       if(/성함\s*\(?업체명\)?/.test(t) && /지급/.test(t)) continue;           // 표 머리글
-      const bm = t.match(VIP_BULLET);
-      if(bm){ vipRows.push([bm[1], bm[2], bm[3], bm[4]].map(s => s.trim())); continue; }
-      const cells = line.trim().split(/\s{2,}/);
-      if(cells.length >= 3) vipRows.push([cells[0], cells[1], cells[2], cells.slice(3).join(' ')].map(s => (s||'').trim()));
+      vipLines.push(line);
       continue;
     }
 
@@ -10356,6 +10358,27 @@ function parseText(raw){
     }
     if(cur) cur.parts.push(t);                                   // 이어지는 값
   }
+
+  // ── VIP 명단: 줄바꿈 · 칸 간격이 어떻게 읽혀도 한 덩어리로 모아 한 명씩 뽑는다
+  (function(){
+    const blob = vipLines.map(x => x.trim().replace(/^[-•·]\s*/, '')).join(' ').replace(/\s+/g, ' ').trim();
+    const out = [];
+    const RE = /(.+?)\s*\/\s*관계\s*:?\s*(.*?)\s*\/\s*연락처\s*:?\s*(.*?)\s*\/?\s*지급\s*식권\s*수량\s*:?\s*(\d+\s*[매장개]?|-)?(?=\s+\S+\s*\/\s*관계|\s*$)/g;
+    let m;
+    while((m = RE.exec(blob))){ out.push([m[1].replace(/^[-•·]\s*/, '').trim(), m[2].trim(), m[3].trim(), (m[4]||'').trim()]); }
+    if(!out.length){
+      vipLines.forEach(l => {
+        const t = l.trim().replace(/^[-•·]\s*/, '');
+        const bm = t.match(VIP_BULLET);
+        if(bm){ out.push([bm[1], bm[2], bm[3], bm[4]].map(x => x.trim())); return; }
+        const cells = t.split(/\s{2,}/);
+        if(cells.length >= 3){ out.push([cells[0], cells[1], cells[2], cells.slice(3).join(' ')].map(x => (x||'').trim())); return; }
+        const sm = t.match(/^(.+?)\s+(\S+)\s+((?:\+?82[-\s]?)?0?1[016789][-\s]?\d{3,4}[-\s]?\d{4}|-)\s+(\d+\s*[매장개]?)$/);
+        if(sm) out.push([sm[1], sm[2], sm[3], sm[4]].map(x => x.trim()));
+      });
+    }
+    out.forEach(r => { if(r[0]) vipRows.push(r); });
+  })();
 
   // 값 뒤에 다음 항목 이름('신랑 연락처 신부 연락처' 등)이 딸려 온 경우 그 앞에서 자름
   const TAIL_LABEL = new RegExp('\\s+(?:' + COMPILED.filter(l => l.len >= 5).map(l => l.src).join('|') + ')(?=\\s|$|:).*$');
