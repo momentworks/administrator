@@ -414,6 +414,30 @@ body.portal-open{overflow:hidden;}
 .p-roleCell .p-pos{white-space:nowrap;margin:0;padding:3px 5px;font-size:10.5px;background:var(--ink);}
 .p-roleCell input{min-width:0;}
 .p-editor-slot{grid-template-columns:150px 1fr 104px 66px 30px;}
+
+/* 스케줄 보드: 예식별 배치 · 인원별 이동 동선 */
+.p-bv-month{font-weight:800;font-size:14px;margin:16px 2px 8px;color:var(--wine)}
+.p-bv-card{background:var(--paper-card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer;box-shadow:var(--shadow)}
+.p-bv-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:13px}.p-bv-top strong{font-size:14px}.p-bv-top small{color:#8A8274}.p-bv-top u{margin-left:auto;text-decoration:none;font-weight:800;color:var(--wine)}
+.p-bv-top em{font-style:normal;font-size:11px;font-weight:800;border-radius:10px;padding:1px 8px}.p-bv-top em.bad{background:#FCE9E5;color:#B0483F}.p-bv-top em.good{background:#E8F2EC;color:#25613F}
+.p-bv-sub{font-size:11.5px;color:#8A8274;margin:3px 0 8px}
+.p-bv-people{display:flex;flex-wrap:wrap;gap:6px}
+.p-bv-person{display:flex;align-items:center;gap:5px;border:1px solid #E6DFD0;border-left:4px solid var(--c,#999);background:#fff;border-radius:8px;padding:4px 8px;font-size:12px}
+.p-bv-person i{display:none}.p-bv-person small{color:#8A8274}.p-bv-person em{font-style:normal;font-size:10.5px;font-weight:700;color:#B07A1E}.p-bv-person em.ok{color:#2F7D57}.p-bv-person em.multi{background:#EEF2FA;color:#3B5FA5;border-radius:8px;padding:0 6px}
+.p-bv-person.warn{background:#FFF4F1;border-color:#E3B1A5}.p-bv-person.empty{border-style:dashed;border-left-color:#E0572F;color:#B0483F;background:#FFF9F7}
+.p-rt-note{font-size:12.5px;background:#F6EFE0;border-radius:10px;padding:9px 12px;margin-bottom:10px;line-height:1.6}
+.p-rt-card{background:var(--paper-card);border:1px solid var(--line);border-left:5px solid var(--c,#999);border-radius:12px;padding:10px 12px;margin-bottom:10px;box-shadow:var(--shadow)}
+.p-rt-head{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}.p-rt-head i{display:none}.p-rt-head b{font-size:15px}.p-rt-head small{color:#8A8274}.p-rt-head span{margin-left:auto;font-size:12px;color:#8A8274}.p-rt-head em{font-style:normal;font-weight:800;color:#3B5FA5}
+.p-rt-day{display:grid;grid-template-columns:86px 1fr;gap:8px;padding:8px 0;border-top:1px dashed #E6DFD0}
+.p-rt-day.multi{background:linear-gradient(90deg,#F4F7FD,transparent);border-radius:8px;padding:8px 6px}
+.p-rt-date{font-weight:800;font-size:13px}.p-rt-date em{display:block;font-style:normal;font-size:10.5px;color:#3B5FA5;margin-top:2px}
+.p-rt-step{display:flex;gap:8px;align-items:flex-start;cursor:pointer;padding:3px 0}.p-rt-step i{font-style:normal;font-size:16px;color:var(--wine);line-height:1.3;flex:none;width:20px;text-align:center}
+.p-rt-step b{font-size:13px;display:block}.p-rt-step small{color:#8A8274;font-size:11.5px}
+.p-rt-move{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:center;margin:4px 0 4px 28px;padding:5px 9px;border-radius:8px;font-size:12px;border-left:3px solid #2F7D57;background:#F0F7F3}
+.p-rt-move span{font-weight:800}.p-rt-move small{color:#8A8274}.p-rt-move em{font-style:normal;font-weight:800;margin-left:auto}
+.p-rt-move.tight{border-color:#D9A13B;background:#FFF8E8}.p-rt-move.bad{border-color:#D6453B;background:#FDECEA;color:#9B2E26}.p-rt-move.unk{border-color:#aaa;background:#F4F3EE}
+@media (max-width:700px){.p-rt-day{grid-template-columns:1fr}}
+.p-rt-more>summary{cursor:pointer;font-size:12px;font-weight:700;color:#8A8274;padding:8px 0 2px}
 /* ================= 파트너 포털 (통합관리시스템 내장 + 파트너스오피스 공용) ================= */
 .pp{--pp-ink:#241F22;--pp-soft:#5B5650;--pp-paper:#EEF0EA;--pp-card:#FAFAF6;--pp-line:#D9D6C9;--pp-wine:#7A2E3A;--pp-wine-d:#5C1F29;--pp-gold:#A9823C;--pp-gold-s:#EFE3C6;--pp-sage:#4F6F52;--pp-sage-s:#E1EAE0;--pp-coral:#C1553D;--pp-coral-s:#F5DFD8;--pp-slate:#6B7280;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--pp-ink);background:var(--pp-paper);min-height:100vh;font-variant-numeric:tabular-nums;padding-bottom:40px;}
@@ -858,6 +882,39 @@ details.pp-past summary{cursor:pointer;font-size:13px;font-weight:700;color:var(
 .pp-ar-side{border-top:1px dashed #e5e7eb;padding:8px 0}.pp-ar-code{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;font-size:13px}
 .pp-ar-code span{color:#64748b}.pp-ar-code b{font-size:16px;letter-spacing:.5px;user-select:all}.pp-ar-code em{color:#94a3b8;font-style:normal}
 .pp-ar-go{width:100%;padding:12px}.pp-ar-go[disabled]{opacity:.45}
+/* 스마트폰용 월 달력 — 균등 7열, 일정 있는 주만 높게 */
+.pp-sc{padding:14px 10px 10px;background:#FFFDF9;border:1px solid #E6DFD0;border-radius:14px;box-shadow:0 2px 10px rgba(60,40,30,.05)}
+.pp-sc-head{display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px}
+.pp-sc-head div{text-align:center;line-height:1.25}.pp-sc-head b{font-family:'Noto Serif KR',serif;font-size:17px;letter-spacing:.3px;color:var(--pp-ink);display:block}
+.pp-sc-head small{font-size:10.5px;color:var(--pp-soft);letter-spacing:.4px}
+.pp-sc-head button{width:34px;height:34px;border-radius:50%;border:1px solid #E6DFD0;background:#fff;color:var(--pp-ink);font-size:20px;line-height:1;cursor:pointer;padding:0 0 3px}
+.pp-sc-wd,.pp-sc-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.pp-sc-wd{border-bottom:1px solid #D9D0BE;padding-bottom:6px;margin-bottom:2px}
+.pp-sc-wd span{text-align:center;font-size:10.5px;font-weight:700;letter-spacing:1px;color:#8A8274}.pp-sc-wd .sun{color:#B0483F}.pp-sc-wd .sat{color:#4A6FA5}
+.pp-sc-week{border-bottom:1px solid #F0EADD}.pp-sc-week:last-of-type{border-bottom:0}
+.pp-sc-week.quiet .pp-sc-day{min-height:32px;padding-top:6px}
+.pp-sc-week.has .pp-sc-day{min-height:70px}
+.pp-sc-day{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;padding:6px 1px 4px;cursor:pointer;min-width:0;color:var(--pp-ink);border-radius:8px;font-family:inherit}
+.pp-sc-dn{font-size:12.5px;font-weight:600;width:24px;height:24px;line-height:24px;text-align:center;border-radius:50%;font-variant-numeric:tabular-nums}
+.pp-sc-day.sun .pp-sc-dn{color:#B0483F}.pp-sc-day.sat .pp-sc-dn{color:#4A6FA5}
+.pp-sc-day:not(.ev) .pp-sc-dn{color:#A39B8B;font-weight:500}.pp-sc-day.sun:not(.ev) .pp-sc-dn{color:#C9948E}.pp-sc-day.sat:not(.ev) .pp-sc-dn{color:#93A8C8}
+.pp-sc-day.today .pp-sc-dn{background:var(--pp-gold,#B8924A);color:#fff;font-weight:800}
+.pp-sc-day.sel{background:#F6EFE0}
+.pp-sc-ev{display:flex;flex-direction:column;align-items:center;width:calc(100% - 4px);border-radius:6px;padding:3px 1px;line-height:1.2;position:relative;border-left:3px solid;overflow:hidden}
+.pp-sc-ev b{font-size:10.5px;font-weight:800;font-variant-numeric:tabular-nums}.pp-sc-ev>span{font-size:9px;font-weight:600;max-width:100%;overflow:hidden;white-space:nowrap}
+.pp-sc-ev.wait{background:#F8ECEA;color:#7A2E2A;border-color:#B0483F}.pp-sc-ev.ok{background:#E8F2EC;color:#25613F;border-color:#2F7D57}
+.pp-sc-new{position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:#E0572F}
+.pp-sc-av{font-size:9px;font-weight:700;color:#8A8274;background:#F1EDE3;border-radius:4px;padding:1px 4px}
+.pp-sc-legend{display:flex;justify-content:center;gap:14px;margin-top:10px;font-size:10.5px;color:#8A8274}.pp-sc-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:0}
+.pp-sc-legend i.ok{background:#2F7D57}.pp-sc-legend i.wait{background:#B0483F}
+/* 배정 확인: 펼침 상세 · 지도 */
+.pp-cfitem{border-top:1px solid var(--pp-line)}.pp-cfitem:first-child{border-top:0}.pp-cfitem .pp-cfrow{border-top:0;cursor:pointer}
+.pp-cfitem.open{background:#FCFBF8}.pp-cf-caret{color:var(--pp-soft);font-size:12px;flex:none;width:12px;text-align:center}
+.pp-cf-map{flex:none;border:1px solid #03C75A;background:#fff;color:#03A94D;border-radius:8px;padding:3px 7px;cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.1;font-size:15px}.pp-cf-map small{font-size:9px;font-weight:800}
+.pp-cf-detail{padding:0 8px 10px}.pp-cf-detail .pp-card{margin:0;box-shadow:none}
+.pp-cf-filter{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;font-weight:700;margin:10px 2px 0;background:var(--pp-gold-s);border-radius:8px;padding:8px 10px}
+@media (max-width:400px){.pp-cf-region{display:none}.pp-cfrow{gap:6px;padding:10px 6px}.pp-cf-time{min-width:36px}}
+.pp-cfhead .pp-btn{white-space:nowrap;flex:none}.pp-cfhead>div{min-width:0}.pp-cfhead small{display:block;font-size:11px;line-height:1.4}
 /* ================= 접속 메인화면 (모먼트웍스 로고) ================= */
 .mw-entry{position:fixed;inset:0;z-index:500;overflow-y:auto;background:#F7F5F0;background-image:radial-gradient(ellipse at 50% 38%, #FFFFFF 0%, #F7F5F0 55%, #EFEBE3 100%);color:#1A1618;
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;display:flex;align-items:center;justify-content:center;padding:56px 22px;box-sizing:border-box;}
@@ -2712,7 +2769,7 @@ function renderAlerts(){
     : sendTargets.map(({r,dd})=>`
       <div class="lb-item">
         <div style="flex:1;cursor:pointer;" data-id="${r.id}">
-          <div class="lb-name"><span class="badge badge-soon" style="margin-right:6px;">${dd.label}</span>${esc(r.clientName)}</div>
+          <div class="lb-name"><span class="badge badge-soon" style="margin-right:6px;">${dd.label}</span>${esc(coupleName(r))}</div>
           <div class="lb-code">${esc(r.phone||'')} · ${esc(r.venueName||'')}</div>
         </div>
         <button class="btn btn-primary btn-sm" data-sent-id="${r.id}">알림완료</button>
@@ -2735,7 +2792,7 @@ function renderAlerts(){
     : confirmTargets.map(({r,dd})=>`
       <div class="lb-item">
         <div style="flex:1;cursor:pointer;" data-id="${r.id}">
-          <div class="lb-name"><span class="badge badge-urgent" style="margin-right:6px;">${dd.label}</span>${esc(r.clientName)}</div>
+          <div class="lb-name"><span class="badge badge-urgent" style="margin-right:6px;">${dd.label}</span>${esc(coupleName(r))}</div>
           <div class="lb-code">${esc(r.phone||'')} · 제출여부·변동사항 확인 필요</div>
         </div>
         <button class="btn btn-primary btn-sm" data-confirm-id="${r.id}">제출확인 완료</button>
@@ -2818,7 +2875,7 @@ function renderRibbon(){
   el.innerHTML = upcoming.map(({r,dd})=>`
     <div class="ticket ${dd.urgency==='urgent'?'urgent':''} ${dd.urgency==='today'?'today':''}" data-id="${r.id}">
       <div class="ticket-dday">${dd.label}</div>
-      <div class="ticket-name">${esc(r.clientName)} <span class="ticket-product ${productTypeClass(r.productType)}">${esc(r.productType||'-')}</span></div>
+      <div class="ticket-name">${esc(coupleName(r))} <span class="ticket-product ${productTypeClass(r.productType)}">${esc(r.productType||'-')}</span></div>
       <div class="ticket-meta">${esc(r.hallName||'')} · ${esc(r.venueName||'')}<br>${fmtDate(r.weddingDate)} ${r.weddingTime||''}</div>
       <div class="ticket-divider"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
@@ -2855,7 +2912,7 @@ function renderRecentList(){
     const stage = recordStage(r);
     return `<div class="lb-item" style="cursor:pointer;" data-id="${r.id}">
       <div>
-        <div class="lb-name">${esc(r.clientName)} <span class="badge badge-${stage==='lead'?'lead':stage==='cancelled'?'cancelled':stage==='settled'?'done':stage==='held'?'pending':'normal'}" style="margin-left:6px;">${STAGE_LABEL[stage]}</span></div>
+        <div class="lb-name">${esc(coupleName(r))} <span class="badge badge-${stage==='lead'?'lead':stage==='cancelled'?'cancelled':stage==='settled'?'done':stage==='held'?'pending':'normal'}" style="margin-left:6px;">${STAGE_LABEL[stage]}</span></div>
         <div class="lb-code">${esc(r.venueName||r.hallName||'')}</div>
       </div>
       <div class="lb-count" style="text-align:right;font-size:11.5px;color:var(--ink-soft);">${fmtDate(r.contractDate||r.createdAt)}</div>
@@ -2919,7 +2976,7 @@ function renderList(){
     return `<tr data-id="${r.id}">
       <td>${ddayBadge}</td>
       <td><span class="badge badge-${stage==='lead'?'lead':stage==='cancelled'?'cancelled':stage==='settled'?'done':stage==='held'?'pending':'normal'}">${STAGE_LABEL[stage]}</span></td>
-      <td>${esc(r.clientName||'-')}</td>
+      <td>${esc(coupleName(r)||'-')}</td>
       <td class="mono">${esc(r.phone||'-')}</td>
       <td class="mono">${esc(r.contractCode||'-')}</td>
       <td>${fmtDate(r.weddingDate)}</td>
@@ -2998,7 +3055,7 @@ function renderSettlement(){
     const held = dd && dd.diff<0;
     return `<div class="lb-item">
       <div style="flex:1;">
-        <div class="lb-name">${esc(r.clientName)} ${held?'<span class="badge badge-pending" style="margin-left:6px;">예식완료</span>':'<span class="badge badge-normal" style="margin-left:6px;">'+ (dd?dd.label:'예식일 미정') +'</span>'}</div>
+        <div class="lb-name">${esc(coupleName(r))} ${held?'<span class="badge badge-pending" style="margin-left:6px;">예식완료</span>':'<span class="badge badge-normal" style="margin-left:6px;">'+ (dd?dd.label:'예식일 미정') +'</span>'}</div>
         <div class="lb-code">${esc(r.venueName||'')} ${esc(r.hallName||'')} · ${fmtDate(r.weddingDate)} · ${esc(r.contractCode||'')}</div>
       </div>
       <div class="lb-count">
@@ -3048,7 +3105,7 @@ function renderReferralLegacy(){
       const dd = ddayInfo(r.weddingDate);
       const isConfirmed = !!(dd && dd.diff<=59);
       return `<div class="lb-detail-row">
-        <span class="lb-detail-name">${esc(r.clientName)}</span>
+        <span class="lb-detail-name">${esc(coupleName(r))}</span>
         <span class="lb-detail-date">계약일 ${fmtDate(r.contractDate)}</span>
         <span class="lb-detail-date">예식일 ${fmtDate(r.weddingDate)}${dd? ' · '+dd.label : ''}</span>
         <span class="badge ${isConfirmed?'badge-done':'badge-normal'}">${isConfirmed? '확정(D-59↓)':'미확정'}</span>
@@ -3098,7 +3155,7 @@ function renderReview(){
     const countOptions = (val)=> Array.from({length: pol.max+1}, (_,n)=> n).map(n=>`<option value="${n}" ${Math.min(Number(val)||0, pol.max)===n?'selected':''}>${n}개</option>`).join('');
     return `<tr>
       <td>${fmtDate(r.weddingDate)}</td>
-      <td>${esc(r.clientName)}</td>
+      <td>${esc(coupleName(r))}</td>
       <td class="mono">${esc(r.contractCode||'-')}<div class="rv-pol ${isNewReviewPolicy(r)?'new':''}">${pol.label}</div></td>
       <td><select data-review-id="${r.id}" data-review-kind="contract" data-review-field="count">${countOptions(r.reviewCountContract)}</select></td>
       <td><textarea data-review-id="${r.id}" data-review-kind="contract" data-review-field="urls" rows="2" style="width:220px;font-size:11.5px;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-family:'Pretendard';" placeholder="URL을 한 줄에 하나씩">${esc(r.reviewContractUrls||'')}</textarea></td>
@@ -3166,7 +3223,7 @@ function renderCancelled(){
   body.innerHTML = cancelled.map(r=>`
     <tr data-id="${r.id}">
       <td>${fmtDate(r.cancelDate)}</td>
-      <td>${esc(r.clientName)}</td>
+      <td>${esc(coupleName(r))}</td>
       <td class="mono">${esc(r.phone||'-')}</td>
       <td class="mono">${esc(r.contractCode||'-')}</td>
       <td>${fmtDate(r.weddingDate)}</td>
@@ -3225,7 +3282,7 @@ function renderHeld(){
     const fin = computeFinancials(r);
     return `<tr data-id="${r.id}">
       <td class="held-when">${fmtDate(r.weddingDate)}${r.weddingTime? ` <b>${esc(r.weddingTime)}</b>` : ''}</td>
-      <td>${esc(r.clientName)}</td>
+      <td>${esc(coupleName(r))}</td>
       <td class="mono">${esc(r.phone||'-')}</td>
       <td class="mono">${esc(r.contractCode||'-')}</td>
       <td>${esc(r.venueName||'-')}</td>
@@ -3255,7 +3312,7 @@ function renderBoth(){
       <td>${esc(r.region||'-')}</td>
       <td>${esc(r.venueName||'-')}</td>
       <td>${esc(r.hallName||'-')}</td>
-      <td>${esc(r.clientName)}</td>
+      <td>${esc(coupleName(r))}</td>
       <td>${esc(r.partner||'-')}</td>
       <td class="mono">${fmtMoney(r.laborCost)}</td>
     </tr>`).join('');
@@ -3291,8 +3348,8 @@ function renderWeekendTimetable(){
       const cls = plan.freeCount===0 ? 'full' : (b.length ? 'partial' : 'free');
       const chips = plan.slots.map(x=> x.free
         ? `<span class="wk-slot open"><b>${x.order}</b> ${x.time} <em>예약 가능</em></span>`
-        : `<span class="wk-slot taken" data-id="${x.rec.id}" title="${esc(x.time+' '+x.rec.clientName+' · '+(x.rec.productType||'')+' · '+(x.rec.venueName||x.rec.region||''))}"><b>${x.order}</b> ${x.time} ${esc(x.rec.clientName)} <i class="ticket-product ${productTypeClass(x.rec.productType)}">${esc(x.rec.productType||'-')}</i></span>`).join('');
-      const unknown = b.filter(r=> hmToMin(r.weddingTime)===null).map(r=>`<span class="wk-slot taken" data-id="${r.id}"><b>시간 미정</b> ${esc(r.clientName)}</span>`).join('');
+        : `<span class="wk-slot taken" data-id="${x.rec.id}" title="${esc(x.time+' '+x.rec.clientName+' · '+(x.rec.productType||'')+' · '+(x.rec.venueName||x.rec.region||''))}"><b>${x.order}</b> ${x.time} ${esc(coupleName(x.rec))} <i class="ticket-product ${productTypeClass(x.rec.productType)}">${esc(x.rec.productType||'-')}</i></span>`).join('');
+      const unknown = b.filter(r=> hmToMin(r.weddingTime)===null).map(r=>`<span class="wk-slot taken" data-id="${r.id}"><b>시간 미정</b> ${esc(coupleName(r))}</span>`).join('');
       const tail = plan.freeCount===0 ? '<span class="wk-full">마감</span>' : '';
       return `<div class="wk-day ${cls} ${d.getDay()===0?'sun':''}"><span class="wk-date">${label}</span><span class="wk-body">${chips}${unknown}${tail}</span></div>`;
     }).join('');
@@ -3328,7 +3385,7 @@ function renderWeekendTimetableLegacy(){
         <div style="margin-top:6px;">
           ${available
             ? `<span class="badge badge-done">예약 가능</span>`
-            : bookings.map(b=>`<div style="font-size:11px;margin-bottom:2px;cursor:pointer;" data-id="${b.id}">${esc(b.weddingTime||'')} ${esc(b.clientName)} <span class="ticket-product ${productTypeClass(b.productType)}">${esc(b.productType||'-')}</span> <span style="color:var(--ink-soft);">${esc(b.region||'')}</span></div>`).join('') + `<span class="badge badge-pending" style="margin-top:2px;">${bookings.length}건 예약됨</span>`
+            : bookings.map(b=>`<div style="font-size:11px;margin-bottom:2px;cursor:pointer;" data-id="${b.id}">${esc(b.weddingTime||'')} ${esc(coupleName(b))} <span class="ticket-product ${productTypeClass(b.productType)}">${esc(b.productType||'-')}</span> <span style="color:var(--ink-soft);">${esc(b.region||'')}</span></div>`).join('') + `<span class="badge badge-pending" style="margin-top:2px;">${bookings.length}건 예약됨</span>`
           }
         </div>
       </div>`;
@@ -3347,7 +3404,7 @@ function weekendCardHTML(dateStr, contracts){
     <div style="margin-top:5px;">
       ${available
         ? `<span class="badge badge-done">예약 가능</span>`
-        : bookings.map(b=>`<div style="font-size:10.5px;margin-bottom:2px;cursor:pointer;" data-id="${b.id}">${esc(b.weddingTime||'')} ${esc(b.clientName)} <span class="ticket-product ${productTypeClass(b.productType)}">${esc(b.productType||'-')}</span> <span style="color:var(--ink-soft);">${esc(b.region||'')}</span></div>`).join('') + `<span class="badge badge-pending" style="margin-top:2px;">${bookings.length}건</span>`
+        : bookings.map(b=>`<div style="font-size:10.5px;margin-bottom:2px;cursor:pointer;" data-id="${b.id}">${esc(b.weddingTime||'')} ${esc(coupleName(b))} <span class="ticket-product ${productTypeClass(b.productType)}">${esc(b.productType||'-')}</span> <span style="color:var(--ink-soft);">${esc(b.region||'')}</span></div>`).join('') + `<span class="badge badge-pending" style="margin-top:2px;">${bookings.length}건</span>`
       }
     </div>
   </div>`;
@@ -3439,7 +3496,7 @@ function renderCalendar(){
       .sort((a,b)=> (a.weddingTime||'99:99').localeCompare(b.weddingTime||'99:99'));
     html += `<div class="cal-cell ${other?'other-month':''} ${isToday?'today':''}">
       <div class="cal-date ${isWeekend?'weekend':''}">${dateNum}</div>
-      ${dayEvents.slice(0,3).map(r=>`<div class="cal-event ${r.type==='lead'?'lead':('ev-'+productTypeClass(r.productType))}" data-id="${r.id}" title="${esc(r.region||'')}">${esc(r.weddingTime||'')} ${esc(r.clientName)}${r.type==='contract'?` (${productTypeShort(r.productType)}${r.region?'·'+esc(r.region):''})`:''}</div>`).join('')}
+      ${dayEvents.slice(0,3).map(r=>`<div class="cal-event ${r.type==='lead'?'lead':('ev-'+productTypeClass(r.productType))}" data-id="${r.id}" title="${esc(r.region||'')}">${esc(r.weddingTime||'')} ${esc(coupleName(r))}${r.type==='contract'?` (${productTypeShort(r.productType)}${r.region?'·'+esc(r.region):''})`:''}</div>`).join('')}
       ${dayEvents.length>3?`<div class="cal-more">+${dayEvents.length-3}건</div>`:''}
     </div>`;
   }
@@ -3699,7 +3756,7 @@ document.getElementById('importFileInput').addEventListener('change', async (e)=
     if(importNewRows.length===0){
       summaryEl.innerHTML = `엑셀에서 ${parsed.length}건을 확인했지만, 모두 이미 등록되어 있어 새로 추가할 내역이 없습니다.`;
     } else {
-      const preview = importNewRows.slice(0,10).map(r=> `· ${esc(r.clientName)} (${esc(r.contractCode||'코드없음')}) · 예식일 ${fmtDate(r.weddingDate)}`).join('<br>');
+      const preview = importNewRows.slice(0,10).map(r=> `· ${esc(coupleName(r))} (${esc(r.contractCode||'코드없음')}) · 예식일 ${fmtDate(r.weddingDate)}`).join('<br>');
       const more = importNewRows.length>10 ? `<br>…외 ${importNewRows.length-10}건` : '';
       summaryEl.innerHTML = `총 ${parsed.length}건 중 <b style="color:var(--wine);">${importNewRows.length}건 신규</b>, ${dupCount}건은 이미 등록되어 있어 제외됩니다.<div style="margin-top:8px;">${preview}${more}</div>`;
       document.getElementById('importConfirmBtn').disabled = false;
@@ -4964,6 +5021,32 @@ const PartnerPortal = (function(){
     for(let d=1; d<=days; d++){ h += cellFn(`${y}-${pd(m)}-${pd(d)}`, d); }
     return h;
   }
+  /* 스마트폰용 월 달력: 7열 균등(요일 정렬) · 일정 있는 주는 높게, 없는 주는 낮게 */
+  function smartCal(act, selected){
+    if(!calCursor) calCursor = today().slice(0,7);
+    const [y,m] = calCursor.split('-').map(Number), days = new Date(y,m,0).getDate(), off = (new Date(y,m-1,1).getDay()+6)%7;
+    const byDate={}; view.events.forEach(ev=>{ (byDate[ev.date]=byDate[ev.date]||[]).push(ev); });
+    const av=view.availability||{}, t=today(), weeks=[];
+    let wk = new Array(off).fill(null);
+    for(let d=1; d<=days; d++){ wk.push(`${y}-${pd(m)}-${pd(d)}`); if(wk.length===7){ weeks.push(wk); wk=[]; } }
+    if(wk.length){ while(wk.length<7) wk.push(null); weeks.push(wk); }
+    const head = ['월','화','수','목','금','토','일'].map((w,i)=>`<span class="${i===5?'sat':i===6?'sun':''}">${w}</span>`).join('');
+    const body = weeks.map(w=>{
+      const has = w.some(ds=> ds && (byDate[ds]||[]).length);
+      return `<div class="pp-sc-week ${has?'has':'quiet'}">${w.map((ds,i)=>{
+        if(!ds) return '<span class="pp-sc-out"></span>';
+        const evs=byDate[ds]||[], a=av[ds], dn=Number(ds.slice(8));
+        return `<button class="pp-sc-day ${evs.length?'ev':''} ${i===5?'sat':i===6?'sun':''} ${ds===t?'today':''} ${ds===selected?'sel':''}" data-pp="${act}" data-v="${ds}" aria-label="${ds}${evs.length?' 일정 '+evs.length+'건':''}">
+          <span class="pp-sc-dn">${dn}</span>
+          ${evs.map(ev=>`<span class="pp-sc-ev ${ev.confirmed?'ok':'wait'}"><b>${e((ev.weddingTime||ev.callTime||'').slice(0,5))}</b><span>${e((ev.venueName||'미정').replace(/\s+/g,'').slice(0,5))}</span>${NEWMAP[ev.recordId]?'<i class="pp-sc-new"></i>':''}</span>`).join('')}
+          ${a&&!evs.length?`<span class="pp-sc-av ${a.type}">${a.type==='off'?'휴무':a.type==='am'?'오전':'오후'}</span>`:''}
+        </button>`; }).join('')}</div>`;
+    }).join('');
+    const nEv = view.events.filter(ev=>ev.date.slice(0,7)===calCursor).length;
+    return `<div class="pp-cal pp-sc"><div class="pp-sc-head"><button data-pp="cal" data-v="-1" aria-label="이전 달">‹</button><div><b>${monthLabel(calCursor)}</b><small>${nEv? '배정 '+nEv+'건':'배정 없음'}</small></div><button data-pp="cal" data-v="1" aria-label="다음 달">›</button></div>
+      <div class="pp-sc-wd">${head}</div>${body}
+      <div class="pp-sc-legend"><span><i class="ok"></i>확정</span><span><i class="wait"></i>확정 대기</span></div></div>`;
+  }
   function shiftMonth(cursor, n){ const [y,m]=cursor.split('-').map(Number); const d=new Date(y,m-1+n,1); return d.getFullYear()+'-'+pd(d.getMonth()+1); }
   function monthLabel(cursor){ const [y,m]=cursor.split('-'); return `${y}년 ${Number(m)}월`; }
 
@@ -5193,6 +5276,7 @@ const PartnerPortal = (function(){
   }
 
   let schedFilter = null;
+  let cfOpen = {}, cfDay = null;
   const ARRANGE_URL = 'https://momentworks.github.io/arrange/';
   function arrangeHTML(){
     const up = upcoming().slice().sort((a,b)=> (a.date+(a.weddingTime||''))<(b.date+(b.weddingTime||''))?-1:1);
@@ -5213,18 +5297,23 @@ const PartnerPortal = (function(){
   }
   function confirmHTML(){
     const up = upcoming().slice().sort((a,b)=> (a.date+(a.weddingTime||''))<(b.date+(b.weddingTime||''))?-1:1);
-    const pend = up.filter(ev=>!ev.confirmed), done = up.filter(ev=>ev.confirmed);
+    const shown = cfDay ? up.filter(ev=>ev.date===cfDay) : up;
+    const pend = shown.filter(ev=>!ev.confirmed), done = shown.filter(ev=>ev.confirmed);
     const row = ev=>{
-      const d = parseD(ev.date), dow = '일월화수목금토'[d.getDay()];
-      return `<div class="pp-cfrow ${ev.confirmed?'done':''}">
+      const d = parseD(ev.date), dow = '일월화수목금토'[d.getDay()], open = !!cfOpen[ev.recordId];
+      return `<div class="pp-cfitem ${open?'open':''}"><div class="pp-cfrow ${ev.confirmed?'done':''}" data-pp="cfx" data-rid="${e(ev.recordId)}">
         <span class="pp-cf-date">${pd(d.getMonth()+1)}.${pd(d.getDate())}<small class="${d.getDay()===0?'sun':d.getDay()===6?'sat':''}">${dow}</small></span>
         <span class="pp-cf-time">${e(ev.weddingTime||'-')}</span>
         <span class="pp-cf-venue">${e(ev.venueName||'예식장 미정')}</span>
         <span class="pp-cf-region">${e(ev.region||'')}</span>
         ${ev.confirmed ? `<button class="pp-cf-btn ok" data-pp="unconfirm" data-rid="${e(ev.recordId)}" title="누르면 확정 취소">✓ 확정</button>` : `<button class="pp-cf-btn" data-pp="confirm" data-rid="${e(ev.recordId)}">확정</button>`}
-      </div>`;
+        <button class="pp-cf-map" data-pp="map" data-rid="${e(ev.recordId)}" title="네이버지도로 예식장 위치 보기" aria-label="네이버지도">🗺️<small>지도</small></button>
+        <span class="pp-cf-caret">${open?'▴':'▾'}</span>
+      </div>${open? `<div class="pp-cf-detail">${eventCard(ev,true)}</div>`:''}</div>`;
     };
-    return `<div class="pp-cfhead"><div><b>배정 확인</b> <small>확정 대기 ${pend.length}건 · 확정 ${done.length}건</small></div>${pend.length>1?`<button class="pp-btn primary" data-pp="confirmAll">모두 확정 (${pend.length})</button>`:''}</div>
+    return `${smartCal('cfday', cfDay)}
+      ${cfDay? `<div class="pp-cf-filter">${fdate(cfDay,true)} 일정만 보는 중 <button class="pp-btn" data-pp="cfday" data-v="${cfDay}">전체 보기</button></div>`:''}
+      <div class="pp-cfhead"><div><b>배정 확인</b> <small>확정 대기 ${pend.length}건 · 확정 ${done.length}건 · 일정을 누르면 상세내용이 펼쳐져요</small></div>${pend.length>1?`<button class="pp-btn primary" data-pp="confirmAll">모두 확정 (${pend.length})</button>`:''}</div>
       ${up.length? `${pend.length? `<div class="pp-h">확정 대기 <small>${pend.length}건</small></div><div class="pp-cflist">${pend.map(row).join('')}</div>`:'<div class="pp-empty">✅ 확정할 일정이 없어요. 모두 확정하셨어요!</div>'}
         ${done.length? `<div class="pp-h">확정 완료 <small>${done.length}건</small></div><div class="pp-cflist">${done.map(row).join('')}</div>`:''}` : '<div class="pp-empty">배정된 예정 일정이 없어요</div>'}
       <p class="pp-cf-note">자세한 내용은 「내 일정」 탭에서 볼 수 있어요.</p>`;
@@ -5238,23 +5327,12 @@ const PartnerPortal = (function(){
     if(!calCursor) calCursor = today().slice(0,7);
     const byDate={}; view.events.forEach(ev=>{ (byDate[ev.date]=byDate[ev.date]||[]).push(ev); });
     const av=view.availability||{}, t=today();
-    const cells = monthGrid(calCursor, (ds,d)=>{
-      const dow=parseD(ds).getDay(), evs=byDate[ds]||[], a=av[ds];
-      return `<button class="pp-day ${dow===0||dow===6?'we':''} ${ds===t?'today':''} ${ds===selDay?'sel':''}" data-pp="day" data-v="${ds}">
-        <span class="pp-dn">${d}</span>
-        ${evs.map(ev=>`<span class="pp-ev">${e(ev.callTime||'')} ${e(ev.venueName.split(' ')[0]||'')}${ev.confirmed?' <b class="pp-ok-badge">확정</b>':''}${NEWMAP[ev.recordId]?' <b class="pp-newtag '+NEWMAP[ev.recordId]+'">N</b>':''}</span>`).join('')}
-        ${a&&!evs.length?`<span class="pp-av ${a.type}">${a.type==='off'?'휴무':a.type==='am'?'오전만':'오후만'}</span>`:''}
-      </button>`;
-    });
     const up=upcoming(), past=pastEvents();
     const dayEvs = selDay ? (byDate[selDay]||[]) : [];
     let groups='', lastMonth='';
     up.forEach(ev=>{ const mk=ev.date.slice(0,7); if(mk!==lastMonth){ groups+=`<div class="pp-h">${monthLabel(mk)} <small>${up.filter(x=>x.date.slice(0,7)===mk).length}건</small></div>`; lastMonth=mk; } groups+=eventCard(ev,true); });
     return `
-      <div class="pp-cal">
-        <div class="pp-cal-head"><button data-pp="cal" data-v="-1">◀</button><b>${monthLabel(calCursor)}</b><button data-pp="cal" data-v="1">▶</button></div>
-        <div class="pp-cal-grid">${cells}</div>
-      </div>
+      ${smartCal('day', selDay)}
       ${selDay ? `<div class="pp-h">${fdate(selDay,true)}</div>${dayEvs.length? dayEvs.map(ev=>eventCard(ev,true)).join('') : '<div class="pp-empty">이 날은 배정된 예식이 없어요</div>'}`:''}
       <div class="pp-h">다가오는 일정 <button class="pp-btn" data-pp="icsAll">📅 전체 캘린더에 추가</button></div>
       ${up.length? groups : '<div class="pp-empty">다가오는 배정이 없어요</div>'}
@@ -5396,6 +5474,8 @@ const PartnerPortal = (function(){
     const el = ev.target.closest('[data-pp]'); if(!el) return;
     const act=el.dataset.pp, v=el.dataset.v, rid=el.dataset.rid;
     if(act==='pendingList'){ tab='confirm'; schedFilter=null; selDay=null; sheet=null; render(); window.scrollTo(0,0); return; }
+    if(act==='cfx'){ cfOpen[rid] = !cfOpen[rid]; render(); return; }
+    if(act==='cfday'){ cfDay = (cfDay===v)? null : v; render(); return; }
     if(act==='arrCopy' || act==='arrGo'){
       const evn = view.events.find(x=>x.recordId===rid), c = evn && evn.arrange && evn.arrange[v]; if(!c) return;
       const ok = await copyText(c); toast(ok? `${v==='groom'?'신랑':'신부'}측 접속코드를 복사했어요` : '복사하지 못했어요 · 코드를 직접 선택해 주세요');
@@ -5571,6 +5651,7 @@ let partnerSub = 'overview';
 let boardStart = null;       // 스케줄 보드 시작일
 let boardWeekdays = true;    // 예식 있는 평일 포함
 let boardWeeks = 6;
+let boardView = 'grid';      // grid(인원×날짜) · byEvent(예식별 배치) · route(인원별 이동 동선)
 let assignFilter = 'all'; // 배정 관리: 기본으로 예정된 전체 일정 표시
 let payMonthSel = null;
 let pEditor = null;          // 배정 편집 상태
@@ -6418,7 +6499,7 @@ function eventRowHTML(rec, opts){
   return `<div class="p-row">
     <div class="p-when"><b>${fmtDate(rec.weddingDate)}</b><small>${dd?`<span class="badge badge-${dd.urgency==='past'?'past':dd.urgency==='urgent'||dd.urgency==='today'?'urgent':dd.urgency==='soon'?'soon':'normal'}">${dd.label}</span>`:''} 예식 ${esc(rec.weddingTime||'-')}</small></div>
     <div class="p-what"><b>${esc(shortVenue(rec.venueName))}</b> <span class="ticket-product ${productTypeClass(rec.productType)}">${esc(rec.productType||'-')}</span>
-      <small>${esc(rec.clientName)} · ${esc(rec.hallName||'')} · ${esc(rec.region||'')} · 출근 ${win.call||'-'} ~ 종료 예상 ${win.endHm||'-'}</small></div>
+      <small>${esc(coupleName(rec))} · ${esc(rec.hallName||'')} · ${esc(rec.region||'')} · 출근 ${win.call||'-'} ~ 종료 예상 ${win.endHm||'-'}</small></div>
     <div class="p-slots" style="flex:1.2;min-width:200px;">${slotChipsHTML(rec, st.a)}</div>
     <div class="p-fill ${st.empty?'bad':'ok'}">${st.filled}/${st.required}</div>
     <div class="p-actions">
@@ -6469,7 +6550,7 @@ function pOverviewHTML(){
     const m = ds.slice(0,7); let head = '';
     if(m!==wkMonth){ wkMonth = m; head = `<div class="p-month-head">${m.slice(0,4)}년 ${Number(m.slice(5,7))}월 <span>${upAll.filter(r=> r.weddingDate.slice(0,7)===m).length}건</span></div>`; }
     return head + `<div style="margin-bottom:10px;"><div style="font-weight:700;font-size:12.5px;color:${dowOf(ds)===0?'var(--wine)':'var(--ink)'};margin-bottom:4px;">${fmtDate(ds)}${ds===t?' <span class="badge badge-urgent">오늘</span>':''}</div>
-      ${evs.map(r=>{ const a=getAssignment(r), w=eventWindow(r,a); return `<div class="p-row" style="padding:6px 0;"><div class="p-when" style="min-width:90px;"><b>출근 ${w.call||'-'}</b><small>예식 ${esc(r.weddingTime||'')}</small></div><div class="p-what" style="min-width:120px;"><b>${esc(shortVenue(r.venueName))}</b><small>${esc(r.clientName)}</small></div><div class="p-slots">${slotChipsHTML(r,a)}</div><div class="p-actions"><button class="btn btn-sm" data-act="editAssign" data-rid="${r.id}">편집</button></div></div>`; }).join('')}
+      ${evs.map(r=>{ const a=getAssignment(r), w=eventWindow(r,a); return `<div class="p-row" style="padding:6px 0;"><div class="p-when" style="min-width:90px;"><b>출근 ${w.call||'-'}</b><small>예식 ${esc(r.weddingTime||'')}</small></div><div class="p-what" style="min-width:120px;"><b>${esc(shortVenue(r.venueName))}</b><small>${esc(coupleName(r))}</small></div><div class="p-slots">${slotChipsHTML(r,a)}</div><div class="p-actions"><button class="btn btn-sm" data-act="editAssign" data-rid="${r.id}">편집</button></div></div>`; }).join('')}
     </div>`;
   }).join('');
   // 활동 피드
@@ -6525,7 +6606,92 @@ function boardDates(){
   while(d<end){ const dw=dowOf(d); if(dw===6||dw===0|| (boardWeekdays && eventDates.has(d))) out.push(d); d=addDaysStr(d,1); }
   return out;
 }
+function boardViewBar(){
+  const b=(k,l)=>`<button class="btn btn-sm ${boardView===k?'btn-primary':''}" data-act="boardView" data-v="${k}">${l}</button>`;
+  return `<div class="toolbar" style="gap:6px;">${b('grid','📅 인원 × 날짜')}${b('byEvent','💍 예식별 배치')}${b('route','🚗 인원별 이동 동선')}</div>`;
+}
+/* 예식별: 예정된 모든 예식에 누가 배치됐는지 */
+function pBoardByEventHTML(){
+  const list = upcomingStaffable(), resp = ensurePdb().responses, t = todayStr();
+  if(!list.length) return '<div class="empty-state">예정된 예식이 없어요</div>';
+  let lastMonth='';
+  return list.map(r=>{
+    const st = staffing(r), a = st.a, win = eventWindow(r, a), mk = r.weddingDate.slice(0,7);
+    const head = mk!==lastMonth ? `<div class="p-bv-month">${mk.replace('-','년 ')}월</div>` : ''; lastMonth = mk;
+    const people = a.slots.map(sl=>{
+      const m = sl.memberId ? memberById(sl.memberId) : null;
+      if(!m) return `<div class="p-bv-person empty"><span>빈자리</span><small>${esc(sl.role||'')}</small></div>`;
+      const rs = (resp[r.id]||{})[m.id]||{}, own = isOwner(m);
+      const others = memberAssignments(m.id, x=> x.weddingDate===r.weddingDate && x.id!==r.id);
+      const iss = memberIssues(m.id, r, a);
+      return `<div class="p-bv-person ${iss.length?'warn':''}" style="--c:${esc(m.color)}"><i></i><b>${esc(m.name)}</b><small>${esc(sl.role||m.title||'')}</small>
+        ${own?'':`<em class="${rs.confirmed?'ok':''}">${rs.confirmed?'✓ 확인':'⏳ 미확인'}</em>`}${others.length?`<em class="multi">같은 날 ${others.length+1}건</em>`:''}</div>`;
+    }).join('');
+    const dd = diffDaysStr(t, r.weddingDate);
+    return `${head}<div class="p-bv-card" data-act="editAssign" data-rid="${r.id}">
+      <div class="p-bv-top"><b>${r.weddingDate.slice(5).replace('-','/')}(${WEEKDAY_KR[dowOf(r.weddingDate)]})</b><span>${esc(r.weddingTime||'시간미정')}</span><strong>${esc(shortVenue(r.venueName))}</strong><small>${esc(r.region||'')}${r.hallName?' · '+esc(r.hallName):''}</small><em class="${st.empty?'bad':'good'}">${st.empty? `빈자리 ${st.empty}`:'배치 완료'}</em><u>${dd===0?'오늘':'D-'+dd}</u></div>
+      <div class="p-bv-sub">${esc(coupleName(r))} · 출근 ${win.call||'-'} ~ 종료 예상 ${win.endHm||'-'}</div>
+      <div class="p-bv-people">${people}</div></div>`;
+  }).join('');
+}
+/* 양측 · 통합 계약은 일정 어디서나 '신랑 ♥ 신부' 이름을 함께 표시 (한측 계약은 계약자명 그대로) */
+function coupleName(rec){
+  const base = String((rec && rec.clientName) || '').trim();
+  try{
+    if(!rec || !(rec.productType==='양측' || rec.productType==='통합')) return base;
+    const rp = ensurePdb().referralPay || {}, g = rp['guide:'+rec.id] || {}, c = rp['client:'+rec.id] || {}, sd = c.sides || {};
+    const card = ((rp['card:'+rec.id] || {}).rows) || [], cv = k => { const r = card.find(x=> x && x.key===k); return r ? String(r.value||'').trim() : ''; };
+    const nm = x=> String(x||'').trim();
+    let gn = nm(g.groomName) || nm((sd.groom||{}).name) || cv('groom_name'), bn = nm(g.brideName) || nm((sd.bride||{}).name) || cv('bride_name');
+    const key = x=> x.replace(/[^가-힣a-zA-Z]/g,'');
+    // 한쪽만 알면 계약자명으로 나머지 한쪽을 채움 (계약자명이 아는 쪽과 다를 때)
+    if(gn && !bn && base && key(base)!==key(gn)) bn = base;
+    if(bn && !gn && base && key(base)!==key(bn)) gn = base;
+    return (gn && bn) ? gn+' ♥ '+bn : base;
+  }catch(e){ return base; }
+}
+function diffDaysStr(a,b){ return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000); }
+/* 인원별: 날짜마다 ① → ② → ③ 순서로 이동 동선 */
+function pBoardRouteHTML(){
+  const t = todayStr(), members = sortedMembers(false), buf = Number(pSet().bufferMinutes)||0;
+  const cards = [];
+  members.forEach(m=>{
+    const list = memberAssignments(m.id, r=> r.weddingDate>=t);
+    if(!list.length) return;
+    const byDay = {}; list.forEach(x=> (byDay[x.rec.weddingDate]=byDay[x.rec.weddingDate]||[]).push(x));
+    const days = Object.keys(byDay).sort();
+    const multi = days.filter(d=> byDay[d].length>1);
+    const dayBlock = d=>{
+      const evs = byDay[d];
+      const steps = evs.map((x,i)=>{
+        const prev = evs[i-1];
+        let move = '';
+        if(prev){
+          const gap = (x.win.start!==null && prev.win.end!==null) ? x.win.start - prev.win.end : null;
+          const same = String(prev.rec.venueName||'').trim() && prev.rec.venueName===x.rec.venueName;
+          const cls = gap===null ? 'unk' : gap<0 ? 'bad' : gap<buf ? 'tight' : 'ok';
+          const gtxt = gap===null ? '시간 미정' : gap<0 ? `${-gap}분 겹침 ⚠️` : `여유 ${Math.floor(gap/60)?Math.floor(gap/60)+'시간 ':''}${gap%60?gap%60+'분':''}`.trim()+(gap<buf?' (빠듯)':'');
+          move = `<div class="p-rt-move ${cls}"><span>🚗 이동</span><b>${esc(shortVenue(prev.rec.venueName))} → ${esc(shortVenue(x.rec.venueName))}</b>${prev.rec.region&&x.rec.region&&prev.rec.region!==x.rec.region?`<small>${esc(prev.rec.region)} → ${esc(x.rec.region)}</small>`:(same?'<small>같은 예식장</small>':'')}<em>${gtxt}</em></div>`;
+        }
+        return `${move}<div class="p-rt-step" data-act="editAssign" data-rid="${x.rec.id}"><i>${evs.length>1?'①②③④⑤'[i]||i+1:'●'}</i><div><b>${esc(x.rec.weddingTime||'--:--')} ${esc(shortVenue(x.rec.venueName))}</b><small>${esc(x.rec.region||'')} · 출근 ${x.win.call||'-'} ~ 종료 예상 ${x.win.endHm||'-'} · ${esc(coupleName(x.rec))}</small></div></div>`;
+      }).join('');
+      return `<div class="p-rt-day ${evs.length>1?'multi':''}"><div class="p-rt-date">${d.slice(5).replace('-','/')}(${WEEKDAY_KR[dowOf(d)]})${evs.length>1?`<em>하루 ${evs.length}건 · 이동 ${evs.length-1}회</em>`:''}</div><div class="p-rt-steps">${steps}</div></div>`;
+    };
+    const singles = days.filter(d=> byDay[d].length===1);
+    const dayHTML = multi.map(dayBlock).join('') + (singles.length ? (multi.length ? `<details class="p-rt-more"><summary>하루 1건 근무 ${singles.length}일 보기</summary>${singles.map(dayBlock).join('')}</details>` : singles.map(dayBlock).join('')) : '');
+    cards.push({multi: multi.length, html: `<section class="p-rt-card" style="--c:${esc(m.color)}"><div class="p-rt-head"><i></i><b>${esc(m.name)}</b><small>${esc(m.title||'')}</small><span>예정 ${list.length}건${multi.length?` · <em>하루 2건 이상 ${multi.length}일</em>`:''}</span></div>${dayHTML}</section>`});
+  });
+  if(!cards.length) return '<div class="empty-state">배정된 예정 일정이 없어요</div>';
+  cards.sort((a,b)=> b.multi-a.multi);
+  const nm = cards.filter(c=>c.multi).length;
+  return `<div class="p-rt-note">${nm? `🚗 하루에 2건 이상 근무하는 인원 <b>${nm}명</b>을 위에 모았어요. 첫 예식 종료 예상 시각과 다음 예식 출근 시각 사이의 여유를 보여줘요.` : '하루에 2건 이상 근무하는 인원은 아직 없어요.'}</div>${cards.map(c=>c.html).join('')}`;
+}
 function pBoardHTML(){
+  if(boardView==='byEvent') return boardViewBar()+pBoardByEventHTML();
+  if(boardView==='route') return boardViewBar()+pBoardRouteHTML();
+  return boardViewBar()+pBoardGridHTML();
+}
+function pBoardGridHTML(){
   const dates = boardDates(), members = sortedMembers(false), t=todayStr();
   const byDate = {};
   staffableContracts().forEach(r=>{ (byDate[r.weddingDate]=byDate[r.weddingDate]||[]).push(r); });
@@ -6537,7 +6703,7 @@ function pBoardHTML(){
   }).join('');
   const needRow = `<tr class="p-unassigned"><td class="p-mcol" style="color:var(--coral);">미배정 자리<small>클릭해서 배정</small></td>${dates.map(ds=>{
     const evs=(byDate[ds]||[]).filter(r=>staffing(r).empty>0);
-    return `<td class="p-cell" style="cursor:default;">${evs.map(r=>{ const st=staffing(r); return `<span class="pchip need" style="--c:var(--coral)" data-act="editAssign" data-rid="${r.id}"><b>${esc(r.weddingTime||'')} ${esc(r.clientName)}</b><span>${esc(shortVenue(r.venueName))} · ${st.empty}자리</span></span>`; }).join('')}</td>`;
+    return `<td class="p-cell" style="cursor:default;">${evs.map(r=>{ const st=staffing(r); return `<span class="pchip need" style="--c:var(--coral)" data-act="editAssign" data-rid="${r.id}"><b>${esc(r.weddingTime||'')} ${esc(coupleName(r))}</b><span>${esc(shortVenue(r.venueName))} · ${st.empty}자리</span></span>`; }).join('')}</td>`;
   }).join('')}</tr>`;
   const rows = members.map(m=>{
     const cells = dates.map(ds=>{
@@ -6546,7 +6712,7 @@ function pBoardHTML(){
       const resp = ensurePdb().responses;
       return `<td class="p-cell ${av?av.type:''}" data-act="cellAvail" data-mid="${m.id}" data-date="${ds}" title="빈 칸을 클릭하면 휴무를 표시/해제해요">
         ${av?`<span class="p-avtag ${av.type}">${av.type==='off'?'휴무':av.type==='am'?'오전만':'오후만'}${av.by==='partner'?' (신청)':''}</span>`:''}
-        ${list.map(x=>{ const r=(resp[x.rec.id]||{})[m.id]||{}; const iss=memberIssues(m.id,x.rec,x.a); return `<span class="pchip ${iss.length?'warn':''}" style="--c:${esc(m.color)}" data-act="editAssign" data-rid="${x.rec.id}" title="${esc(iss.join(' / '))}"><b>${x.win.call||'--:--'} 출근 ${isOwner(m)?'':(r.confirmed?'✓':'⏳')}</b><span>${esc(shortVenue(x.rec.venueName))}</span><span>${esc(x.slot.role||'')} · ${esc(x.rec.clientName)}</span></span>`; }).join('')}
+        ${list.map(x=>{ const r=(resp[x.rec.id]||{})[m.id]||{}; const iss=memberIssues(m.id,x.rec,x.a); return `<span class="pchip ${iss.length?'warn':''}" style="--c:${esc(m.color)}" data-act="editAssign" data-rid="${x.rec.id}" title="${esc(iss.join(' / '))}"><b>${x.win.call||'--:--'} 출근 ${isOwner(m)?'':(r.confirmed?'✓':'⏳')}</b><span>${esc(shortVenue(x.rec.venueName))}</span><span>${esc(x.slot.role||'')} · ${esc(coupleName(x.rec))}</span></span>`; }).join('')}
       </td>`;
     }).join('');
     const inRange = memberAssignments(m.id, r=> r.weddingDate>=dates[0] && r.weddingDate<=dates[dates.length-1]).length;
@@ -6706,7 +6872,7 @@ function payByEventHTML(t, minWage){
     const evTotal = slots.reduce((x,s)=>x+slotTotal(s),0);
     return `<div class="p-panel" style="padding:12px 16px;">
       <h3><span>${fmtDate(rec.weddingDate)} ${esc(rec.weddingTime||'')} · ${esc(shortVenue(rec.venueName))} <span class="ticket-product ${productTypeClass(rec.productType)}">${esc(rec.productType||'')}</span>${rec.weddingDate>=t?' <span class="badge badge-normal">예정</span>':''}</span>
-        <span style="font-family:'Pretendard';font-size:12.5px;">${esc(rec.clientName)} · 출근 ${win.call} ~ 종료 예상 ${win.endHm} (최대 ${fmtHours(win.minutes)}) · 합계 <b style="color:var(--wine)" class="p-evtot" data-rid="${rec.id}">${fmtMoney(evTotal)}</b></span></h3>
+        <span style="font-family:'Pretendard';font-size:12.5px;">${esc(coupleName(rec))} · 출근 ${win.call} ~ 종료 예상 ${win.endHm} (최대 ${fmtHours(win.minutes)}) · 합계 <b style="color:var(--wine)" class="p-evtot" data-rid="${rec.id}">${fmtMoney(evTotal)}</b></span></h3>
       <div class="table-wrap p-tablewrap" style="box-shadow:none;margin-top:6px;"><div style="overflow-x:auto;"><table>
         <thead><tr><th>인원</th><th>기본</th><th>추가수당</th><th>추가 사유</th><th>합계</th><th>환산시급</th><th>지급</th></tr></thead>
         <tbody>${slots.map(sl=>{
@@ -7128,6 +7294,7 @@ async function onPartnersClick(ev){
       await saveAssignmentsAndRecords(changed, filled? `${filled}자리를 자동배정했어요` : '배정 가능한 인원이 없어요');
       break;
     }
+    case 'boardView': boardView = el.dataset.v; renderPartnersTab(); break;
     case 'boardNav': { const v=Number(el.dataset.v); if(v===0) boardStart=null; else { boardDates(); boardStart=addDaysStr(boardStart, v*7); } renderPartnersTab(); break; }
     case 'cellAvail': {
       if(ev.target.closest('.pchip')) break;
@@ -8560,7 +8727,7 @@ function paybackRowHTML(p){
     : `본식후기 할인 ${fmtMoney(Number(r.reviewDiscountDay)||0)}${Number(r.reviewCountDay)?` · 후기 ${r.reviewCountDay}건`:''}`;
   return `<div class="lb-item pb-item">
     <div style="flex:1;cursor:pointer;min-width:0;" data-id="${r.id}">
-      <div class="lb-name">${esc(r.clientName)} <span style="font-weight:500;color:var(--slate);font-size:11.5px;">예식 ${fmtDate(r.weddingDate)}</span></div>
+      <div class="lb-name">${esc(coupleName(r))} <span style="font-weight:500;color:var(--slate);font-size:11.5px;">예식 ${fmtDate(r.weddingDate)}</span></div>
       <div class="lb-code">${detail}</div>
       <div class="pb-amounts"><span>지급할 금액 <b>${fmtMoney(p.owed)}</b></span><span>지급한 금액 <b class="paid">${fmtMoney(p.paid)}</b></span></div>
     </div>
@@ -8585,7 +8752,7 @@ function renderPaybackAlerts(){
         <span class="pb-tot"><span>지급할 <b>${fmtMoney(x.dueTotal)}</b></span><span>지급한 <b class="paid">${fmtMoney(x.paidTotal)}</b></span></span>
       </div>
       ${x.due.length ? x.due.map(paybackRowHTML).join('') : `<div class="pb-empty">지급할 ${PAYBACK_KINDS[kind].label}이 없습니다</div>`}
-      ${showPaidPaybacks && x.done.length ? `<div class="pb-done">${x.done.map(p=>`<div><span>${esc(p.rec.clientName)} · ${fmtDate(p.rec.weddingDate)}</span><b>지급완료 ${fmtMoney(p.paid)}</b></div>`).join('')}</div>`:''}
+      ${showPaidPaybacks && x.done.length ? `<div class="pb-done">${x.done.map(p=>`<div><span>${esc(coupleName(p.rec))} · ${fmtDate(p.rec.weddingDate)}</span><b>지급완료 ${fmtMoney(p.paid)}</b></div>`).join('')}</div>`:''}
     </div>`;
   }).join('') + `<div style="text-align:center;padding:2px 0 6px;"><button class="btn btn-sm btn-ghost" id="pbToggleDone">${showPaidPaybacks?'지급 완료 내역 접기':`지급 완료 내역 보기 (${L.referral.done.length + L.review.done.length}건)`}</button></div>`;
   el.querySelectorAll('[data-id]').forEach(x=> x.addEventListener('click', ()=> openModal(x.dataset.id)));
@@ -8630,7 +8797,7 @@ function renderReferral(){
       const done = !!(dd && dd.diff<0);
       const kind = !done ? '' : (info.payback.includes(r) ? '페이백' : '잔금 할인');
       return `<div class="lb-detail-row">
-        <span class="lb-detail-name">${esc(r.clientName)}</span>
+        <span class="lb-detail-name">${esc(coupleName(r))}</span>
         <span class="lb-detail-date">계약일 ${fmtDate(r.contractDate)}</span>
         <span class="lb-detail-date">예식일 ${fmtDate(r.weddingDate)}${dd? ' · '+dd.label : ''}</span>
         <span class="badge ${done?'badge-done':'badge-normal'}">${done? '확정(본식 종료)':'미확정'}</span>
@@ -8872,7 +9039,7 @@ function renderFinance(){
   const rows = (selP ? selP.rows : total.rows).slice().sort((a,b)=> String(a.rec.weddingDate).localeCompare(String(b.rec.weddingDate)));
   document.getElementById('finDetailTitle').textContent = selP ? `${FIN_STATE.view==='year'?'':FIN_STATE.year+'년 '}${selP.label} 계약별 내역 (${rows.length}건)` : `${scope} 계약별 내역 (${rows.length}건) · 위 표의 기간 제목을 누르면 그 기간만 볼 수 있어요`;
   document.getElementById('finDetail').innerHTML = rows.length ? `<thead><tr><th>예식일</th><th>계약자</th><th>상품</th><th>총매출</th><th>할인</th><th>페이백</th><th>실매출</th><th>인건비</th><th>영업이익</th><th>정산</th></tr></thead><tbody>${rows.map(x=>`<tr data-id="${x.rec.id}">
-      <td>${fmtDate(x.rec.weddingDate)}${x.done?'':' <span class="badge badge-normal">예정</span>'}</td><td>${esc(x.rec.clientName)}</td><td>${esc(x.rec.productType||'-')}</td>
+      <td>${fmtDate(x.rec.weddingDate)}${x.done?'':' <span class="badge badge-normal">예정</span>'}</td><td>${esc(coupleName(x.rec))}</td><td>${esc(x.rec.productType||'-')}</td>
       <td class="mono">${fmtMoney(x.gross)}</td><td class="mono">${x.discounts?'−'+fmtMoney(x.discounts):'-'}</td><td class="mono">${x.payback?'−'+fmtMoney(x.payback):'-'}</td>
       <td class="mono"><b>${fmtMoney(x.real)}</b></td><td class="mono">${x.labor?'−'+fmtMoney(x.labor):'-'}</td><td class="mono ${x.profit<0?'neg':''}"><b>${fmtMoney(x.profit)}</b></td>
       <td>${x.rec.settlementDone?'<span class="badge badge-done">완료</span>':(x.done?'<span class="badge badge-pending">대기</span>':'-')}</td></tr>`).join('')}</tbody>`
@@ -8976,7 +9143,7 @@ function settleDocHTML(rec, ov){
       <div class="sd-meta">발행일 ${fmtDate(today)}<br>계약코드 ${esc(rec.contractCode||'-')}</div>
     </div>
     <table class="sd-info">
-      <tr><th>계약자</th><td>${esc(rec.clientName||'')}</td><th>연락처</th><td>${esc(rec.phone||'-')}</td></tr>
+      <tr><th>계약자</th><td>${esc(coupleName(rec)||'')}</td><th>연락처</th><td>${esc(rec.phone||'-')}</td></tr>
       <tr><th>예식일시</th><td>${fmtDate(rec.weddingDate)} ${esc(rec.weddingTime||'')}</td><th>상품</th><td>${esc(rec.productType||'-')}</td></tr>
       <tr><th>예식장</th><td colspan="3">${esc(rec.venueName||'')} ${esc(rec.hallName||'')}</td></tr>
     </table>
@@ -9086,7 +9253,7 @@ function renderSettlePicker(){
   const pick = document.getElementById('settlePick'); if(!pick) return;
   const cur = pick.value;
   const list = activeContracts().filter(r=> r.weddingDate).slice().sort((a,b)=> String(b.weddingDate).localeCompare(String(a.weddingDate)));
-  pick.innerHTML = '<option value="">계약 선택 (예식일 최신순)</option>' + list.map(r=>`<option value="${r.id}" ${r.id===cur?'selected':''}>${fmtDate(r.weddingDate)} · ${esc(r.clientName)} · ${esc(r.productType||'')}${r.settlementDone?' · 정산완료':''}</option>`).join('');
+  pick.innerHTML = '<option value="">계약 선택 (예식일 최신순)</option>' + list.map(r=>`<option value="${r.id}" ${r.id===cur?'selected':''}>${fmtDate(r.weddingDate)} · ${esc(coupleName(r))} · ${esc(r.productType||'')}${r.settlementDone?' · 정산완료':''}</option>`).join('');
 }
 
 /* ---------- 상단 로고: 대시보드로 이동 + 최신 데이터로 새로고침 ---------- */
@@ -10517,7 +10684,7 @@ function guideImportHTML(){
       const ids = new Set(x.candIds||[]), near = activeContracts().filter(r=> ids.has(r.id));
       const list = (near.length ? near : activeContracts()).slice().sort((a,b)=> String(a.weddingDate).localeCompare(String(b.weddingDate)));
       return `<div class="bad">⚠️ ${esc(x.file)}<div class="cu-gimport-why">${esc(x.error)}${x.date||(x.names||[]).length? ` <small>(읽은 정보: ${esc([x.date, (x.names||[]).join(' · ')].filter(Boolean).join(' · '))})</small>`:''}</div>
-        ${x.payload? `<span class="cu-gimport-pick"><select data-gi="${i}"><option value="">${near.length? '이 날짜 계약 중 선택…' : '계약 직접 선택…'}</option>${list.map(r=>`<option value="${r.id}">${fmtDate(r.weddingDate)} ${esc(r.weddingTime||'')} ${esc(r.clientName)} (${esc(r.productType||'')}${r.contractCode? ' · '+esc(r.contractCode):''})</option>`).join('')}</select><button class="btn btn-sm" data-cu="gassign" data-gi="${i}">이 계약에 적용</button></span>` : ''}</div>`;
+        ${x.payload? `<span class="cu-gimport-pick"><select data-gi="${i}"><option value="">${near.length? '이 날짜 계약 중 선택…' : '계약 직접 선택…'}</option>${list.map(r=>`<option value="${r.id}">${fmtDate(r.weddingDate)} ${esc(r.weddingTime||'')} ${esc(coupleName(r))} (${esc(r.productType||'')}${r.contractCode? ' · '+esc(r.contractCode):''})</option>`).join('')}</select><button class="btn btn-sm" data-cu="gassign" data-gi="${i}">이 계약에 적용</button></span>` : ''}</div>`;
     }).join('')}</div>` : ''}
   </div>`;
 }
@@ -10668,7 +10835,7 @@ function renderCustomerTab(){
         const dd = ddayInfo(r.weddingDate);
         return `<tr class="cu-row ${open?'open':''} ${isNewRec(r)?'mw-new-row':''}" data-rid="${r.id}" title="${open?'눌러서 접기':'눌러서 편집'}">
           <td><span class="cu-when">${fmtDate(r.weddingDate)}${r.weddingTime? ` <b>${esc(r.weddingTime)}</b>`:''}</span>${dd && dd.diff>=0 ? ` <span class="badge ${dd.diff<=7?'badge-urgent':'badge-normal'}">${dd.label}</span>`:''}</td>
-          <td><b>${esc(r.clientName)}</b>${isNewRec(r)?' <span class="mw-new-tag">NEW</span>':''}<div class="cu-sub">${esc(r.contractCode||'')}${r.contractCode? `<button class="cu-copy" data-cu="copy" data-code="${esc(r.contractCode)}" data-label="계약코드(짝꿍코드)" title="계약코드(짝꿍코드) 복사">📋</button>`:''}</div></td>
+          <td><b>${esc(coupleName(r))}</b>${isNewRec(r)?' <span class="mw-new-tag">NEW</span>':''}<div class="cu-sub">${esc(r.contractCode||'')}${r.contractCode? `<button class="cu-copy" data-cu="copy" data-code="${esc(r.contractCode)}" data-label="계약코드(짝꿍코드)" title="계약코드(짝꿍코드) 복사">📋</button>`:''}</div></td>
           <td>${esc(r.productType||'-')}<div class="cu-sub">${esc(r.venueName||'')}</div></td>
           <td>${has? `<b class="cu-code ${off?'off':''}">${esc(c.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(c.code)}" title="접속코드 복사">📋</button>${off?'<div class="cu-sub">사용 중지</div>':''}${sideEligible(r)? `<div class="cu-sub">주계약자(${SIDE_LABEL[mainSideOf(r, c)]})</div>` + ['groom','bride'].map(sk=>{ const sd=(c.sides||{})[sk]; return sd&&sd.code? `<div class="cu-sub">${SIDE_LABEL[sk]} <b class="cu-code ${sd.active===false?'off':''}">${esc(sd.code)}</b><button class="cu-copy" data-cu="copy" data-code="${esc(sd.code)}" title="${SIDE_LABEL[sk]} 접속코드 복사">📋</button></div>` : ''; }).join('') + (!((c.sides||{}).groom||{}).code && !((c.sides||{}).bride||{}).code ? `<div class="cu-sub"><a href="#" data-cu="edit" data-id="${r.id}">+ 추가 코드 (${SIDE_LABEL[OTHER_SIDE[mainSideOf(r, c)]]})</a></div>` : '') : ''}` : `<button class="btn btn-sm btn-primary" data-cu="create" data-id="${r.id}">코드 발급</button>`}</td>
           <td>${yes(c.contractUrl)}</td><td>${yes(liveSet(c))}${c.youtubeGroom&&c.youtubeBride?'<div class="cu-sub">신랑·신부</div>':''}</td><td>${yes(giftSet(c))}</td><td>${yes(guideOf(r))}</td>
@@ -10824,7 +10991,7 @@ function renderNewBanner(){
   const sig = list.map(r=> r.id).join(',');
   if(el.dataset.sig===sig) return; el.dataset.sig = sig;
   el.innerHTML = `<div class="mw-nb-in"><span class="mw-nb-ic">🆕</span><div class="mw-nb-t"><b>신규 계약 ${list.length}건이 들어왔어요</b>
-    <span>${list.slice(0,6).map(r=>`<a href="#" data-newid="${r.id}">${esc(r.clientName||'이름 없음')}${r.weddingDate? ' · '+fmtDate(r.weddingDate):''}${r.productType? ' · '+esc(r.productType):''}</a>`).join('')}${list.length>6? ` 외 ${list.length-6}건`:''}</span></div>
+    <span>${list.slice(0,6).map(r=>`<a href="#" data-newid="${r.id}">${esc(coupleName(r)||'이름 없음')}${r.weddingDate? ' · '+fmtDate(r.weddingDate):''}${r.productType? ' · '+esc(r.productType):''}</a>`).join('')}${list.length>6? ` 외 ${list.length-6}건`:''}</span></div>
     <button type="button" class="mw-nb-x" data-newclose aria-label="알림 닫기" title="닫기">✕</button></div>`;
 }
 document.addEventListener('click', ev=>{
