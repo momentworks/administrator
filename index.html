@@ -5763,6 +5763,11 @@ function normalizePdb(db){
   if(Number(db.settings.slotModel||1) < 3){
     db.settings.slotsByProduct = Object.assign({}, db.settings.slotsByProduct, {'양측':4, '한측':2}); db.settings.slotModel = 3; pdbMigrated = true;
   }
+  if(Number(db.settings.slotModel||1) < 4){   // 통합 · 한측도 2인 배정 (예전에 1인으로 저장된 설정 보정)
+    const sp = db.settings.slotsByProduct = Object.assign({}, db.settings.slotsByProduct);
+    ['통합','한측'].forEach(k=>{ if(!(Number(sp[k]) >= 2)) sp[k] = 2; });
+    db.settings.slotModel = 4; pdbMigrated = true;
+  }
   if(Number(db.settings.slotModel||1) < 2){
     db.settings.slotsByProduct = pvDefaultSettings().slotsByProduct; db.settings.slotModel = 2; pdbMigrated = true;
   }
@@ -6139,7 +6144,7 @@ function sortedMembers(includeInactive){
 }
 /* 시트 파트너1~4 규칙: 한측 2자리 · 양측 4자리 · 통합 2자리 (신랑측·신부측 구분 없이 배정) */
 function roleForPos(rec, pos){ return '파트너'; } // 신랑측·신부측 구분 없이 배정만 표시
-function slotLimitFor(rec){ return Number((pSet().slotsByProduct||{})[rec.productType]) || (rec.productType==='양측' ? 4 : 2); }
+function slotLimitFor(rec){ const n = Number((pSet().slotsByProduct||{})[rec.productType]) || 0; return rec.productType==='양측' ? (n || 4) : Math.max(2, n); }   // 한측 · 통합도 최소 2인 배정
 function defaultSlots(rec){
   const n = Math.max(1, slotLimitFor(rec));
   return Array.from({length:n}, (_,i)=>({id:uid('s'), pos:i+1, role:roleForPos(rec,i+1), memberId:'', pay:0, paid:false}));
@@ -7425,7 +7430,7 @@ async function onPartnersChange(ev){
   }
   if(act==='setNum'){ s[el.dataset.key] = Number(el.value)||0; pDirty.settings=true; await commitPartners('설정이 저장됐어요'); return; }
   if(act==='setBool'){ s[el.dataset.key] = el.checked; pDirty.settings=true; await commitPartners('설정이 저장됐어요'); return; }
-  if(act==='setSlots'){ s.slotsByProduct[el.dataset.key] = Math.min(4, Math.max(1, Number(el.value)||1)); pDirty.settings=true; await commitPartners('설정이 저장됐어요'); return; }
+  if(act==='setSlots'){ s.slotsByProduct[el.dataset.key] = Math.min(4, Math.max(el.dataset.key==='양측'?1:2, Number(el.value)||2)); pDirty.settings=true; await commitPartners('설정이 저장됐어요'); return; }
   if(act==='setOwners'){
     s.ownerNames = el.value.split(/[,，/\n]/).map(x=>x.trim()).filter(Boolean); pDirty.settings=true;
     applyOwnerNames(ensurePdb());
