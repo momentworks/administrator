@@ -10670,7 +10670,7 @@ const CustomerPortal = (function(){
     const tabs = sides.length>1 ? `<div class="cp-live-tabs">${sides.map((x,i)=>`<button class="${i===guideSel?'on':''}" data-cp="guideSel" data-v="${i}">${x.key==='bride'?'👰':'🤵'} ${e(x.label)}측 안내문</button>`).join('')}</div>` : '';
     setTimeout(fitGuide, 0);
     return `<section class="cp-card" id="cp-guide"><h2>📋 예식 안내문</h2>
-      <p class="cp-desc">운영설정서의 <b>하객 안내사항</b>으로 만든 축의대 안내문이에요. 예식 당일 축의대에 비치되고, 하객분들께 미리 공유하실 수도 있어요.</p>
+      <p class="cp-desc">운영설정서의 <b>하객 안내사항</b>으로 만든 축의대 안내문이에요. 필요하신 경우, 출력하시어 예식 당일 축의대에 비치하시거나 하객분들께 미리 공유하실 수 있어요.</p>
       ${tabs}
       <div class="gd-a4wrap" id="gdSheet">${guideSheetHTML(sd, g.items)}</div>
       <div class="cp-row2" style="margin-top:12px;"><button class="cp-btn primary" data-cp="guideShare">📤 안내문 공유하기</button><button class="cp-btn ghost" data-cp="guidePrint">🖨 PDF로 저장</button></div>
