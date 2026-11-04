@@ -2059,6 +2059,7 @@ tr.mw-new-row>td:first-child{box-shadow:inset 4px 0 0 #E0A526;}
   body.gd-printing #gdPrint .gd-a4{position:static;transform:none !important;}
   @page{size:A4;margin:0;}
 }
+.cp-arr-auto{display:block;font-size:11.5px;color:#2F7D57;font-weight:600;margin-top:4px}.cp-arr-auto b{font-family:monospace;font-size:12.5px;background:#E3F1E9;border-radius:4px;padding:1px 6px}
 </style>
 </head>
 <body>
@@ -5019,7 +5020,9 @@ function buildCustomerView(records, db, code, todayStr, withFile){
       settled: !!r.settlementDone},
     live: (function(){
       var base = String(s.giftBaseUrl || 'https://momentworks.github.io/arrange/').trim();
-      var code = String((side && side.giftCode) || client.giftCode || '').trim();
+      var arrV = ((rp['arrange:' + recordId] || {}).viewers) || {};   // 예식 10일 전 자동 생성된 현황판 코드
+      var arrCode = sideKey ? arrV[sideKey] : (arrV[client.mainSide] || arrV.groom || arrV.bride);
+      var code = String((side && side.giftCode) || client.giftCode || arrCode || '').trim();
       var custom = String((side && side.giftUrl) || client.giftUrl || '').trim();
       var url = code ? base.split('#')[0] + '#code=' + encodeURIComponent(code) : (custom || base);
       var yg = String(client.youtubeGroom||'').trim(), yb = String(client.youtubeBride||'').trim(), streams = [];
@@ -9994,9 +9997,14 @@ function maybeSweep_(force) {
   if (!lock.tryLock(5000)) return 0;
   try {
     var db = readJson_(PARTNER_SHEET, {});
-    var n = sweepTimeouts(db, contractRecordsCached_(), new Date().toISOString(), today_());
-    if (n) writeRaw_(PARTNER_SHEET, JSON.stringify(db));
-    return n;
+    var recs = contractRecordsCached_();
+    var n = sweepTimeouts(db, recs, new Date().toISOString(), today_());
+    var m = 0;
+    var due = force || arrangeDue_();
+    if (due) { try { m = arrangeAutoCodes_(db, recs, today_()).created.length; } catch (e2) { Logger.log('축의정리 코드 자동 생성 오류: ' + e2); } }
+    if (due) { try { m += arrangeFillGift_(db, recs); } catch (e3) { Logger.log('현황판 코드 자동 입력 오류: ' + e3); } }
+    if (n || m) writeRaw_(PARTNER_SHEET, JSON.stringify(db));
+    return n + m;
   } catch (e) { return 0; } finally { lock.releaseLock(); }
 }
 /* 파트너가 파트너스오피스를 연 시각 (6시간에 한 번만 저장) */
@@ -10012,6 +10020,188 @@ function recordSeen_(memberId) {
     writeRaw_(PARTNER_SHEET, JSON.stringify(db));
     c.put(k, '1', 21600);
   } catch (e) {} finally { lock.releaseLock(); }
+}
+/* ===== 축의정리 시트(수파베이스) 접속코드 자동 생성 =====
+   · 예식 10일 전부터(그 사이 언제든) 운영설정서로 신랑 · 신부 이름이 확인된 계약을 수파베이스 events 에 등록
+   · 양측 · 통합: 신랑(-1) · 신부(-2) 2개 / 한측: 계약한 쪽 1개 (설정서 이름과 계약자명으로 판단)
+   · 형식: couple_name '홍길동 신랑님' · event_date · place(예식장) · staff null · editor_code 'mw'+YYMMDD+HHMM+'-1|-2' · viewer_code 영문 2 + 숫자 4
+   · 스크립트 속성 SUPABASE_SERVICE_KEY (수파베이스 service_role 키) 가 있어야 동작 · SUPABASE_URL 은 없으면 기본 주소
+   · 만든 코드는 referralPay['arrange:'+계약id] = {groom, bride, viewers:{groom, bride}} 에 저장 → 파트너스오피스 · 고객페이지 자동 로그인 */
+var SUPABASE_URL_DEFAULT = 'https://mvcwqdrsyfzmypwivxfz.supabase.co';
+var ARRANGE_DAYS_BEFORE = 10;
+function arrangeDue_() { var c = CacheService.getScriptCache(); if (c.get('arrAt')) return false; c.put('arrAt', '1', 1800); return true; }
+function sbConf_() {
+  var p = PropertiesService.getScriptProperties();
+  return { url: String(p.getProperty('SUPABASE_URL') || SUPABASE_URL_DEFAULT).replace(/\/+$/, ''), key: p.getProperty('SUPABASE_SERVICE_KEY') || '' };
+}
+function sbReq_(method, path, body) {
+  var c = sbConf_();
+  if (!c.key) throw new Error('스크립트 속성 SUPABASE_SERVICE_KEY 가 없어요');
+  var o = { method: method, muteHttpExceptions: true, contentType: 'application/json', headers: { apikey: c.key, Authorization: 'Bearer ' + c.key, Prefer: 'return=representation' } };
+  if (body) o.payload = JSON.stringify(body);
+  var r = UrlFetchApp.fetch(c.url + '/rest/v1/' + path, o), code = r.getResponseCode(), txt = r.getContentText();
+  if (code >= 300) throw new Error('수파베이스 응답 ' + code + ': ' + String(txt).slice(0, 200));
+  return txt ? JSON.parse(txt) : null;
+}
+function arrangeNameKey_(s) { return String(s || '').replace(/\s+/g, '').replace(/(님|신랑|신부)$/g, ''); }
+/* 만들어야 할 코드 목록 (수파베이스는 건드리지 않음) */
+function arrangePlan_(db, recs, todayStr) {
+  var rp = db.referralPay || {}, out = [], wait = [];
+  var t0 = new Date(todayStr + 'T00:00:00Z').getTime();
+  (recs || []).forEach(function (r) {
+    if (!r || r.type !== 'contract' || r.cancelled || !r.weddingDate) return;
+    var days = Math.round((new Date(r.weddingDate + 'T00:00:00Z').getTime() - t0) / 86400000);
+    if (days < 0 || days > ARRANGE_DAYS_BEFORE) return;
+    var a = rp['arrange:' + r.id] || {}, g = rp['guide:' + r.id] || {};
+    var gn = String(g.groomName || '').trim(), bn = String(g.brideName || '').trim();
+    var prod = String(r.productType || '').trim(), sides = [];
+    var label = r.weddingDate + ' ' + (r.venueName || '') + ' (' + (r.clientName || '') + ')';
+    if (prod === '한측') {
+      var cn = arrangeNameKey_(r.clientName), side = '';
+      if (gn && !bn) side = 'groom'; else if (bn && !gn) side = 'bride';
+      else if (gn && bn) { if (cn && arrangeNameKey_(gn) === cn) side = 'groom'; else if (cn && arrangeNameKey_(bn) === cn) side = 'bride'; }
+      if (!gn && !bn) { wait.push(label + ' · 운영설정서 제출 대기'); return; }
+      if (!side) { wait.push(label + ' · 한측인데 계약자명이 신랑/신부 이름과 달라 쪽을 알 수 없어요 (직접 입력 필요)'); return; }
+      sides = [side];
+    } else {
+      if (!gn || !bn) { wait.push(label + ' · 운영설정서 제출 대기 (신랑 · 신부 이름 필요)'); return; }
+      sides = ['groom', 'bride'];
+    }
+    var tm = /^(\d{1,2}):(\d{2})/.exec(String(r.weddingTime || ''));
+    if (!tm) { wait.push(label + ' · 예식 시간이 없어요'); return; }
+    var d = r.weddingDate.split('-');
+    var stem = 'mw' + d[0].slice(2) + d[1] + d[2] + ('0' + tm[1]).slice(-2) + tm[2];
+    sides.forEach(function (sk) {
+      if (a[sk]) return; // 이미 코드가 있음 (직접 입력했거나 이전에 생성)
+      var used = arrangeUsedNums_(rp, stem);
+      out.forEach(function (x) { if (x.stem === stem) used[x.num] = 1; });
+      var num = arrangePickNum_(used, sk === 'groom' ? 1 : 2);
+      out.push({ recordId: r.id, side: sk, name: (sk === 'groom' ? gn : bn) + ' ' + (sk === 'groom' ? '신랑님' : '신부님'),
+        date: r.weddingDate, place: String(r.venueName || '').trim(), stem: stem, num: num, editor: stem + '-' + num, label: label });
+    });
+  });
+  return { plan: out, wait: wait };
+}
+/* 같은 예식일+시간(stem)에 이미 쓰인 번호 → {1:1, 2:1, ...} (통합관리에 저장된 코드 기준) */
+function arrangeUsedNums_(rp, stem) {
+  var used = {};
+  Object.keys(rp || {}).forEach(function (k) {
+    if (k.indexOf('arrange:') !== 0 || !rp[k]) return;
+    ['groom', 'bride'].forEach(function (sk) { var c = String(rp[k][sk] || ''); if (c.indexOf(stem + '-') === 0) { var n = Number(c.slice(stem.length + 1)); if (n) used[n] = 1; } });
+  });
+  return used;
+}
+/* 기본 번호(신랑 1 · 신부 2)가 비어 있으면 그 번호, 이미 쓰였으면 비어 있는 가장 작은 번호 → -3, -4 … */
+function arrangePickNum_(used, preferred) {
+  if (!used[preferred]) return preferred;
+  for (var n = 1; n < 100; n++) if (!used[n]) return n;
+  return 99;
+}
+function arrangeViewerCode_() {
+  var L = 'abcdefghjkmnpqrstuvwxyz', s = '';
+  for (var i = 0; i < 2; i++) s += L.charAt(Math.floor(Math.random() * L.length));
+  for (var j = 0; j < 4; j++) s += String(Math.floor(Math.random() * 10));
+  return s;
+}
+/* 실제 생성: 수파베이스 events 등록 + 통합관리 데이터에 저장 → {created:[...], wait:[...], errors:[...]} */
+function arrangeAutoCodes_(db, recs, todayStr) {
+  var res = { created: [], wait: [], errors: [] };
+  if (!sbConf_().key) return res;
+  var p = arrangePlan_(db, recs, todayStr);
+  res.wait = p.wait;
+  db.referralPay = db.referralPay || {};
+  p.plan.forEach(function (it) {
+    try {
+      // 같은 예식일+시간 코드 전체를 확인: 같은 신랑/신부 이름으로 이미 등록돼 있으면 그대로 연결, 아니면 비어 있는 다음 번호
+      var rows = sbReq_('get', 'events?select=editor_code,viewer_code,couple_name&editor_code=like.' + encodeURIComponent(it.stem + '-*')) || [];
+      var mine = rows.filter(function (x) { return String(x.couple_name || '').replace(/\s+/g, '') === it.name.replace(/\s+/g, ''); })[0];
+      var found = mine ? [mine] : [];
+      var viewer = mine ? mine.viewer_code : '';
+      if (mine) it.editor = mine.editor_code;
+      else {
+        var used = arrangeUsedNums_(db.referralPay, it.stem);
+        rows.forEach(function (x) { var n = Number(String(x.editor_code || '').slice(it.stem.length + 1)); if (n) used[n] = 1; });
+        it.num = arrangePickNum_(used, it.side === 'groom' ? 1 : 2); it.editor = it.stem + '-' + it.num;
+      }
+      if (!viewer) {
+        for (var k = 0; k < 8 && !viewer; k++) {
+          var cand = arrangeViewerCode_();
+          var dup = sbReq_('get', 'events?select=viewer_code&viewer_code=eq.' + cand);
+          if (!dup || !dup.length) viewer = cand;
+        }
+        if (!viewer) throw new Error('현황판 코드를 만들지 못했어요');
+        sbReq_('post', 'events', { couple_name: it.name, event_date: it.date, place: it.place, staff: null, editor_code: it.editor, viewer_code: viewer });
+      }
+      var key = 'arrange:' + it.recordId, a = db.referralPay[key] || {};
+      a[it.side] = it.editor; a.viewers = a.viewers || {}; a.viewers[it.side] = viewer;
+      a.auto = true; a.updatedAt = Date.now();
+      db.referralPay[key] = a;
+      res.created.push(it.label + ' · ' + it.name + ' · 입력자 ' + it.editor + ' · 현황판 ' + viewer + ((found && found.length) ? ' (이미 등록돼 있던 코드 연결)' : ''));
+    } catch (e) { res.errors.push(it.label + ' · ' + it.name + ' · ' + e); }
+  });
+  return res;
+}
+/* 고객 현황판 코드(viewer_code) → 고객페이지 「실시간 축의 현황판 코드」 자동 입력
+   · 주계약자 쪽 → 계약자 설정의 현황판 코드(client.giftCode) / 상대방 쪽 → 신랑·신부측 카드의 현황판 코드(client.sides[측].giftCode)
+   · 이미 다른 코드가 직접 입력돼 있으면 덮어쓰지 않음 · 한 번 넣은 코드는 기록(giftFilled)해 두어 직접 지운 칸을 다시 채우지 않음
+   · 고객 접속코드가 아직 없으면 생길 때까지 기다렸다가 채움 */
+function arrangeMainSide_(c, r, rp, a) {
+  if (c.mainSide === 'groom' || c.mainSide === 'bride') return c.mainSide;
+  var sd = c.sides || {}, hg = !!(sd.groom && sd.groom.code), hb = !!(sd.bride && sd.bride.code);
+  if (hg && !hb) return 'bride'; if (hb && !hg) return 'groom';
+  var g = rp['guide:' + r.id] || {}, cn = arrangeNameKey_(r.clientName);
+  if (cn && arrangeNameKey_(g.groomName) === cn) return 'groom';
+  if (cn && arrangeNameKey_(g.brideName) === cn) return 'bride';
+  if (a.groom && !a.bride) return 'groom';
+  return 'bride';
+}
+function arrangeFillGift_(db, recs) {
+  var rp = db.referralPay || {}, n = 0;
+  (recs || []).forEach(function (r) {
+    if (!r || !r.id) return;
+    var a = rp['arrange:' + r.id], c = rp['client:' + r.id];
+    if (!a || !a.viewers || !c || !c.code) return;
+    var two = (r.productType === '양측' || r.productType === '통합');
+    var main = two ? arrangeMainSide_(c, r, rp, a) : '';
+    a.giftFilled = a.giftFilled || {};
+    ['groom', 'bride'].forEach(function (sk) {
+      var v = String(a.viewers[sk] || '').trim();
+      if (!v || a.giftFilled[sk] === v) return;
+      if (!two || sk === main) {
+        if (!String(c.giftCode || '').trim()) c.giftCode = v;
+      } else {
+        c.sides = c.sides || {}; c.sides[sk] = c.sides[sk] || {};
+        if (!String(c.sides[sk].giftCode || '').trim()) c.sides[sk].giftCode = v;
+      }
+      a.giftFilled[sk] = v; c.updatedAt = new Date().toISOString(); n++;
+    });
+  });
+  return n;
+}
+/* Apps Script 편집기에서 실행: 만들 코드를 미리 보기만 (수파베이스 · 데이터 변경 없음) */
+function 축의시트코드_미리보기() {
+  var p = arrangePlan_(readJson_(PARTNER_SHEET, {}), contractRecordsCached_(), today_());
+  Logger.log('서비스 키: ' + (sbConf_().key ? '등록됨' : '없음 (스크립트 속성 SUPABASE_SERVICE_KEY 필요)'));
+  Logger.log('만들 코드 ' + p.plan.length + '개');
+  p.plan.forEach(function (x) { Logger.log('  ' + x.label + ' → ' + x.name + ' / ' + x.editor); });
+  Logger.log('대기 ' + p.wait.length + '건');
+  p.wait.forEach(function (x) { Logger.log('  ' + x); });
+}
+/* Apps Script 편집기에서 실행: 지금 바로 생성 */
+function 축의시트코드_지금생성() {
+  var lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    var db = readJson_(PARTNER_SHEET, {});
+    var recs0 = contractRecordsCached_();
+    var r = arrangeAutoCodes_(db, recs0, today_());
+    var filled = arrangeFillGift_(db, recs0);
+    if (r.created.length || filled) writeRaw_(PARTNER_SHEET, JSON.stringify(db));
+    Logger.log('고객페이지 현황판 코드 자동 입력 ' + filled + '건');
+    if (!sbConf_().key) Logger.log('스크립트 속성 SUPABASE_SERVICE_KEY 가 없어요');
+    Logger.log('생성 ' + r.created.length + '개'); r.created.forEach(function (x) { Logger.log('  ✅ ' + x); });
+    Logger.log('대기 ' + r.wait.length + '건'); r.wait.forEach(function (x) { Logger.log('  ⏳ ' + x); });
+    if (r.errors.length) { Logger.log('오류 ' + r.errors.length + '건'); r.errors.forEach(function (x) { Logger.log('  ❌ ' + x); }); }
+  } finally { lock.releaseLock(); }
 }
 function 자동점검_실행() { var n = maybeSweep_(true); Logger.log('응답 기한 지난 자동배정 ' + n + '건을 다음 순위로 넘겼어요'); return n; }
 function 자동점검_설치() {
@@ -11675,8 +11865,8 @@ function renderClientBox(rec, boxEl){
       ${sidesHTML(rec, c)}
       ${guideAdminHTML(rec)}
       <div class="cp-arrange"><div class="cp-arrange-h">🧾 축의대 내역정리 시트 접속코드 <span class="cp-admin-hint">배정된 파트너가 파트너스오피스 「축의대 내역정리」 메뉴에서 보고 복사해요</span></div>
-        <div class="cp-admin-grid"><label>신랑측 접속코드<input data-cpr="groom" value="${esc(arrangeOf(rec).groom||'')}" placeholder="신랑측 내역정리 접속코드"></label>
-        <label>신부측 접속코드<input data-cpr="bride" value="${esc(arrangeOf(rec).bride||'')}" placeholder="신부측 내역정리 접속코드"></label></div></div>
+        <div class="cp-admin-grid">${['groom','bride'].map(sk=>{ const ar = arrangeOf(rec), v = (ar.viewers||{})[sk]; return `<label>${sk==='groom'?'신랑측':'신부측'} 입력자 접속코드<input data-cpr="${sk}" value="${esc(ar[sk]||'')}" placeholder="${sk==='groom'?'신랑측':'신부측'} 내역정리 접속코드">${v? `<small class="cp-arr-auto">🤖 예식 10일 전 자동 생성 · 고객 현황판 코드 <b>${esc(v)}</b></small>`:''}</label>`; }).join('')}</div>
+        <div class="cp-admin-hint" style="margin-top:4px;">예식 10일 전 · 운영설정서 제출 후 수파베이스에 자동 등록되고 여기에 채워져요 (양측 · 통합 2개 · 한측 1개) · 고객 현황판 코드는 위 「실시간 축의 현황판 코드」(계약자 · 신랑/신부측)에도 자동으로 들어가요</div></div>
       ${cardAdminHTML(rec)}
       <div class="cp-admin-foot">${c.contractUrl? '<button type="button" class="btn btn-sm" data-cpa="filecheck">📥 계약서 다운로드 점검</button>' : ''}<button type="button" class="btn btn-sm btn-ghost" data-cpa="regen">코드 재발급</button><button type="button" class="btn btn-sm btn-ghost ${off?'':'btn-danger'}" data-cpa="toggle">${off? '다시 사용' : '사용 중지'}</button>
         ${String(pSet().customerUrl||'').trim()? '' : '<span class="cp-admin-warn">파트너스 → 분리 운영 · 설정에서 고객 페이지 주소를 넣으면 초대 문구에 링크가 함께 들어가요</span>'}</div>`;
@@ -11790,7 +11980,9 @@ async function saveClientBoxAll(rec, box, opt){
   }
   if(has('[data-cpr]')){
     const ak = 'arrange:'+rec.id, g = val('[data-cpr="groom"]'), b = val('[data-cpr="bride"]');
-    if(g || b) db.referralPay[ak] = {groom: g, bride: b, updatedAt: new Date().toISOString()}; else delete db.referralPay[ak];
+    const prev = db.referralPay[ak] || {}, vw = Object.assign({}, prev.viewers||{});
+    if(prev.groom !== g) delete vw.groom; if(prev.bride !== b) delete vw.bride;   // 직접 바꾼 쪽의 자동 현황판 코드만 해제 · 나머지는 보존
+    if(g || b) db.referralPay[ak] = Object.assign({}, prev, {groom: g, bride: b, viewers: vw, updatedAt: new Date().toISOString()}); else delete db.referralPay[ak];
     pDirty.referral.add(ak);
   }
   if(has('[data-cpc]')){
