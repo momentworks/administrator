@@ -2101,6 +2101,17 @@ tr.mw-new-row>td:first-child{box-shadow:inset 4px 0 0 #E0A526;}
 .dy-dot{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;font-style:normal;font-size:10.5px;font-weight:800;background:#F1ECE6;color:#A69A90}.dy-dot.on{background:#2F7D57;color:#fff}
 .dy-li > .dy-body{border-top:1px solid #F0E8E0}
 @media (max-width:900px){.dy-lh{grid-template-columns:80px minmax(0,1fr) 16px}.dy-lh .badge{display:none}.dy-lp{grid-column:1/-1;justify-content:flex-start}}
+/* 고객페이지: PC 한 화면에 맞춤 (편집 칸이 표를 옆으로 늘리지 않게) */
+#custTabRoot .cu-table{width:100%;}
+#custTabRoot .cu-table tr.cu-edit > td{white-space:normal;max-width:0;}
+#custTabRoot .cp-admin,#custTabRoot .cp-admin *{box-sizing:border-box;}
+#custTabRoot .cp-admin{width:100%;max-width:100%;}
+#custTabRoot .cp-admin-grid,#custTabRoot .cp-sides-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+#custTabRoot .cp-side-card .cp-admin-grid{grid-template-columns:minmax(0,1fr);}
+#custTabRoot .cp-admin input,#custTabRoot .cp-admin textarea,#custTabRoot .cp-admin select{max-width:100%;min-width:0;}
+#custTabRoot .cp-admin label{min-width:0;}
+#custTabRoot .cu-acts{white-space:normal;min-width:150px;}#custTabRoot .cu-acts .btn{margin:2px 2px 2px 0;}
+@media (max-width:820px){#custTabRoot .cp-admin-grid,#custTabRoot .cp-sides-grid{grid-template-columns:minmax(0,1fr);}}
 </style>
 </head>
 <body>
@@ -4953,7 +4964,7 @@ function applyPartnerUpdate(db, records, code, op, todayStr){
 ========================================================= */
 function guideNormalize(input){
   var FIELDS = [
-    ['parking','주차 등록 · 무료 주차',['주차정산','주차','주차안내','주차등록','주차권']],
+    ['parking','주차 정산',['주차정산','주차','주차안내','주차등록','주차권']],
     ['atm','ATM 위치',['info_atm','atm위치','atm','현금인출기','atm기','atm안내']],
     ['banquet','연회장 위치',['info_hall','연회장위치','연회장','식당위치','식당','피로연장','식사장소']],
     ['bridalRoom','신부대기실 위치',['info_bride_room','신부대기실','신부대기실위치','신부대기실안내','대기실']],
@@ -5096,6 +5107,25 @@ function applySettingsGuide(records, db, payload, trusted){
     rows.push({key: String(k), label: LAB[k] || String(k).replace(/_/g,' ').trim(), value: v});
   });
   if(rows.length){ db.referralPay['card:'+hit.id] = {rows: rows.slice(0,200), updatedAt: new Date().toISOString()}; }
+  // 양측 · 통합: 설정서의 신랑 · 신부 성함 · 연락처 → 고객페이지 「접속코드 2개 운영」 카드 (직접 고친 칸은 그대로 둠)
+  if(hit.productType==='양측' || hit.productType==='통합'){
+    var ck = 'client:'+hit.id, cl = db.referralPay[ck];
+    if(cl && typeof cl==='object'){
+      var fmtPh = function(x){ var d = String(x||'').replace(/\D/g,''); return /^01\d{8,9}$/.test(d) ? d.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3') : ''; };
+      var nmC = function(x){ return String(x||'').replace(/[^가-힣a-zA-Z\s]/g,'').trim().slice(0,20); };
+      var info = {groom: {name: nmC(payload.groom_name) || db.referralPay[k].groomName, phone: fmtPh(payload.groom_phone)}, bride: {name: nmC(payload.bride_name) || db.referralPay[k].brideName, phone: fmtPh(payload.bride_phone)}};
+      var sides = {}; Object.keys(cl.sides||{}).forEach(function(s2){ sides[s2] = cl.sides[s2]; });
+      var touched = false;
+      ['groom','bride'].forEach(function(sk){
+        var sd = {}; Object.keys(sides[sk]||{}).forEach(function(q){ sd[q] = sides[sk][q]; });
+        var ch = false;
+        if(info[sk].name && (!sd.name || sd.nameAuto) && sd.name!==info[sk].name){ sd.name = info[sk].name; sd.nameAuto = true; ch = true; }
+        if(info[sk].phone && (!sd.phone || sd.phoneAuto) && sd.phone!==info[sk].phone){ sd.phone = info[sk].phone; sd.phoneAuto = true; ch = true; }
+        if(ch){ sides[sk] = sd; touched = true; }
+      });
+      if(touched){ var c2 = {}; Object.keys(cl).forEach(function(q){ c2[q] = cl[q]; }); c2.sides = sides; c2.updatedAt = new Date().toISOString(); db.referralPay[ck] = c2; }
+    }
+  }
   return {ok:true, db:db, recordId: hit.id, contractCode: hit.contractCode||'', items: Object.keys(g.items).length};
 }
 
@@ -5169,7 +5199,9 @@ function buildCustomerView(records, db, code, todayStr, withFile){
   return {
     ok: true, v: 1,
     today: today,
-    client: {name: (side && side.name) || r.clientName||'', contractName: r.clientName||'', code: myCode, side: sideKey, sideLabel: sideKey==='groom' ? '신랑측' : sideKey==='bride' ? '신부측' : ''},
+    // 고객 전용페이지: 접속코드 2개 운영이어도 '신랑 · 신부' 표시 없이 'ㅇㅇㅇ님' (이름만)
+    client: {name: (function(){ var gd = rp['guide:'+recordId] || {}; var nn = (side && side.name) || (sideKey==='groom' ? gd.groomName : sideKey==='bride' ? gd.brideName : '') || r.clientName || '';
+      return String(nn).replace(/\s+(신랑|신부)(측)?\s*(님)?\s*$/, '').replace(/\s*님$/, '').trim() || String(r.clientName||''); })(), contractName: r.clientName||'', code: myCode, side: sideKey, sideLabel: ''},
     wedding: {date: r.weddingDate||'', time: r.weddingTime||'', venue: r.venueName||'', hall: r.hallName||'', region: r.region||'',
       product: r.productType||'', groomGuests: n(r.groomGuests), brideGuests: n(r.brideGuests), settingsSubmitted: !!r.settingsSubmitted},
     contract: {date: r.contractDate||'', code: myCode, hasFile: !!String(client.contractUrl||'').trim(),
@@ -10616,8 +10648,11 @@ function mmTplSideDefault_() {
   ].join('\n');
 }
 function mmFill_(tpl, m) {
-  return String(tpl || '').replace(/\{(이름|계약자|접속코드|짝꿍코드|하객할인|주소)\}/g, function (all, k) { return (m[k] === undefined || m[k] === null) ? '' : String(m[k]); });
+  // 예전에 저장된 문구의 '기준인원인 400명' → 계약 상품별 기준인원으로
+  return String(tpl || '').replace(/기준인원인\s*400명\s*초과/g, '기준인원인 {기준인원}명 초과').replace(/\{(이름|계약자|접속코드|짝꿍코드|하객할인|기준인원|주소)\}/g, function (all, k) { return (m[k] === undefined || m[k] === null) ? '' : String(m[k]); });
 }
+/* 하객 기준인원: 한측 250명 · 양측 400명 · 통합 150명 (통합관리 설정 guestPolicy.base 가 있으면 그 값) */
+function mmBaseGuests_(db, product) { var b = (((db || {}).settings || {}).guestPolicy || {}).base || {}, d = { '한측': 250, '양측': 400, '통합': 150 }; var v = Number(b[product]) || d[product]; return v ? String(v) : '400'; }
 function mmPhoneFmt_(s) { var d = String(s || '').replace(/\D/g, ''); return /^01\d{8,9}$/.test(d) ? d : ''; }
 /* 상대방 연락처: 고객페이지 신랑/신부측 카드의 연락처 → 운영설정서의 신랑/신부 연락처 항목 */
 function mmPhoneOf_(rp, id, sk, c) {
@@ -10751,7 +10786,7 @@ function dayRecipients_(rp, r, c, g) {
   });
 }
 /* 사전 안내 템플릿 (통합관리 설정 mmTplContract · mmTplSettings · mmTplSide 가 있으면 그것을 사용) */
-var MM_TPL_CONTRACT_DEFAULT = ["믿고 맡겨주셔서 감사합니다.", "", "[모먼트웍스] {계약자}님 마이모먼트💐", "💌 짝꿍코드 {짝꿍코드}", "", "예식 정보 · 계약서 · 유튜브 라이브 · 실시간 축의 현황 · 짝꿍코드 추천 현황을 한 곳에서 확인하실 수 있는", "<마이모먼트> 페이지를 공유드립니다.", "", "📌 마이모먼트", "{주소}", "", "- 접속코드: {접속코드}", "", "🌟 메인 페이지 하단의 [홈 화면에 바로가기 추가]를 눌러 홈화면 추가 시 편리하게 접속 가능합니다.", "", "🔔 안드로이드", "하단의 [홈 화면에 바로가기 추가]", "→ 웹브라우저로 자동 이동", "→ [홈 화면에 바로가기 추가] 다시 선택", "", "🔔 아이폰", "하단의 [홈 화면에 바로가기 추가]", "→ 사파리, 크롬 등으로 오픈", "→ 주소창 옆 공유 버튼", "→ 더보기 선택 → 홈 화면에 추가", "", "───────────────", "", "✅ 계약 정보(📌계약서 다운로드)", "- 계약서를 PDF파일로 다운로드 받으실 수 있습니다.", "- 계약서 제4조(계약의 성립)에 따라 계약금 납부 시 계약 내용에 동의하신 것으로 간주되며, 계약금 납부가 서명 또는 날인을 대신하여 계약이 성립됩니다. 따라서 별도의 서명 절차는 진행하지 않으셔도 됩니다.", "※ <대표자 신분증, 사업자등록증>은 본인 확인 및 계약 신뢰 확보를 위한 용도로만 제공되는 자료이므로 외부 공개, 제3자 제공 및 다른 용도로의 사용은 삼가 주시길 부탁드립니다.", "", "✅ 축의대 운영 설정서(예식 7일 전까지 작성)", "- 원활한 축의대 운영을 위해 축의금 접수 및 운영 방식, 특이사항 및 요청사항 등 예식 당일 운영에 필요한 내용을 작성 부탁드립니다.", "- 항목이 다소 많기 때문에 제일 하단의 '임시저장' 버튼을 활용하시면서 작성 부탁드립니다.", "- 보안상 임시저장하셨던 기기(동일한 핸드폰, 동일한 PC)로 다시 접속하셔야 작성하셨던 내용을 불러올 수 있습니다.", "", "✅ 정산 관리", "- 잔금은 예식 다음날까지 정산 부탁드립니다.", "- 잔금 정산 후, 계약금+잔금에 대한 현금영수증이 발행됩니다.", "", "✅ 예식 안내문", "- 축의대 운영 설정서의 '하객 안내사항'을 참고하여 제작합니다.", "필요하신 경우, 출력하시어 예식 당일 축의대에 비치하시거나 하객분들께 미리 공유하실 수 있습니다.", "", "✅ 유튜브 실시간 라이브", "- 본식 종료 후 6개월까지 다시보기로 재생 가능합니다.", "- 웨딩홀 통신상황에 따라 녹화본으로 대체하는 경우에는 당일 자정까지 녹화본 링크를 등록해드릴 예정입니다.", "", "✅ 실시간 축의 현황(하객 성함/식권 수량/축의금액 등)", "- 예식 2일 전부터 접속 가능합니다.", "- 식권 수량은 본식 당일에 실제 수량으로 업데이트 됩니다.", "", "✅ 짝꿍코드 현황", "- 소개받은 분의 예식 종료 후 건당 1만원의 할인 혜택이 확정됩니다.", "- 예식 전에 확정된 금액은 잔금에서 할인되고, 예식 이후 확정된 금액은 페이백으로 혜택이 제공됩니다.", "", "✅ 하객 규모별 맞춤 할인 {하객할인}은 실제 하객 수 집계 후 적용됩니다. (할인 기준 충족 시 할인 적용)", "", "✅ 기준인원인 400명 초과 시 1인당 1천원 추가금 발생합니다.", "", "✅ 블로그, 스레드, 웨딩 단톡방, 카페 등에 계약/본식 후기를 작성해주시면 최대 8만원 할인(페이백) 적용됩니다.🍀", "- 계약 리뷰: 1건당 2만원(최대 4만원)", "- 본식 리뷰: 1건당 2만원(최대 4만원)", "", "계약 후기는 잔금에서 차감되기 때문에 본식 전까지 링크(캡처본)를 보내주시면 잔금에서 차감하고 있습니다.✨️", "본식 후기는 2개월 이내에 작성해주시면 페이백으로 혜택 제공해드립니다.", "", "작성하신 후기는 ⭐전체공개⭐상태로 1년 유지 부탁드립니다.😊", "", "✅ 카페 후기 작성 시 <다이렉트 결혼준비> 카페를 제외한 다른 카페에 작성을 부탁드립니다. 제휴업체가 아니기 때문에 게시글이 삭제되므로 할인 혜택 적용이 불가합니다.", "", "✅ 후기는 계약후기라고 명시하지 않으셔도 됩니다. 짝꿍코드 구하는 글 또는 짝꿍코드 홍보하는 글로 자연스럽게 업체명을 노출해주셔도 할인 혜택 적용됩니다.", "웨딩단톡방/카페 규정 참고하시어 게시글이 삭제되지 않도록 작성 부탁드립니다."].join('\n');
+var MM_TPL_CONTRACT_DEFAULT = ["믿고 맡겨주셔서 감사합니다.", "", "[모먼트웍스] {계약자}님 마이모먼트💐", "💌 짝꿍코드 {짝꿍코드}", "", "예식 정보 · 계약서 · 유튜브 라이브 · 실시간 축의 현황 · 짝꿍코드 추천 현황을 한 곳에서 확인하실 수 있는", "<마이모먼트> 페이지를 공유드립니다.", "", "📌 마이모먼트", "{주소}", "", "- 접속코드: {접속코드}", "", "🌟 메인 페이지 하단의 [홈 화면에 바로가기 추가]를 눌러 홈화면 추가 시 편리하게 접속 가능합니다.", "", "🔔 안드로이드", "하단의 [홈 화면에 바로가기 추가]", "→ 웹브라우저로 자동 이동", "→ [홈 화면에 바로가기 추가] 다시 선택", "", "🔔 아이폰", "하단의 [홈 화면에 바로가기 추가]", "→ 사파리, 크롬 등으로 오픈", "→ 주소창 옆 공유 버튼", "→ 더보기 선택 → 홈 화면에 추가", "", "───────────────", "", "✅ 계약 정보(📌계약서 다운로드)", "- 계약서를 PDF파일로 다운로드 받으실 수 있습니다.", "- 계약서 제4조(계약의 성립)에 따라 계약금 납부 시 계약 내용에 동의하신 것으로 간주되며, 계약금 납부가 서명 또는 날인을 대신하여 계약이 성립됩니다. 따라서 별도의 서명 절차는 진행하지 않으셔도 됩니다.", "※ <대표자 신분증, 사업자등록증>은 본인 확인 및 계약 신뢰 확보를 위한 용도로만 제공되는 자료이므로 외부 공개, 제3자 제공 및 다른 용도로의 사용은 삼가 주시길 부탁드립니다.", "", "✅ 축의대 운영 설정서(예식 7일 전까지 작성)", "- 원활한 축의대 운영을 위해 축의금 접수 및 운영 방식, 특이사항 및 요청사항 등 예식 당일 운영에 필요한 내용을 작성 부탁드립니다.", "- 항목이 다소 많기 때문에 제일 하단의 '임시저장' 버튼을 활용하시면서 작성 부탁드립니다.", "- 보안상 임시저장하셨던 기기(동일한 핸드폰, 동일한 PC)로 다시 접속하셔야 작성하셨던 내용을 불러올 수 있습니다.", "", "✅ 정산 관리", "- 잔금은 예식 다음날까지 정산 부탁드립니다.", "- 잔금 정산 후, 계약금+잔금에 대한 현금영수증이 발행됩니다.", "", "✅ 예식 안내문", "- 축의대 운영 설정서의 '하객 안내사항'을 참고하여 제작합니다.", "필요하신 경우, 출력하시어 예식 당일 축의대에 비치하시거나 하객분들께 미리 공유하실 수 있습니다.", "", "✅ 유튜브 실시간 라이브", "- 본식 종료 후 6개월까지 다시보기로 재생 가능합니다.", "- 웨딩홀 통신상황에 따라 녹화본으로 대체하는 경우에는 당일 자정까지 녹화본 링크를 등록해드릴 예정입니다.", "", "✅ 실시간 축의 현황(하객 성함/식권 수량/축의금액 등)", "- 예식 2일 전부터 접속 가능합니다.", "- 식권 수량은 본식 당일에 실제 수량으로 업데이트 됩니다.", "", "✅ 짝꿍코드 현황", "- 소개받은 분의 예식 종료 후 건당 1만원의 할인 혜택이 확정됩니다.", "- 예식 전에 확정된 금액은 잔금에서 할인되고, 예식 이후 확정된 금액은 페이백으로 혜택이 제공됩니다.", "", "✅ 하객 규모별 맞춤 할인 {하객할인}은 실제 하객 수 집계 후 적용됩니다. (할인 기준 충족 시 할인 적용)", "", "✅ 기준인원인 {기준인원}명 초과 시 1인당 1천원 추가금 발생합니다.", "", "✅ 블로그, 스레드, 웨딩 단톡방, 카페 등에 계약/본식 후기를 작성해주시면 최대 8만원 할인(페이백) 적용됩니다.🍀", "- 계약 리뷰: 1건당 2만원(최대 4만원)", "- 본식 리뷰: 1건당 2만원(최대 4만원)", "", "계약 후기는 잔금에서 차감되기 때문에 본식 전까지 링크(캡처본)를 보내주시면 잔금에서 차감하고 있습니다.✨️", "본식 후기는 2개월 이내에 작성해주시면 페이백으로 혜택 제공해드립니다.", "", "작성하신 후기는 ⭐전체공개⭐상태로 1년 유지 부탁드립니다.😊", "", "✅ 카페 후기 작성 시 <다이렉트 결혼준비> 카페를 제외한 다른 카페에 작성을 부탁드립니다. 제휴업체가 아니기 때문에 게시글이 삭제되므로 할인 혜택 적용이 불가합니다.", "", "✅ 후기는 계약후기라고 명시하지 않으셔도 됩니다. 짝꿍코드 구하는 글 또는 짝꿍코드 홍보하는 글로 자연스럽게 업체명을 노출해주셔도 할인 혜택 적용됩니다.", "웨딩단톡방/카페 규정 참고하시어 게시글이 삭제되지 않도록 작성 부탁드립니다."].join('\n');
 var MM_TPL_SETTINGS_DEFAULT = ["[모먼트웍스] 운영 설정서 작성 요청", "", "안녕하세요. 😊", "두 분의 예식이 어느 덧 30일 앞으로 다가왔습니다.", "", "원활한 축의대 운영을 위해 예식 7일 전까지 '운영 설정서' 작성을 부탁드립니다.", "", "✅ 마이모먼트 → 축의대 운영 설정서 작성하기", "", "📌 마이모먼트 접속 링크", "{주소}", "- 접속코드: {접속코드}", "", "✅ 축의대 운영 설정서(예식 7일 전까지 작성)", "- 항목이 다소 많기 때문에 제일 하단의 '임시저장' 버튼을 활용하시면서 작성 부탁드립니다.", "- 보안상 임시저장하셨던 기기(동일한 핸드폰, 동일한 PC)로 다시 접속하셔야 작성하셨던 내용을 불러올 수 있습니다.", "", "작성 중에 궁금하신 사항은 언제든지 편하게 문의주세요!", "", "좋은 하루 보내세요. 감사합니다. 😊"].join('\n');
 function mmTplOf_(db, key, def) { var v = (db.settings || {})[key]; return (v === undefined || v === null || String(v).trim() === '') ? def : String(v); }
 /* Apps Script 편집기에서 실행: 오늘(또는 날짜) 예식의 축의대 운영 결과 집계를 실제 수파베이스에서 확인 */
@@ -10782,7 +10817,7 @@ function dayReport_(records, db, rid, todayStr) {
   var steps = [];
   // 사전 안내: 계약자 마이모먼트 안내 · 설정서 작성 요청 · (양측 · 통합) 상대방 마이모먼트 안내
   var mainSk = (people.filter(function (x) { return x.main; })[0] || {}).side || 'bride', otherSk = mainSk === 'groom' ? 'bride' : 'groom';
-  var pm = { 계약자: r.clientName || '', 짝꿍코드: r.contractCode || '-', 접속코드: c.code || '', 하객할인: r.productType === '한측' ? '3만원' : '5만원', 주소: MM_PAGE_URL };
+  var pm = { 계약자: r.clientName || '', 짝꿍코드: r.contractCode || '-', 접속코드: c.code || '', 하객할인: r.productType === '한측' ? '3만원' : '5만원', 기준인원: mmBaseGuests_(db, r.productType), 주소: MM_PAGE_URL };
   var noCode = c.code ? '' : '고객 접속코드가 아직 없어요 (통합관리 고객페이지에서 발급)';
   steps.push({ group: 'pre', to: [mainSk], key: 'pre_contract', step: 'pre_contract', no: '①', label: '마이모먼트 안내 (계약 직후 · 계약자)', hint: '', text: mmFill_(mmTplOf_(db, 'mmTplContract', MM_TPL_CONTRACT_DEFAULT), pm), warn: noCode });
   steps.push({ group: 'pre', to: [mainSk], key: 'pre_settings', step: 'pre_settings', no: '②', label: '운영 설정서 작성 요청 (예식 30일 전 · 계약자)', hint: '', text: mmFill_(mmTplOf_(db, 'mmTplSettings', MM_TPL_SETTINGS_DEFAULT), pm), warn: noCode });
@@ -13292,7 +13327,7 @@ async function importSettingsPdf(file, recordId, opt){
   if(!rec){ const m = matchContractFor(date, names); if(!m.ok) return Object.assign({ok:false, error: m.error, candIds: (m.cands||[]).map(r=>r.id)}, info); rec = m.rec; }
   const r = applySettingsGuide(RECORDS, ensurePdb(), Object.assign({}, payload, {recordId: rec.id}), 'pdf');
   if(!r.ok) return Object.assign({ok:false, error: r.error}, info);
-  pDirty.referral.add('guide:'+r.recordId); pDirty.referral.add('card:'+r.recordId); if(!(opt && opt.noSave)) await savePartnerDb();
+  pDirty.referral.add('guide:'+r.recordId); pDirty.referral.add('card:'+r.recordId); pDirty.referral.add('client:'+r.recordId); if(!(opt && opt.noSave)) await savePartnerDb();
   return Object.assign({ok:true, recordId: r.recordId, items: r.items}, info);
 }
 function guideProgHTML(){
@@ -13414,16 +13449,17 @@ function testSendGuideToMomentWorks() {
 ========================================================= */
 const MM_PAGE_URL = 'https://momentworks.github.io/mymoment/';
 const KK_ICON = '<svg class="kk-ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="#3C1E1E" d="M12 3.2C6.6 3.2 2.3 6.6 2.3 10.8c0 2.7 1.8 5.1 4.5 6.4l-1 3.6c-.1.3.3.6.6.4l4.3-2.8c.4 0 .9.1 1.3.1 5.4 0 9.7-3.4 9.7-7.7S17.4 3.2 12 3.2z"/></svg>';
-const MM_TPL_CONTRACT = ["믿고 맡겨주셔서 감사합니다.", "", "[모먼트웍스] {계약자}님 마이모먼트💐", "💌 짝꿍코드 {짝꿍코드}", "", "예식 정보 · 계약서 · 유튜브 라이브 · 실시간 축의 현황 · 짝꿍코드 추천 현황을 한 곳에서 확인하실 수 있는", "<마이모먼트> 페이지를 공유드립니다.", "", "📌 마이모먼트", "{주소}", "", "- 접속코드: {접속코드}", "", "🌟 메인 페이지 하단의 [홈 화면에 바로가기 추가]를 눌러 홈화면 추가 시 편리하게 접속 가능합니다.", "", "🔔 안드로이드", "하단의 [홈 화면에 바로가기 추가]", "→ 웹브라우저로 자동 이동", "→ [홈 화면에 바로가기 추가] 다시 선택", "", "🔔 아이폰", "하단의 [홈 화면에 바로가기 추가]", "→ 사파리, 크롬 등으로 오픈", "→ 주소창 옆 공유 버튼", "→ 더보기 선택 → 홈 화면에 추가", "", "───────────────", "", "✅ 계약 정보(📌계약서 다운로드)", "- 계약서를 PDF파일로 다운로드 받으실 수 있습니다.", "- 계약서 제4조(계약의 성립)에 따라 계약금 납부 시 계약 내용에 동의하신 것으로 간주되며, 계약금 납부가 서명 또는 날인을 대신하여 계약이 성립됩니다. 따라서 별도의 서명 절차는 진행하지 않으셔도 됩니다.", "※ <대표자 신분증, 사업자등록증>은 본인 확인 및 계약 신뢰 확보를 위한 용도로만 제공되는 자료이므로 외부 공개, 제3자 제공 및 다른 용도로의 사용은 삼가 주시길 부탁드립니다.", "", "✅ 축의대 운영 설정서(예식 7일 전까지 작성)", "- 원활한 축의대 운영을 위해 축의금 접수 및 운영 방식, 특이사항 및 요청사항 등 예식 당일 운영에 필요한 내용을 작성 부탁드립니다.", "- 항목이 다소 많기 때문에 제일 하단의 '임시저장' 버튼을 활용하시면서 작성 부탁드립니다.", "- 보안상 임시저장하셨던 기기(동일한 핸드폰, 동일한 PC)로 다시 접속하셔야 작성하셨던 내용을 불러올 수 있습니다.", "", "✅ 정산 관리", "- 잔금은 예식 다음날까지 정산 부탁드립니다.", "- 잔금 정산 후, 계약금+잔금에 대한 현금영수증이 발행됩니다.", "", "✅ 예식 안내문", "- 축의대 운영 설정서의 '하객 안내사항'을 참고하여 제작합니다.", "필요하신 경우, 출력하시어 예식 당일 축의대에 비치하시거나 하객분들께 미리 공유하실 수 있습니다.", "", "✅ 유튜브 실시간 라이브", "- 본식 종료 후 6개월까지 다시보기로 재생 가능합니다.", "- 웨딩홀 통신상황에 따라 녹화본으로 대체하는 경우에는 당일 자정까지 녹화본 링크를 등록해드릴 예정입니다.", "", "✅ 실시간 축의 현황(하객 성함/식권 수량/축의금액 등)", "- 예식 2일 전부터 접속 가능합니다.", "- 식권 수량은 본식 당일에 실제 수량으로 업데이트 됩니다.", "", "✅ 짝꿍코드 현황", "- 소개받은 분의 예식 종료 후 건당 1만원의 할인 혜택이 확정됩니다.", "- 예식 전에 확정된 금액은 잔금에서 할인되고, 예식 이후 확정된 금액은 페이백으로 혜택이 제공됩니다.", "", "✅ 하객 규모별 맞춤 할인 {하객할인}은 실제 하객 수 집계 후 적용됩니다. (할인 기준 충족 시 할인 적용)", "", "✅ 기준인원인 400명 초과 시 1인당 1천원 추가금 발생합니다.", "", "✅ 블로그, 스레드, 웨딩 단톡방, 카페 등에 계약/본식 후기를 작성해주시면 최대 8만원 할인(페이백) 적용됩니다.🍀", "- 계약 리뷰: 1건당 2만원(최대 4만원)", "- 본식 리뷰: 1건당 2만원(최대 4만원)", "", "계약 후기는 잔금에서 차감되기 때문에 본식 전까지 링크(캡처본)를 보내주시면 잔금에서 차감하고 있습니다.✨️", "본식 후기는 2개월 이내에 작성해주시면 페이백으로 혜택 제공해드립니다.", "", "작성하신 후기는 ⭐전체공개⭐상태로 1년 유지 부탁드립니다.😊", "", "✅ 카페 후기 작성 시 <다이렉트 결혼준비> 카페를 제외한 다른 카페에 작성을 부탁드립니다. 제휴업체가 아니기 때문에 게시글이 삭제되므로 할인 혜택 적용이 불가합니다.", "", "✅ 후기는 계약후기라고 명시하지 않으셔도 됩니다. 짝꿍코드 구하는 글 또는 짝꿍코드 홍보하는 글로 자연스럽게 업체명을 노출해주셔도 할인 혜택 적용됩니다.", "웨딩단톡방/카페 규정 참고하시어 게시글이 삭제되지 않도록 작성 부탁드립니다."].join('\n');
+const MM_TPL_CONTRACT = ["믿고 맡겨주셔서 감사합니다.", "", "[모먼트웍스] {계약자}님 마이모먼트💐", "💌 짝꿍코드 {짝꿍코드}", "", "예식 정보 · 계약서 · 유튜브 라이브 · 실시간 축의 현황 · 짝꿍코드 추천 현황을 한 곳에서 확인하실 수 있는", "<마이모먼트> 페이지를 공유드립니다.", "", "📌 마이모먼트", "{주소}", "", "- 접속코드: {접속코드}", "", "🌟 메인 페이지 하단의 [홈 화면에 바로가기 추가]를 눌러 홈화면 추가 시 편리하게 접속 가능합니다.", "", "🔔 안드로이드", "하단의 [홈 화면에 바로가기 추가]", "→ 웹브라우저로 자동 이동", "→ [홈 화면에 바로가기 추가] 다시 선택", "", "🔔 아이폰", "하단의 [홈 화면에 바로가기 추가]", "→ 사파리, 크롬 등으로 오픈", "→ 주소창 옆 공유 버튼", "→ 더보기 선택 → 홈 화면에 추가", "", "───────────────", "", "✅ 계약 정보(📌계약서 다운로드)", "- 계약서를 PDF파일로 다운로드 받으실 수 있습니다.", "- 계약서 제4조(계약의 성립)에 따라 계약금 납부 시 계약 내용에 동의하신 것으로 간주되며, 계약금 납부가 서명 또는 날인을 대신하여 계약이 성립됩니다. 따라서 별도의 서명 절차는 진행하지 않으셔도 됩니다.", "※ <대표자 신분증, 사업자등록증>은 본인 확인 및 계약 신뢰 확보를 위한 용도로만 제공되는 자료이므로 외부 공개, 제3자 제공 및 다른 용도로의 사용은 삼가 주시길 부탁드립니다.", "", "✅ 축의대 운영 설정서(예식 7일 전까지 작성)", "- 원활한 축의대 운영을 위해 축의금 접수 및 운영 방식, 특이사항 및 요청사항 등 예식 당일 운영에 필요한 내용을 작성 부탁드립니다.", "- 항목이 다소 많기 때문에 제일 하단의 '임시저장' 버튼을 활용하시면서 작성 부탁드립니다.", "- 보안상 임시저장하셨던 기기(동일한 핸드폰, 동일한 PC)로 다시 접속하셔야 작성하셨던 내용을 불러올 수 있습니다.", "", "✅ 정산 관리", "- 잔금은 예식 다음날까지 정산 부탁드립니다.", "- 잔금 정산 후, 계약금+잔금에 대한 현금영수증이 발행됩니다.", "", "✅ 예식 안내문", "- 축의대 운영 설정서의 '하객 안내사항'을 참고하여 제작합니다.", "필요하신 경우, 출력하시어 예식 당일 축의대에 비치하시거나 하객분들께 미리 공유하실 수 있습니다.", "", "✅ 유튜브 실시간 라이브", "- 본식 종료 후 6개월까지 다시보기로 재생 가능합니다.", "- 웨딩홀 통신상황에 따라 녹화본으로 대체하는 경우에는 당일 자정까지 녹화본 링크를 등록해드릴 예정입니다.", "", "✅ 실시간 축의 현황(하객 성함/식권 수량/축의금액 등)", "- 예식 2일 전부터 접속 가능합니다.", "- 식권 수량은 본식 당일에 실제 수량으로 업데이트 됩니다.", "", "✅ 짝꿍코드 현황", "- 소개받은 분의 예식 종료 후 건당 1만원의 할인 혜택이 확정됩니다.", "- 예식 전에 확정된 금액은 잔금에서 할인되고, 예식 이후 확정된 금액은 페이백으로 혜택이 제공됩니다.", "", "✅ 하객 규모별 맞춤 할인 {하객할인}은 실제 하객 수 집계 후 적용됩니다. (할인 기준 충족 시 할인 적용)", "", "✅ 기준인원인 {기준인원}명 초과 시 1인당 1천원 추가금 발생합니다.", "", "✅ 블로그, 스레드, 웨딩 단톡방, 카페 등에 계약/본식 후기를 작성해주시면 최대 8만원 할인(페이백) 적용됩니다.🍀", "- 계약 리뷰: 1건당 2만원(최대 4만원)", "- 본식 리뷰: 1건당 2만원(최대 4만원)", "", "계약 후기는 잔금에서 차감되기 때문에 본식 전까지 링크(캡처본)를 보내주시면 잔금에서 차감하고 있습니다.✨️", "본식 후기는 2개월 이내에 작성해주시면 페이백으로 혜택 제공해드립니다.", "", "작성하신 후기는 ⭐전체공개⭐상태로 1년 유지 부탁드립니다.😊", "", "✅ 카페 후기 작성 시 <다이렉트 결혼준비> 카페를 제외한 다른 카페에 작성을 부탁드립니다. 제휴업체가 아니기 때문에 게시글이 삭제되므로 할인 혜택 적용이 불가합니다.", "", "✅ 후기는 계약후기라고 명시하지 않으셔도 됩니다. 짝꿍코드 구하는 글 또는 짝꿍코드 홍보하는 글로 자연스럽게 업체명을 노출해주셔도 할인 혜택 적용됩니다.", "웨딩단톡방/카페 규정 참고하시어 게시글이 삭제되지 않도록 작성 부탁드립니다."].join('\n');
 const MM_TPL_SETTINGS = ["[모먼트웍스] 운영 설정서 작성 요청", "", "안녕하세요. 😊", "두 분의 예식이 어느 덧 30일 앞으로 다가왔습니다.", "", "원활한 축의대 운영을 위해 예식 7일 전까지 '운영 설정서' 작성을 부탁드립니다.", "", "✅ 마이모먼트 → 축의대 운영 설정서 작성하기", "", "📌 마이모먼트 접속 링크", "{주소}", "- 접속코드: {접속코드}", "", "✅ 축의대 운영 설정서(예식 7일 전까지 작성)", "- 항목이 다소 많기 때문에 제일 하단의 '임시저장' 버튼을 활용하시면서 작성 부탁드립니다.", "- 보안상 임시저장하셨던 기기(동일한 핸드폰, 동일한 PC)로 다시 접속하셔야 작성하셨던 내용을 불러올 수 있습니다.", "", "작성 중에 궁금하신 사항은 언제든지 편하게 문의주세요!", "", "좋은 하루 보내세요. 감사합니다. 😊"].join('\n');
 const MM_TPL_SIDE = ["{이름}님, 안녕하세요.", "신랑, 신부님의 축의대를 담당할 모먼트웍스 김현관입니다.", "", "예식 정보 · 계약서 · 유튜브 라이브 · 실시간 축의 현황 · 짝꿍코드 추천 현황을 한 곳에서 확인하실 수 있는 <마이모먼트> 페이지를 공유드립니다.", "", "📌 마이모먼트", "{주소}", "", "- 접속코드: {접속코드}", "", "🌟 메인 페이지 하단의 [홈 화면에 바로가기 추가]를 눌러 홈화면 추가 시 편리하게 접속 가능합니다.", "", "🔔 안드로이드", "하단의 [홈 화면에 바로가기 추가]", "→ 웹브라우저로 자동 이동", "→ [홈 화면에 바로가기 추가] 다시 선택", "", "🔔 아이폰", "하단의 [홈 화면에 바로가기 추가]", "→ 사파리, 크롬 등으로 오픈", "→ 주소창 옆 공유 버튼", "→ 더보기 선택 → 홈 화면에 추가", "", "✅ 유튜브 실시간 라이브", "- 본식 종료 후 6개월까지 다시보기로 재생 가능합니다.", "- 웨딩홀 통신상황에 따라 녹화본으로 대체하는 경우에는 당일 자정까지 녹화본 링크를 등록해드릴 예정입니다.", "", "✅ 실시간 축의 현황(하객 성함/식권 수량/축의금액 등)", "- 예식 2일 전부터 접속 가능합니다.", "- 식권 수량은 본식 당일에 실제 수량으로 업데이트 됩니다.", "", "감사합니다."].join('\n');
-function mmFill(tpl, m){ return String(tpl||'').replace(/\{(이름|계약자|접속코드|짝꿍코드|하객할인|주소)\}/g, (all,k)=> m[k]==null ? '' : String(m[k])); }
+function mmFill(tpl, m){ return String(tpl||'').replace(/기준인원인\s*400명\s*초과/g, '기준인원인 {기준인원}명 초과').replace(/\{(이름|계약자|접속코드|짝꿍코드|하객할인|기준인원|주소)\}/g, (all,k)=> m[k]==null ? '' : String(m[k])); }
+function mmBaseGuests(rec){ const b = ((pSet()||{}).guestPolicy||{}).base || {}, d = {'한측':250,'양측':400,'통합':150}, p = rec && rec.productType; return String(Number(b[p]) || d[p] || 400); }   // 한측 250 · 양측 400 · 통합 150
 function mmDiscount(rec){ return rec && rec.productType==='한측' ? '3만원' : '5만원'; }   // 한측 3만원 · 양측 · 통합 5만원
 function mmContractText(rec, c){
-  return mmFill(pSet().mmTplContract || MM_TPL_CONTRACT, {계약자: rec.clientName||'', 이름: rec.clientName||'', 짝꿍코드: rec.contractCode||'-', 접속코드: (c&&c.code)||'', 하객할인: mmDiscount(rec), 주소: MM_PAGE_URL});
+  return mmFill(pSet().mmTplContract || MM_TPL_CONTRACT, {계약자: rec.clientName||'', 이름: rec.clientName||'', 짝꿍코드: rec.contractCode||'-', 접속코드: (c&&c.code)||'', 하객할인: mmDiscount(rec), 기준인원: mmBaseGuests(rec), 주소: MM_PAGE_URL});
 }
 function mmSettingsText(rec, c){
-  return mmFill(pSet().mmTplSettings || MM_TPL_SETTINGS, {계약자: rec.clientName||'', 이름: rec.clientName||'', 짝꿍코드: rec.contractCode||'-', 접속코드: (c&&c.code)||'', 하객할인: mmDiscount(rec), 주소: MM_PAGE_URL});
+  return mmFill(pSet().mmTplSettings || MM_TPL_SETTINGS, {계약자: rec.clientName||'', 이름: rec.clientName||'', 짝꿍코드: rec.contractCode||'-', 접속코드: (c&&c.code)||'', 하객할인: mmDiscount(rec), 기준인원: mmBaseGuests(rec), 주소: MM_PAGE_URL});
 }
 function mmSideName(rec, sk, sd){ const g = (ensurePdb().referralPay||{})['guide:'+rec.id] || {}; return String((sk==='groom'? g.groomName : g.brideName) || (sd&&sd.name) || '').trim(); }
 function mmSideText(rec, sk, sd){
@@ -13484,7 +13520,7 @@ function mmPanelHTML(){
 }
 function mmSettingsHTML(){
   const s = pSet();
-  return `<div class="form-field mm-set"><label>💬 계약자 마이모먼트 안내문 (카카오톡) <span class="hint">{계약자} {짝꿍코드} {접속코드} {하객할인: 한측 3만원 · 양측 · 통합 5만원} {주소} 가 자동으로 바뀌어요</span></label>
+  return `<div class="form-field mm-set"><label>💬 계약자 마이모먼트 안내문 (카카오톡) <span class="hint">{계약자} {짝꿍코드} {접속코드} {하객할인: 한측 3만원 · 양측 · 통합 5만원} {기준인원: 한측 250 · 양측 400 · 통합 150} {주소} 가 자동으로 바뀌어요</span></label>
       <textarea data-act="setText" data-key="mmTplContract" rows="8" style="font-size:12px;">${esc(s.mmTplContract || MM_TPL_CONTRACT)}</textarea>
       <button type="button" class="btn btn-sm btn-ghost" data-mm="reset" data-key="mmTplContract" style="margin-top:6px;">기본 문구로 되돌리기</button></div>
     <div class="form-field mm-set"><label>📝 운영 설정서 작성 요청 (예식 30일 전 · 카카오톡) <span class="hint">홈 「설정서 발송」 알림의 「안내문 공유」에 들어가요 · {계약자} {접속코드} {주소}</span></label>
@@ -13787,7 +13823,7 @@ document.addEventListener('click', async (ev)=>{
     if(!x || !x.payload || !sel || !sel.value){ showToast('적용할 계약을 선택해주세요'); return; }
     const r = applySettingsGuide(RECORDS, ensurePdb(), Object.assign({}, x.payload, {recordId: sel.value}), 'pdf');
     if(!r.ok){ alert(r.error); return; }
-    pDirty.referral.add('guide:'+r.recordId); pDirty.referral.add('card:'+r.recordId); GUIDE_IMPORT[i] = Object.assign({}, x, {ok:true, recordId:r.recordId, items:r.items});
+    pDirty.referral.add('guide:'+r.recordId); pDirty.referral.add('card:'+r.recordId); pDirty.referral.add('client:'+r.recordId); GUIDE_IMPORT[i] = Object.assign({}, x, {ok:true, recordId:r.recordId, items:r.items});
     renderCustomerTab(); showToast('예식 안내문을 적용했어요'); await savePartnerDb(); return;
   }
   if(a==='copySnippet'){ copyText(settingsGuideSnippet(), '연동 코드를 복사했어요 · 운영설정서 Apps Script에 붙여넣어 주세요'); return; }
