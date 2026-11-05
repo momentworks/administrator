@@ -2091,6 +2091,16 @@ tr.mw-new-row>td:first-child{box-shadow:inset 4px 0 0 #E0A526;}
 .lb-acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.btn.btn-kakao.done{opacity:.75}
 .dy-pre{border:1px dashed #E1D3C4;border-radius:10px;padding:8px 10px;background:#fff;margin-top:10px}.dy-pre summary{cursor:pointer;font-weight:800;font-size:13px}.dy-gh{font-weight:800;font-size:13px;margin-top:12px}
 .dy-den{border:1px solid #EADFC9;background:#FFFBF2;border-radius:8px;padding:8px 10px;margin-top:8px}.dy-den b{font-size:12.5px}.dy-den-in{display:flex;gap:12px;margin-top:6px;flex-wrap:wrap}.dy-den-in label{font-size:12.5px;font-weight:700}.dy-den-in input{width:70px;border:1px solid #E5DBD2;border-radius:6px;padding:5px 6px;font:inherit;text-align:right}.dy-den-msg{font-size:12px;font-weight:700;margin-top:5px;color:var(--slate,#6b6b6b)}.dy-den-msg.ok{color:#2F7D57}.dy-den-msg.bad{color:#B71C1C}.dy-acts.locked .btn{opacity:.4}
+#dayTabRoot .dy-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:14px 0 8px}.dy-q{flex:1;min-width:200px;max-width:340px;border:1px solid #E5DBD2;border-radius:999px;padding:6px 14px;font:inherit;font-size:13px}
+.dy-legend{font-size:12px;color:var(--slate,#6b6b6b);margin:0 0 10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dy-month{font-weight:800;font-size:14px;margin:16px 2px 6px}.dy-month small{font-weight:600;color:var(--slate,#6b6b6b);margin-left:4px}
+.dy-li{border:1px solid #EADFD2;border-radius:12px;background:#fff;margin-top:6px;overflow:hidden}.dy-li.is-today{border-color:#E7C76B;box-shadow:0 0 0 2px #FFF3CF}.dy-li.open{box-shadow:0 4px 14px rgba(36,31,34,.08)}
+.dy-lh{display:grid;grid-template-columns:96px 64px minmax(0,1fr) auto 16px;gap:12px;align-items:center;width:100%;border:0;background:none;padding:10px 14px;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.dy-ld{display:flex;flex-direction:column}.dy-ld b{font-size:13px}.dy-ld small{font-size:12px;color:var(--slate,#6b6b6b)}.dy-lt{display:flex;flex-direction:column;min-width:0}.dy-lt b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dy-lt small{font-size:12px;color:var(--slate,#6b6b6b);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dy-lp{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}.dy-pg{display:flex;align-items:center;gap:3px}.dy-pg em{font-style:normal;font-size:11px;color:var(--slate,#6b6b6b);margin-right:2px}
+.dy-dot{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;font-style:normal;font-size:10.5px;font-weight:800;background:#F1ECE6;color:#A69A90}.dy-dot.on{background:#2F7D57;color:#fff}
+.dy-li > .dy-body{border-top:1px solid #F0E8E0}
+@media (max-width:900px){.dy-lh{grid-template-columns:80px minmax(0,1fr) 16px}.dy-lh .badge{display:none}.dy-lp{grid-column:1/-1;justify-content:flex-start}}
 </style>
 </head>
 <body>
@@ -2154,6 +2164,7 @@ tr.mw-new-row>td:first-child{box-shadow:inset 4px 0 0 #E0A526;}
   <button data-tab="held">예식완료</button>
   <button data-tab="both">양측계약</button>
   <button data-tab="customers">💍 고객페이지</button>
+  <button data-tab="dayguide">🎊 예식 당일 안내</button>
   <button data-tab="finance">📊 재무제표</button>
 </div>
 
@@ -2448,6 +2459,12 @@ tr.mw-new-row>td:first-child{box-shadow:inset 4px 0 0 #E0A526;}
     <div class="section-head"><div><h2 class="section-title">고객 전용 페이지 관리</h2>
       <p class="section-desc">계약자별 접속코드 발급 · 계약서 · 유튜브 라이브 · 실시간 축의 현황 링크를 한 곳에서 관리하고, 고객 화면을 미리 볼 수 있어요</p></div></div>
     <div id="custTabRoot"></div>
+  </section>
+
+  <section class="section" id="tab-dayguide">
+    <div class="section-head"><div><h2 class="section-title">🎊 예식 당일 안내</h2>
+      <p class="section-desc">예정된 모든 예식의 사전 안내(마이모먼트 · 설정서 요청 · 상대방)와 당일 단계별 안내(오전 인사 → 사진 → 운영 결과 → 인계 → 정산)를 한 곳에서 카카오톡 · 문자로 보내고 진행 현황을 관리해요</p></div></div>
+    <div id="dayTabRoot"></div>
   </section>
 
   <!-- FINANCE (재무제표) -->
@@ -3861,6 +3878,7 @@ function renderAll(){
   if(typeof renderFinance==='function') renderFinance();
   if(typeof renderSettlePicker==='function') renderSettlePicker();
   if(typeof renderCustomerTab==='function') renderCustomerTab();
+  if(typeof renderDayTab==='function') renderDayTab();
 }
 
 function esc(s){ if(s===undefined||s===null) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -13477,7 +13495,7 @@ function mmSettingsHTML(){
       <button type="button" class="btn btn-sm btn-ghost" data-mm="reset" data-key="mmTplSide" style="margin-top:6px;">기본 문구로 되돌리기</button></div>`;
 }
 document.addEventListener('click', async (ev)=>{
-  const el = ev.target.closest('#custTabRoot [data-mm], #cpAdminBox [data-mm]'); if(!el || el.type==='checkbox') return;
+  const el = ev.target.closest('#custTabRoot [data-mm], #cpAdminBox [data-mm], #dayTabRoot [data-mm]'); if(!el || el.type==='checkbox') return;
   const a = el.dataset.mm, rec = el.dataset.id ? recordById(el.dataset.id) : null;
   if(a==='kakao' && rec){ mmShare(mmContractText(rec, clientOf(rec)), `${rec.clientName}님 마이모먼트 안내문을 복사했어요 · 카카오톡에 붙여넣어 보내주세요`); return; }
   if(a==='kdone' && rec){ mmMark('mmnotice:'+rec.id, {at: new Date().toISOString(), by:'admin'}); renderCustomerTab(); showToast('안내 완료로 표시했어요'); return; }
@@ -13488,7 +13506,7 @@ document.addEventListener('click', async (ev)=>{
     mmMark(k, Object.assign({}, prev, {side: el.dataset.sk, status:'done', reason:'', doneAt: new Date().toISOString()}));
     renderCustomerTab(); showToast('보냄으로 표시했어요'); return;
   }
-  if(a==='reset'){ if(!confirm('기본 문구로 되돌릴까요?')) return; delete pSet()[el.dataset.key]; pDirty.settings = true; await savePartnerDb(); renderCustomerTab(); showToast('기본 문구로 되돌렸어요'); return; }
+  if(a==='reset'){ if(!confirm('기본 문구로 되돌릴까요?')) return; delete pSet()[el.dataset.key]; pDirty.settings = true; await savePartnerDb(); renderCustomerTab(); renderDayTab(); showToast('기본 문구로 되돌렸어요'); return; }
 });
 
 /* =========================================================
@@ -13497,7 +13515,7 @@ document.addEventListener('click', async (ev)=>{
 ========================================================= */
 const DAY_STEPS = [["morning", "1", "오전 인사", ""], ["photos", "2", "현금 · 화환 사진", "사진을 함께 보내는 단계예요"], ["result", "3", "축의대 운영 결과보고", ""], ["handover", "4", "인계 완료 보고", ""], ["settle", "5", "정산 안내", ""]];
 const DAY_TPL_DEFAULT = {"result_denom": ["금일 축의대 운영 결과를 보고드립니다. 😊", "", "[축의대 운영 결과{측}]", "· 접수금액: {접수금액}원", "· 접수하객: {접수하객}명", "· (대인)식권사용/잔량: {대인사용}장/{대인잔량}장", "· (소인)식권사용/잔량: {소인사용}장/{소인잔량}장", "", "[권종별 집계 현황]", "· 5만원권: {오만원권}장", "· 1만원권: {만원권}장"].join('\n'), "morning": "안녕하세요. 😊\n드디어 두 분의 예식 날이 다가왔습니다. 결혼을 진심으로 축하드립니다.🎉\n\n예식 70분 전에 도착 후 식권을 전달받고 축의 접수대를 오픈할 예정입니다.\n실시간 라이브 영상과 실시간 축의 현황은 <마이모먼트>에서 확인하실 수 있습니다.\n\n📌 마이모먼트\n{주소}", "photos": "현재 접수된 축의금과 화환 사진 공유드립니다. 😊", "result": "금일 축의대 운영 결과를 보고드립니다. 😊\n\n[축의대 운영 결과{측}]\n· 접수금액: {접수금액}원\n· 접수하객: {접수하객}명\n· (대인)식권사용/잔량: {대인사용}장/{대인잔량}장\n· (소인)식권사용/잔량: {소인사용}장/{소인잔량}장\n\n* PDF 파일 및 엑셀 파일은 마이모먼트에서도 다운로드 가능합니다.\n✅ 다운로드 경로: 마이모먼트 > 💌 실시간 축의 현황 > 📱 여기서 바로보기 > 하단의 🔑 실시간 축의현황 확인코드 복사 & 붙여넣기 > 접속하기 > 오른쪽 하단 PDF로 저장 또는 엑셀로 저장\n\n✅ PDF로 저장하실 때에는 인쇄옵션(설정)에서 '배경그래픽 포함'을 꼭 선택 부탁드립니다.", "handover": "축의금은 사전에 지정해주신 인수자분({인수자})께 전달드렸습니다.\n분홍색 봉투에 챙겨드린 휴족시간이 피로회복에 조금이나마 도움되면 좋겠습니다. 😊\n\n오늘 정말 고생많으셨습니다.\n다시 한번 두분의 결혼을 진심으로 축하드립니다.🎉", "settle": "💌 모먼트웍스 잔금 정산 안내\n\n모먼트웍스 축의대 대행 잔금 정산을 안내드립니다.💛\n\n정산내역서를 확인하신 후,\n내일까지 잔금 정산을 부탁드립니다.\n\n✔️ 잔금: {잔금}원\n✔️ 입금 계좌\n- 카카오뱅크 3333-37-9293260\n- 예금주: 김현관(모먼트웍스)\n✔️ 현금영수증(계약금+잔금)은 계약자분의 핸드폰번호로 발행됩니다. 다른 분 번호로 발행을 원하신다면 핸드폰번호를 말씀 부탁드립니다.\n✔️ 축의내역 중 성함/금액 등 수정이 필요하신 사항은 언제든지 편하게 말씀해주시면 수정본 송부드리겠습니다."};
-const DAY_ST = {date:null, open:null, data:{}, err:{}, loading:{}, edit:{}, den:{}};
+const DAY_ST = {filter:'all', q:'', open:null, data:{}, err:{}, loading:{}, edit:{}, den:{}};
 function denCheck(st, v){   // 권종별 검산: 5만원권 × 장수 + 1만원권 × 장수 = 내역정리 총액
   const a = String(v && v.a!=null ? v.a : '').replace(/[^0-9]/g,''), b = String(v && v.b!=null ? v.b : '').replace(/[^0-9]/g,'');
   const total = st.denom ? st.denom.total : null, sum = (Number(a)||0)*50000 + (Number(b)||0)*10000;
@@ -13509,22 +13527,58 @@ function denCheck(st, v){   // 권종별 검산: 5만원권 × 장수 + 1만원�
     : `❌ 합계 ${won(sum)}원 · 총액 ${won(total)}원과 ${won(Math.abs(sum-total))}원 ${sum>total?'많아요':'모자라요'}`;
   return {a, b, ok, msg, fill: t=> String(t||'').replace(/\{오만원권\}/g, a || '__').replace(/\{만원권\}/g, b || '__')};
 }
+function renderDayTab(){
+  const sec = document.getElementById('tab-dayguide'), root = document.getElementById('dayTabRoot');
+  if(!sec || !root || !sec.classList.contains('active') || !PDB) return;
+  if(root.contains(document.activeElement) && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;   // 입력 중에는 다시 그리지 않음
+  root.innerHTML = dayPanelHTML();
+}
+function dayRerender(){ const a = document.activeElement; if(a && document.getElementById('dayTabRoot') && document.getElementById('dayTabRoot').contains(a) && a.blur && a.tagName!=='INPUT') a.blur(); renderDayTab(); }
 function daySentA(rid){ try{ return JSON.parse(localStorage.getItem('mw_day_'+rid)||'{}'); }catch(_){ return {}; } }
 function dayMarkA(rid, key, how){ try{ const s = daySentA(rid); s[key] = {at: Date.now(), how}; localStorage.setItem('mw_day_'+rid, JSON.stringify(s)); }catch(_){} }
 function dayTextA(rid, key){ const k = rid+':'+key; const st = ((DAY_ST.data[rid]||{}).steps||[]).find(x=>x.key===key); const t = DAY_ST.edit[k]!==undefined ? DAY_ST.edit[k] : (st ? st.text : ''); return (st && st.denom) ? denCheck(st, DAY_ST.den[k]).fill(t) : t; }
 async function dayLoadA(rid, force){
   if(DAY_ST.loading[rid] || (DAY_ST.data[rid] && !force)) return;
-  if(!SERVER_URL){ DAY_ST.err[rid] = '서버 주소가 없어요'; renderCustomerTab(); return; }
-  DAY_ST.loading[rid] = true; DAY_ST.err[rid] = ''; renderCustomerTab();
+  if(!SERVER_URL){ DAY_ST.err[rid] = '서버 주소가 없어요'; dayRerender(); return; }
+  DAY_ST.loading[rid] = true; DAY_ST.err[rid] = ''; dayRerender();
   try{ const r = await (await fetch(apiUrl({action:'dayReport', rid}), {method:'GET'})).json();
     if(!r || !r.ok) throw new Error((r && r.error) || '불러오지 못했어요');
     DAY_ST.data[rid] = r; Object.keys(DAY_ST.edit).forEach(k=>{ if(k.indexOf(rid+':')===0) delete DAY_ST.edit[k]; }); }
   catch(err){ DAY_ST.err[rid] = (err.message||'불러오지 못했어요') + (/dayReport|action/i.test(err.message||'')? '' : ' · 최신 서버 스크립트로 배포됐는지 확인해주세요'); }
-  finally{ DAY_ST.loading[rid] = false; renderCustomerTab(); }
+  finally{ DAY_ST.loading[rid] = false; dayRerender(); }
+}
+const DAY_FILTERS = [['all','예정 전체'],['today','오늘'],['week','7일 이내'],['month','30일 이내'],['todo','안내 남은 예식'],['past','지난 예식 (30일)']];
+/* 단계별 보냄 표시 (이 기기 기록 + 서버 기록: 계약자 안내 완료 · 설정서 발송 · 상대방 문자) */
+function dayProgress(r){
+  const sent = daySentA(r.id), rp = (ensurePdb().referralPay||{}), two = r.productType==='양측' || r.productType==='통합';
+  const has = re=> Object.keys(sent).some(k=> re.test(k));
+  const pre = [
+    ['①', '마이모먼트', has(/^pre_contract$/) || !!rp['mmnotice:'+r.id]],
+    ['②', '설정서 요청', has(/^pre_settings$/) || !!r.settingsSentNotified],
+  ];
+  if(two) pre.push(['③', '상대방', has(/^pre_side$/) || /^(done|sent)$/.test(((rp['mmsms:'+r.id])||{}).status||'')]);
+  const day = [['1','오전 인사',has(/^morning$/)],['2','사진',has(/^photos$/)],['3','결과보고',has(/^result/)],['4','인계',has(/^handover$/)],['5','정산',has(/^settle$/)]];
+  return {pre, day, preN: pre.filter(x=>x[2]).length, dayN: day.filter(x=>x[2]).length};
+}
+function dayListRows(){
+  const t = todayStr(), f = DAY_ST.filter || 'all', q = String(DAY_ST.q||'').trim().replace(/\s+/g,'').toLowerCase();
+  const end = n=> addDaysStr(t, n);
+  let list = activeContracts().filter(r=> r.weddingDate);
+  if(f==='past') list = list.filter(r=> r.weddingDate < t && r.weddingDate >= end(-30));
+  else {
+    list = list.filter(r=> r.weddingDate >= t);
+    if(f==='today') list = list.filter(r=> r.weddingDate===t);
+    if(f==='week') list = list.filter(r=> r.weddingDate <= end(6));
+    if(f==='month') list = list.filter(r=> r.weddingDate <= end(29));
+    if(f==='todo') list = list.filter(r=>{ const g = dayProgress(r); return g.preN < g.pre.length || (r.weddingDate===t && g.dayN < g.day.length); });
+  }
+  if(q) list = list.filter(r=> [r.clientName, coupleName(r), r.venueName, r.hallName, r.contractCode].join(' ').replace(/\s+/g,'').toLowerCase().indexOf(q)>=0);
+  list.sort((a,b)=> String(a.weddingDate).localeCompare(String(b.weddingDate)) || String(a.weddingTime||'').localeCompare(String(b.weddingTime||'')));
+  if(f==='past') list.reverse();
+  return list;
 }
 function dayPanelHTML(){
-  const t = todayStr(); if(!DAY_ST.date) DAY_ST.date = t;
-  const list = activeContracts().filter(r=> r.weddingDate===DAY_ST.date).sort((a,b)=> String(a.weddingTime||'').localeCompare(String(b.weddingTime||'')));
+  const t = todayStr();
   const card = r=>{
     const open = DAY_ST.open===r.id, d = DAY_ST.data[r.id], sent = daySentA(r.id), n = Object.keys(sent).length;
     const head = `<button class="dy-head" data-dy="open" data-id="${r.id}"><b class="dy-time">${esc(r.weddingTime||'--:--')}</b><span class="dy-tt"><b>${esc((d&&d.couple) || coupleName(r))}</b><small>${esc(r.venueName||'')}${r.hallName? ' · '+esc(r.hallName):''} · ${esc(r.productType||'')}</small></span>${n? `<span class="dy-prog">✓ ${n}단계</span>`:''}<span class="dy-arr">${open?'▲':'▼'}</span></button>`;
@@ -13551,10 +13605,38 @@ function dayPanelHTML(){
     }
     return `<div class="dy-card open">${head}<div class="dy-body">${body}</div></div>`;
   };
-  const chip = (d,l)=> `<button class="dy-chip ${DAY_ST.date===d?'on':''}" data-dy="date" data-v="${d}">${l}</button>`;
-  return `<div class="mm-box dy-panel"><div class="mm-h"><b>🎊 예식 당일 안내</b><span>오전 인사부터 정산 안내까지 단계별로 신랑 · 신부님께 카카오톡 · 문자로 보내요 · 결과보고는 축의대 내역정리 집계가 자동으로 들어가요</span></div>
-    <div class="dy-bar">${chip(addDaysStr(t,-1),'어제')}${chip(t,'오늘')}${chip(addDaysStr(t,1),'내일')}<input type="date" data-dy="pick" value="${esc(DAY_ST.date)}"><span class="dy-cnt">${list.length}건</span></div>
-    ${list.length? list.map(card).join('') : `<div class="dy-wait">${esc(DAY_ST.date)} 예식이 없어요</div>`}</div>`;
+  const rows = dayListRows(), up = activeContracts().filter(r=> r.weddingDate && r.weddingDate >= t);
+  const todayN = up.filter(r=> r.weddingDate===t).length, weekN = up.filter(r=> r.weddingDate <= addDaysStr(t,6)).length;
+  const preLeft = up.filter(r=>{ const g = dayProgress(r); return g.preN < g.pre.length; }).length;
+  const dots = (arr)=> arr.map(([no,l,done])=> `<i class="dy-dot ${done?'on':''}" title="${esc(no+' '+l)}${done?' · 보냄':''}">${esc(no)}</i>`).join('');
+  const row = r=>{
+    const dd = ddayInfo(r.weddingDate), g = dayProgress(r), open = DAY_ST.open===r.id;
+    return `<div class="dy-li ${open?'open':''} ${r.weddingDate===t?'is-today':''}" id="dy-${r.id}">
+      <button class="dy-lh" data-dy="open" data-id="${r.id}">
+        <span class="dy-ld"><b>${esc(fmtDate(r.weddingDate))}</b><small>${esc(r.weddingTime||'--:--')}</small></span>
+        <span class="badge ${dd && dd.diff===0 ? 'badge-urgent' : dd && dd.diff>0 && dd.diff<=7 ? 'badge-soon' : 'badge-normal'}">${dd? esc(dd.label) : ''}</span>
+        <span class="dy-lt"><b>${esc(coupleName(r))}</b><small>${esc(r.venueName||'')}${r.hallName? ' · '+esc(r.hallName):''} · ${esc(r.productType||'')}</small></span>
+        <span class="dy-lp"><span class="dy-pg"><em>사전</em>${dots(g.pre)}</span><span class="dy-pg"><em>당일</em>${dots(g.day)}</span></span>
+        <span class="dy-arr">${open?'▲':'▼'}</span>
+      </button>
+      ${open? card(r).replace(/^<div class="dy-card open">[\s\S]*?<div class="dy-body">/, '<div class="dy-body">').replace(/<\/div>$/, '') : ''}
+    </div>`;
+  };
+  let body = '', last = '';
+  rows.forEach(r=>{ const m = String(r.weddingDate).slice(0,7); if(m!==last){ last = m; body += `<div class="dy-month">${Number(m.slice(0,4))}년 ${Number(m.slice(5,7))}월 <small>${rows.filter(x=> String(x.weddingDate).slice(0,7)===m).length}건</small></div>`; } body += row(r); });
+  return `<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi-card accent"><div class="kpi-label">예정 예식</div><div class="kpi-value">${up.length}건</div><div class="kpi-sub">오늘 이후 전체</div></div>
+      <div class="kpi-card"><div class="kpi-label">오늘 예식</div><div class="kpi-value">${todayN}건</div><div class="kpi-sub">당일 안내 5단계</div></div>
+      <div class="kpi-card"><div class="kpi-label">7일 이내</div><div class="kpi-value">${weekN}건</div><div class="kpi-sub">이번 주 준비</div></div>
+      <div class="kpi-card ${preLeft?'warn':''}"><div class="kpi-label">사전 안내 남음</div><div class="kpi-value">${preLeft}건</div><div class="kpi-sub">마이모먼트 · 설정서 · 상대방</div></div>
+    </div>
+    <div class="dy-bar">
+      ${DAY_FILTERS.map(([k,l])=> `<button class="dy-chip ${(DAY_ST.filter||'all')===k?'on':''}" data-dy="filter" data-v="${k}">${l}</button>`).join('')}
+      <input class="dy-q" data-dy="q" value="${esc(DAY_ST.q||'')}" placeholder="계약자 · 예식장 · 계약코드 검색"><span class="dy-cnt">${rows.length}건</span>
+    </div>
+    <div class="dy-legend">진행 표시: <i class="dy-dot on">1</i> 보낸 단계 · <i class="dy-dot">1</i> 남은 단계 <span class="hint">(카톡 · 문자 · 복사 버튼을 누르면 표시 · 계약자 안내 완료 · 설정서 발송 · 상대방 문자 기록도 반영)</span></div>
+    <div class="dy-list">${body || '<div class="dy-wait" style="padding:24px;text-align:center;">해당하는 예식이 없어요</div>'}</div>
+    <div class="p-panel" style="margin-top:18px;"><h3>✏️ 안내 문구</h3><div class="form-grid" style="grid-template-columns:1fr;gap:8px;">${daySettingsHTML()}</div></div>`;
 }
 function addDaysStr(s, n){ const d = new Date(s+'T00:00:00'); d.setDate(d.getDate()+n); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function daySettingsHTML(){
@@ -13568,20 +13650,20 @@ function daySettingsHTML(){
       <button type="button" class="btn btn-sm btn-ghost" data-mm="reset" data-key="dayTpl_result_denom" style="margin-top:6px;">기본 문구로 되돌리기</button></details></div>`;
 }
 document.addEventListener('click', async (ev)=>{
-  const el = ev.target.closest('#custTabRoot [data-dy]'); if(!el || el.tagName==='INPUT') return;
+  const el = ev.target.closest('#dayTabRoot [data-dy]'); if(!el || el.tagName==='INPUT') return;
   const a = el.dataset.dy, rid = el.dataset.id, key = el.dataset.k;
-  if(a==='date'){ DAY_ST.date = el.dataset.v; DAY_ST.open = null; renderCustomerTab(); return; }
-  if(a==='open'){ DAY_ST.open = DAY_ST.open===rid ? null : rid; renderCustomerTab(); if(DAY_ST.open) dayLoadA(rid); return; }
+  if(a==='filter'){ DAY_ST.filter = el.dataset.v; DAY_ST.open = null; dayRerender(); return; }
+  if(a==='open'){ DAY_ST.open = DAY_ST.open===rid ? null : rid; dayRerender(); if(DAY_ST.open){ dayLoadA(rid); setTimeout(()=>{ const li = document.getElementById('dy-'+rid); if(li && li.getBoundingClientRect().top < 60) li.scrollIntoView({block:'start', behavior:'smooth'}); }, 30); } return; }
   if(a==='reload'){ dayLoadA(rid, true); return; }
   const text = dayTextA(rid, key);
   const dst = ((DAY_ST.data[rid]||{}).steps||[]).find(x=> x.key===key);
   if(dst && dst.denom && /^(copy|kakao|sms)$/.test(a) && !denCheck(dst, DAY_ST.den[rid+':'+key]).ok){ showToast('권종별 장수를 입력하고 총액과 검산이 맞아야 보낼 수 있어요'); return; }
-  if(a==='copy'){ copyText(text, '문구를 복사했어요'); dayMarkA(rid, key, 'copy'); renderCustomerTab(); return; }
-  if(a==='kakao'){ mmShare(text, '문구를 복사했어요 · 카카오톡에 붙여넣어 보내주세요'); dayMarkA(rid, key, 'kakao'); renderCustomerTab(); return; }
+  if(a==='copy'){ copyText(text, '문구를 복사했어요'); dayMarkA(rid, key, 'copy'); dayRerender(); return; }
+  if(a==='kakao'){ mmShare(text, '문구를 복사했어요 · 카카오톡에 붙여넣어 보내주세요'); dayMarkA(rid, key, 'kakao'); dayRerender(); return; }
   if(a==='sms'){ const p = ((DAY_ST.data[rid]||{}).people||[])[Number(el.dataset.i)] || {};
     copyText(text, mmIsPhone() ? '문자 앱을 열어요' : '문구를 복사했어요 · 휴대폰에서 누르면 문자 앱이 바로 열려요');
     if(mmIsPhone()) location.href = mmSmsHref(p.phone, text);
-    dayMarkA(rid, key, 'sms'); renderCustomerTab(); return; }
+    dayMarkA(rid, key, 'sms'); dayRerender(); return; }
 });
 document.addEventListener('input', ev=>{ const t = ev.target; if(t && t.dataset && t.dataset.dyt) DAY_ST.edit[t.dataset.dyt] = t.value;
   if(t && t.dataset && t.dataset.dyden){
@@ -13593,7 +13675,7 @@ document.addEventListener('input', ev=>{ const t = ev.target; if(t && t.dataset 
     const ta = q('textarea[data-dyt="%"]'); if(ta) ta.value = dayTextA(rid, key);
     const ac = q('[data-dyacts="%"]'); if(ac) ac.classList.toggle('locked', !c.ok);
   } });
-document.addEventListener('change', ev=>{ const t = ev.target.closest && ev.target.closest('#custTabRoot [data-dy="pick"]'); if(t && t.value){ DAY_ST.date = t.value; DAY_ST.open = null; renderCustomerTab(); } });
+document.addEventListener('input', ev=>{ const t = ev.target.closest && ev.target.closest('#dayTabRoot [data-dy="q"]'); if(!t) return; DAY_ST.q = t.value; clearTimeout(DAY_ST._qt); DAY_ST._qt = setTimeout(()=>{ const pos = t.selectionStart; const root = document.getElementById('dayTabRoot'); root.innerHTML = dayPanelHTML(); const n = root.querySelector('[data-dy="q"]'); if(n){ n.focus(); try{ n.setSelectionRange(pos, pos); }catch(e){} } }, 250); });
 function customerSettingsHTML(){
   const s = pSet();
   const n = allClientCodes().length;
@@ -13609,7 +13691,7 @@ function customerSettingsHTML(){
       <div class="form-field"><label>고객 문의 카카오톡 <span class="hint">비우면 모먼트웍스 공식 채널</span></label><input data-act="setText" data-key="customerKakaoUrl" value="${esc(s.customerKakaoUrl||'')}" placeholder="https://pf.kakao.com/_FbIfX/chat"></div>
       <div class="form-field"><label>모든 고객에게 보이는 안내문</label><textarea data-act="setText" data-key="customerNotice" rows="3" placeholder="예: 예식 1주일 전까지 운영 설정서를 제출해주세요.">${esc(s.customerNotice||'')}</textarea></div>
       ${mmSettingsHTML()}
-      ${daySettingsHTML()}
+      <div class="form-field"><label>🎊 예식 당일 안내 문구</label><div class="hint">상단 「🎊 예식 당일 안내」 메뉴 맨 아래에서 고칠 수 있어요</div></div>
       <div class="form-field"><label>📋 운영설정서 → 예식 안내문 연동 코드 <span class="hint">운영설정서 Apps Script에 붙여넣으면 제출 즉시 고객페이지에 안내문이 생겨요</span></label>
         <textarea readonly rows="6" class="mono" id="cpGuideSnippet" style="font-size:11px;">${esc(settingsGuideSnippet())}</textarea>
         <button type="button" class="btn btn-sm" data-cu="copySnippet" style="margin-top:6px;">연동 코드 복사</button></div>
@@ -13661,7 +13743,6 @@ function renderCustomerTab(){
       <span class="cu-count">${rows.length}건</span>
       ${upc.length-upIssued.length ? `<button class="btn btn-primary btn-sm" data-cu="bulk">예정 예식 ${upc.length-upIssued.length}건 코드 일괄 발급</button>`:''}
     </div>
-    ${dayPanelHTML()}
     ${mmPanelHTML()}
     ${guideImportHTML()}
     <div class="table-wrap"><div style="overflow-x:auto;"><table class="cu-table">
@@ -13758,7 +13839,7 @@ async function runGuideImport(list){
 document.addEventListener('change', async (ev)=>{
   const ac = ev.target.closest('#custTabRoot [data-act="autoCode"]');
   if(ac){ pSet().autoClientCode = ac.checked; pDirty.settings = true; showToast(ac.checked? '신규 계약 자동 발급을 켰어요' : '자동 발급을 껐어요'); await savePartnerDb(); if(ac.checked && autoIssueClientCodes()) renderCustomerTab(); return; }
-  const st = ev.target.closest('#custTabRoot [data-act="setText"]');
+  const st = ev.target.closest('#custTabRoot [data-act="setText"], #dayTabRoot [data-act="setText"]');
   if(st){ pSet()[st.dataset.key] = st.value.trim(); pDirty.settings = true; showToast('고객 페이지 설정을 저장했어요'); await savePartnerDb(); return; }
   const el = ev.target.closest('#custTabRoot [data-cu]'); if(!el) return;
   if(el.dataset.cu==='gimport'){ const fl = [...(el.files||[])]; el.value = ''; await runGuideImport(fl); return; }
