@@ -7061,8 +7061,13 @@ const PartnerPortal = (function(){
     }
     if(act==='daySms'){
       const p = ((dayData[rid]||{}).people||[])[Number(el.dataset.i)] || {};
-      copyPlain(text); dayMark(rid, key, 'sms');
-      if(isPhoneUA()){ location.href = smsHrefTo(p.phone, text); }
+      let st2 = text;   // 받는 분(신랑 · 신부)의 마이모먼트 접속코드로
+      if(dst && dst.texts && p.side){
+        if(dayEdit[rid+':'+key]===undefined && !dst.denom) st2 = dst.texts[p.side] || text;
+        else if(dst.codeAll && dst.codes && dst.codes[p.side] && dst.codeAll!==dst.codes[p.side]) st2 = text.split(dst.codeAll).join(dst.codes[p.side]);
+      }
+      copyPlain(st2); dayMark(rid, key, 'sms');
+      if(isPhoneUA()){ location.href = smsHrefTo(p.phone, st2); }
       else toast('문구를 복사했어요 · 휴대폰에서 누르면 문자 앱이 바로 열려요');
       render(); return true;
     }
@@ -11159,7 +11164,7 @@ function 마이모먼트문자_지금실행() {
 var DAY_STEPS = [["morning", "1", "오전 인사", ""], ["photos", "2", "현금 · 화환 사진", "사진을 함께 보내는 단계예요"], ["result", "3", "축의대 운영 결과보고", ""], ["handover", "4", "인계 완료 보고", ""], ["settle", "5", "정산 안내", ""]];
 var DAY_TPL_DEFAULT = {
   result_denom: ["금일 축의대 운영 결과를 보고드립니다. 😊", "", "[축의대 운영 결과{측}]", "· 접수금액: {접수금액}원", "· 접수하객: {접수하객}명", "· (대인)식권사용/잔량: {대인사용}장/{대인잔량}장", "· (소인)식권사용/잔량: {소인사용}장/{소인잔량}장", "", "[권종별 집계 현황]", "· 5만원권: {오만원권}장", "· 1만원권: {만원권}장"].join('\n'),
-  morning: ["안녕하세요. 😊", "드디어 두 분의 예식 날이 다가왔습니다. 결혼을 진심으로 축하드립니다.🎉", "", "예식 70분 전에 도착 후 식권을 전달받고 축의 접수대를 오픈할 예정입니다.", "실시간 라이브 영상과 실시간 축의 현황은 <마이모먼트>에서 확인하실 수 있습니다.", "", "📌 마이모먼트", "{주소}"].join('\n'),
+  morning: ["안녕하세요. 😊", "드디어 두 분의 예식 날이 다가왔습니다. 결혼을 진심으로 축하드립니다.🎉", "", "예식 70분 전에 도착 후 식권을 전달받고 축의 접수대를 오픈할 예정입니다.", "실시간 라이브 영상과 실시간 축의 현황은 <마이모먼트>에서 확인하실 수 있습니다.", "", "📌 마이모먼트", "{주소}", "- 접속코드: {접속코드}"].join('\n'),
   photos: ["현재 접수된 축의금과 화환 사진 공유드립니다. 😊"].join('\n'),
   result: ["금일 축의대 운영 결과를 보고드립니다. 😊", "", "[축의대 운영 결과{측}]", "· 접수금액: {접수금액}원", "· 접수하객: {접수하객}명", "· (대인)식권사용/잔량: {대인사용}장/{대인잔량}장", "· (소인)식권사용/잔량: {소인사용}장/{소인잔량}장", "", "* PDF 파일 및 엑셀 파일은 마이모먼트에서도 다운로드 가능합니다.", "✅ 다운로드 경로: 마이모먼트 > 💌 실시간 축의 현황 > 📱 여기서 바로보기 > 하단의 🔑 실시간 축의현황 확인코드 복사 & 붙여넣기 > 접속하기 > 오른쪽 하단 PDF로 저장 또는 엑셀로 저장", "", "✅ PDF로 저장하실 때에는 인쇄옵션(설정)에서 '배경그래픽 포함'을 꼭 선택 부탁드립니다."].join('\n'),
   handover: ["축의금은 사전에 지정해주신 인수자분({인수자})께 전달드렸습니다.", "분홍색 봉투에 챙겨드린 휴족시간이 피로회복에 조금이나마 도움되면 좋겠습니다. 😊", "", "오늘 정말 고생많으셨습니다.", "다시 한번 두분의 결혼을 진심으로 축하드립니다.🎉"].join('\n'),
@@ -11267,10 +11272,23 @@ function dayReport_(records, db, rid, todayStr) {
   var rp = db.referralPay || {}, c = rp['client:' + r.id] || {}, g = rp['guide:' + r.id] || {}, a = rp['arrange:' + r.id] || {};
   var people = dayRecipients_(rp, r, c, g);
   var base = { 주소: MM_PAGE_URL, 신랑: g.groomName || '', 신부: g.brideName || '', 계약자: r.clientName || '' };
+  // 마이모먼트 접속코드: 신랑 · 신부 각자의 코드 (주계약자 = 고객 접속코드 · 상대방 = 양측/통합 추가 코드)
+  var mainSk0 = (people.filter(function (x) { return x.main; })[0] || {}).side || 'bride';
+  var sideCode = function (sk) { var sd = (c.sides || {})[sk] || {}; if (sd.code && sd.active !== false) return String(sd.code); return sk === mainSk0 ? String(c.code || '') : ''; };
+  var codes = { groom: sideCode('groom'), bride: sideCode('bride') };
+  var codeAll = (codes.groom && codes.bride && codes.groom !== codes.bride) ? '신랑 ' + codes.groom + ' · 신부 ' + codes.bride : (codes.groom || codes.bride || c.code || '');
+  base.접속코드 = codeAll;
   var mk = function (st, extra, m, warn, tk) {
     var mm = {}; Object.keys(base).forEach(function (k) { mm[k] = base[k]; }); Object.keys(m || {}).forEach(function (k) { mm[k] = m[k]; });
-    return { group: 'day', to: ['groom', 'bride'], key: st[0] + (extra ? '_' + extra : ''), step: st[0], no: st[1], label: st[2] + (extra ? ' · ' + (extra === 'groom' ? '신랑측' : '신부측') : ''), hint: st[3] || '',
-      text: dayFill_(dayTpl_(db, tk || st[0]), mm), warn: warn || '' };
+    var tpl = dayTpl_(db, tk || st[0]), o = { group: 'day', to: ['groom', 'bride'], key: st[0] + (extra ? '_' + extra : ''), step: st[0], no: st[1], label: st[2] + (extra ? ' · ' + (extra === 'groom' ? '신랑측' : '신부측') : ''), hint: st[3] || '',
+      text: dayFill_(tpl, mm), warn: warn || '' };
+    if (/\{접속코드\}/.test(tpl)) {   // 받는 사람별 문구: 문자는 그 사람의 접속코드로
+      o.texts = {}; ['groom', 'bride'].forEach(function (sk) { var m2 = {}; Object.keys(mm).forEach(function (k) { m2[k] = mm[k]; }); m2.접속코드 = codes[sk] || codeAll; o.texts[sk] = dayFill_(tpl, m2); });
+      o.codeAll = codeAll; o.codes = codes;
+      if (!codes.groom && !codes.bride && !c.code) o.warn = (o.warn ? o.warn + ' · ' : '') + '마이모먼트 접속코드가 아직 없어요 (고객페이지에서 발급)';
+      else if (r.productType !== '한측' && (!codes.groom || !codes.bride)) o.warn = (o.warn ? o.warn + ' · ' : '') + (!codes.groom ? '신랑' : '신부') + '측 접속코드가 아직 없어 주계약자 코드로 넣었어요';
+    }
+    return o;
   };
   var steps = [];
   // 사전 안내: 계약자 마이모먼트 안내 · 설정서 작성 요청 · (양측 · 통합) 상대방 마이모먼트 안내
@@ -14204,7 +14222,7 @@ document.addEventListener('click', async (ev)=>{
    문구는 서버(dayReport)가 축의 집계 · 인수자 · 잔금을 채워서 만들어 줌 → 카카오톡 공유 / 문자
 ========================================================= */
 const DAY_STEPS = [["morning", "1", "오전 인사", ""], ["photos", "2", "현금 · 화환 사진", "사진을 함께 보내는 단계예요"], ["result", "3", "축의대 운영 결과보고", ""], ["handover", "4", "인계 완료 보고", ""], ["settle", "5", "정산 안내", ""]];
-const DAY_TPL_DEFAULT = {"result_denom": ["금일 축의대 운영 결과를 보고드립니다. 😊", "", "[축의대 운영 결과{측}]", "· 접수금액: {접수금액}원", "· 접수하객: {접수하객}명", "· (대인)식권사용/잔량: {대인사용}장/{대인잔량}장", "· (소인)식권사용/잔량: {소인사용}장/{소인잔량}장", "", "[권종별 집계 현황]", "· 5만원권: {오만원권}장", "· 1만원권: {만원권}장"].join('\n'), "morning": "안녕하세요. 😊\n드디어 두 분의 예식 날이 다가왔습니다. 결혼을 진심으로 축하드립니다.🎉\n\n예식 70분 전에 도착 후 식권을 전달받고 축의 접수대를 오픈할 예정입니다.\n실시간 라이브 영상과 실시간 축의 현황은 <마이모먼트>에서 확인하실 수 있습니다.\n\n📌 마이모먼트\n{주소}", "photos": "현재 접수된 축의금과 화환 사진 공유드립니다. 😊", "result": "금일 축의대 운영 결과를 보고드립니다. 😊\n\n[축의대 운영 결과{측}]\n· 접수금액: {접수금액}원\n· 접수하객: {접수하객}명\n· (대인)식권사용/잔량: {대인사용}장/{대인잔량}장\n· (소인)식권사용/잔량: {소인사용}장/{소인잔량}장\n\n* PDF 파일 및 엑셀 파일은 마이모먼트에서도 다운로드 가능합니다.\n✅ 다운로드 경로: 마이모먼트 > 💌 실시간 축의 현황 > 📱 여기서 바로보기 > 하단의 🔑 실시간 축의현황 확인코드 복사 & 붙여넣기 > 접속하기 > 오른쪽 하단 PDF로 저장 또는 엑셀로 저장\n\n✅ PDF로 저장하실 때에는 인쇄옵션(설정)에서 '배경그래픽 포함'을 꼭 선택 부탁드립니다.", "handover": "축의금은 사전에 지정해주신 인수자분({인수자})께 전달드렸습니다.\n분홍색 봉투에 챙겨드린 휴족시간이 피로회복에 조금이나마 도움되면 좋겠습니다. 😊\n\n오늘 정말 고생많으셨습니다.\n다시 한번 두분의 결혼을 진심으로 축하드립니다.🎉", "settle": "💌 모먼트웍스 잔금 정산 안내\n\n모먼트웍스 축의대 대행 잔금 정산을 안내드립니다.💛\n\n정산내역서를 확인하신 후,\n내일까지 잔금 정산을 부탁드립니다.\n\n✔️ 잔금: {잔금}원\n✔️ 입금 계좌\n- 카카오뱅크 3333-37-9293260\n- 예금주: 김현관(모먼트웍스)\n✔️ 현금영수증(계약금+잔금)은 계약자분의 핸드폰번호로 발행됩니다. 다른 분 번호로 발행을 원하신다면 핸드폰번호를 말씀 부탁드립니다.\n✔️ 축의내역 중 성함/금액 등 수정이 필요하신 사항은 언제든지 편하게 말씀해주시면 수정본 송부드리겠습니다."};
+const DAY_TPL_DEFAULT = {"result_denom": ["금일 축의대 운영 결과를 보고드립니다. 😊", "", "[축의대 운영 결과{측}]", "· 접수금액: {접수금액}원", "· 접수하객: {접수하객}명", "· (대인)식권사용/잔량: {대인사용}장/{대인잔량}장", "· (소인)식권사용/잔량: {소인사용}장/{소인잔량}장", "", "[권종별 집계 현황]", "· 5만원권: {오만원권}장", "· 1만원권: {만원권}장"].join('\n'), "morning": "안녕하세요. 😊\n드디어 두 분의 예식 날이 다가왔습니다. 결혼을 진심으로 축하드립니다.🎉\n\n예식 70분 전에 도착 후 식권을 전달받고 축의 접수대를 오픈할 예정입니다.\n실시간 라이브 영상과 실시간 축의 현황은 <마이모먼트>에서 확인하실 수 있습니다.\n\n📌 마이모먼트\n{주소}\n- 접속코드: {접속코드}", "photos": "현재 접수된 축의금과 화환 사진 공유드립니다. 😊", "result": "금일 축의대 운영 결과를 보고드립니다. 😊\n\n[축의대 운영 결과{측}]\n· 접수금액: {접수금액}원\n· 접수하객: {접수하객}명\n· (대인)식권사용/잔량: {대인사용}장/{대인잔량}장\n· (소인)식권사용/잔량: {소인사용}장/{소인잔량}장\n\n* PDF 파일 및 엑셀 파일은 마이모먼트에서도 다운로드 가능합니다.\n✅ 다운로드 경로: 마이모먼트 > 💌 실시간 축의 현황 > 📱 여기서 바로보기 > 하단의 🔑 실시간 축의현황 확인코드 복사 & 붙여넣기 > 접속하기 > 오른쪽 하단 PDF로 저장 또는 엑셀로 저장\n\n✅ PDF로 저장하실 때에는 인쇄옵션(설정)에서 '배경그래픽 포함'을 꼭 선택 부탁드립니다.", "handover": "축의금은 사전에 지정해주신 인수자분({인수자})께 전달드렸습니다.\n분홍색 봉투에 챙겨드린 휴족시간이 피로회복에 조금이나마 도움되면 좋겠습니다. 😊\n\n오늘 정말 고생많으셨습니다.\n다시 한번 두분의 결혼을 진심으로 축하드립니다.🎉", "settle": "💌 모먼트웍스 잔금 정산 안내\n\n모먼트웍스 축의대 대행 잔금 정산을 안내드립니다.💛\n\n정산내역서를 확인하신 후,\n내일까지 잔금 정산을 부탁드립니다.\n\n✔️ 잔금: {잔금}원\n✔️ 입금 계좌\n- 카카오뱅크 3333-37-9293260\n- 예금주: 김현관(모먼트웍스)\n✔️ 현금영수증(계약금+잔금)은 계약자분의 핸드폰번호로 발행됩니다. 다른 분 번호로 발행을 원하신다면 핸드폰번호를 말씀 부탁드립니다.\n✔️ 축의내역 중 성함/금액 등 수정이 필요하신 사항은 언제든지 편하게 말씀해주시면 수정본 송부드리겠습니다."};
 const DAY_ST = {filter:'all', q:'', open:null, data:{}, err:{}, loading:{}, edit:{}, den:{}, stepOpen:{}};   // stepOpen: 펼친 안내 항목 (계약id:항목)
 function denCheck(st, v){   // 권종별 검산: 5만원권 × 장수 + 1만원권 × 장수 = 내역정리 총액
   const a = String(v && v.a!=null ? v.a : '').replace(/[^0-9]/g,''), b = String(v && v.b!=null ? v.b : '').replace(/[^0-9]/g,'');
@@ -14407,6 +14425,7 @@ function dayPanelHTML(){
               <div class="dy-den-in"><label>5만원권 <input inputmode="numeric" data-dyden="${kk}" data-f="a" value="${esc(c.a)}" placeholder="0"> 장</label><label>1만원권 <input inputmode="numeric" data-dyden="${kk}" data-f="b" value="${esc(c.b)}" placeholder="0"> 장</label></div>
               <div class="dy-den-msg ${c.ok?'ok':(c.a!==''&&c.b!==''?'bad':'')}" data-dymsg="${kk}">${esc(c.msg)}</div></div>`; })() : ''}
             <textarea data-dyt="${r.id}:${st.key}" rows="${Math.min(12, Math.max(2, txt.split('\n').length))}">${esc(txt)}</textarea>
+            ${st.codes && (st.codes.groom || st.codes.bride) ? `<div class="dy-hint">🔑 마이모먼트 접속코드 · ${['groom','bride'].filter(k=> st.codes[k]).map(k=> `${k==='groom'?'신랑':'신부'} <b>${esc(st.codes[k])}</b>`).join(' · ')}${st.codes.groom && st.codes.bride && st.codes.groom!==st.codes.bride ? ' · 문자는 받는 분 코드만 넣어 보내요' : ''}</div>`:''}
             <div class="dy-acts ${st.denom && !denCheck(st, DAY_ST.den[r.id+':'+st.key]).ok ? 'locked':''}" data-dyacts="${r.id}:${st.key}"><button class="btn btn-sm btn-kakao" data-dy="kakao" data-id="${r.id}" data-k="${st.key}">${KK_ICON}카카오톡 공유</button>
               ${people.map((p,i)=> (!st.to || st.to.indexOf(p.side)>=0) ? `<button class="btn btn-sm" data-dy="sms" data-id="${r.id}" data-k="${st.key}" data-i="${i}">📱 ${p.side==='groom'?'신랑':'신부'}에게 문자</button>` : '').join('')}
               <button class="btn btn-sm btn-ghost" data-dy="copy" data-id="${r.id}" data-k="${st.key}">복사</button></div></details>`; };
@@ -14479,8 +14498,13 @@ document.addEventListener('click', async (ev)=>{
   if(a==='copy'){ copyText(text, '문구를 복사했어요'); dayMarkA(rid, key, 'copy'); dayRerender(); return; }
   if(a==='kakao'){ mmShare(text, '문구를 복사했어요 · 카카오톡에 붙여넣어 보내주세요'); dayMarkA(rid, key, 'kakao'); dayRerender(); return; }
   if(a==='sms'){ const p = ((DAY_ST.data[rid]||{}).people||[])[Number(el.dataset.i)] || {};
-    copyText(text, mmIsPhone() ? '문자 앱을 열어요' : '문구를 복사했어요 · 휴대폰에서 누르면 문자 앱이 바로 열려요');
-    if(mmIsPhone()) location.href = mmSmsHref(p.phone, text);
+    let smsText = text;   // 받는 사람(신랑 · 신부)의 마이모먼트 접속코드로
+    if(dst && dst.texts && p.side){
+      if(DAY_ST.edit[rid+':'+key]===undefined && !dst.denom) smsText = dst.texts[p.side] || text;
+      else if(dst.codeAll && dst.codes && dst.codes[p.side] && dst.codeAll!==dst.codes[p.side]) smsText = text.split(dst.codeAll).join(dst.codes[p.side]);
+    }
+    copyText(smsText, mmIsPhone() ? '문자 앱을 열어요' : '문구를 복사했어요 · 휴대폰에서 누르면 문자 앱이 바로 열려요');
+    if(mmIsPhone()) location.href = mmSmsHref(p.phone, smsText);
     dayMarkA(rid, key, 'sms'); dayRerender(); return; }
 });
 document.addEventListener('toggle', ev=>{ const d = ev.target; if(!d || !d.dataset || !d.dataset.dystep) return;
