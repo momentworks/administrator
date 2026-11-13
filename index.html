@@ -2182,6 +2182,13 @@ tr.mw-new-row>td:first-child{box-shadow:inset 4px 0 0 #E0A526;}
 .vd-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--slate,#6b6b6b)}.vd-acts{display:flex;gap:6px}
 @media (max-width:720px){.vd-fields{grid-template-columns:1fr}.vd-when{min-width:0}#vidTabRoot .kpi-grid{grid-template-columns:repeat(2,1fr)!important}}
 .p-wf-msgs{display:inline-flex;flex-wrap:wrap;gap:4px 10px;align-items:center}.p-wf-msgs label{font-size:12px}
+.sd-tk{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:10px 0;background:#FFFCF6}.sd-tk.focus{border-color:var(--gold,#C9A961);box-shadow:0 0 0 3px rgba(201,169,97,.25)}
+.sd-tk-h{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;margin-bottom:6px}.sd-tk-h span{font-weight:800;color:var(--coral,#C0533A)}
+.sd-tk-req{font-size:11.5px;background:#F4EFE4;border-radius:6px;padding:5px 8px;margin-bottom:8px;color:#5C4F33}
+.sd-tk-g{margin-top:6px}.sd-tk-gt{font-size:12.5px;font-weight:700;margin-bottom:4px}.sd-tk-gt small{font-weight:500;color:var(--slate);margin-left:6px}
+.sd-form label.sd-tk-row{display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:8px;margin:3px 0;font-size:12.5px}.sd-tk-row em{font-style:normal;color:var(--slate);margin-left:6px}
+.sd-tk-step{display:inline-flex;align-items:center;gap:4px}.sd-tk-step button{width:26px;height:26px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:14px;line-height:1}.sd-form .sd-tk-step input{width:54px;text-align:center;margin:0;padding:4px}
+.btn.tk-has{border-color:var(--gold,#C9A961);color:#8A6A1F;font-weight:700}
 </style>
 </head>
 <body>
@@ -2425,7 +2432,7 @@ tr.mw-new-row>td:first-child{box-shadow:inset 4px 0 0 #E0A526;}
         <p class="section-desc">예식이 끝났지만 정산이 완료되지 않은 건을 관리합니다</p>
       </div>
     </div>
-    <div class="note-box">정산액 = 잔금 − 본식후기 할인 · 잔금에는 <b>하객 기준인원 초과 추가금</b>(+)과 <b>하객규모할인</b>(−, 제외 시 0)이 반영돼요. 예식일이 지난 건 중 정산 미완료 건이 우선 표시됩니다.</div>
+    <div class="note-box">정산액 = 잔금 − 본식후기 할인 · 잔금에는 <b>식권 제작 서비스</b>(+), <b>하객 기준인원 초과 추가금</b>(+)과 <b>하객규모할인</b>(−, 제외 시 0)이 반영돼요. 예식일이 지난 건 중 정산 미완료 건이 우선 표시됩니다.</div>
     <div class="settle-bar"><b>📄 정산서 출력</b><select id="settlePick"></select><button class="btn btn-primary btn-sm" id="settlePickBtn">정산서 열기</button><span>정산 완료 건도 다시 출력할 수 있어요</span></div>
     <div id="settlementList"></div>
   </section>
@@ -2961,6 +2968,22 @@ function earlyBirdDiscountFor(rec){
   if(!rec || rec.earlyBird!=='O') return 0;
   return isNewEarlyBirdPolicy(rec) ? earlyBirdPolicyAmount(rec) : ((Number(rec.earlyBirdDiscount)||0) || 20000);
 }
+/* 식권 제작 서비스 (정산 시 추가) · 수량은 정산 데이터 settle:<계약>.ticket 에 저장 → 고객페이지 정산에도 같은 금액 */
+const TICKET_ITEMS = [
+  {k:'c200', g:'custom', icon:'✏️', name:'커스텀 디자인 식권', qty:200, price:19900},
+  {k:'c500', g:'custom', icon:'✏️', name:'커스텀 디자인 식권', qty:500, price:39900},
+  {k:'b20',  g:'basic',  icon:'🎟️', name:'모먼트웍스 기본 식권', qty:20,  price:2000},
+  {k:'b50',  g:'basic',  icon:'🎟️', name:'모먼트웍스 기본 식권', qty:50,  price:4000},
+  {k:'b100', g:'basic',  icon:'🎟️', name:'모먼트웍스 기본 식권', qty:100, price:7000}
+];
+function ticketOrderOf(r){
+  if(r && r.__ticket) return r.__ticket;   // 정산서 화면: 저장 전 미리보기 값
+  const fb = (typeof settleFallback==='function' && r) ? (settleFallback(r)||{}) : {};
+  return fb.ticket || {};
+}
+function ticketLines(r){ const o = ticketOrderOf(r); return TICKET_ITEMS.map(it=> Object.assign({}, it, {n: Math.max(0, Math.floor(Number(o[it.k])||0))})).filter(it=> it.n>0).map(it=> Object.assign(it, {amt: it.n*it.price})); }
+function ticketFeeOf(r){ return ticketLines(r).reduce((a,it)=> a+it.amt, 0); }
+function ticketSummary(r){ return ticketLines(r).map(it=> `${it.g==='custom'?'커스텀':'기본'} ${it.qty}장${it.n>1?'×'+it.n:''}`).join(' · '); }
 function computeFinancials(r){
   const base = Number(r.baseAmount)||0;
   const eb = earlyBirdDiscountFor(r);
@@ -2971,10 +2994,11 @@ function computeFinancials(r){
   const travel = Number(r.travelFee)||0;
   const gx = (typeof guestCalc==='function' && r.type!=='lead') ? guestCalc(r) : {gsd:0, surcharge:0};
   const gsd = gx.gsd||0, sur = gx.surcharge||0;   // 하객규모할인(제외 시 0) · 하객 기준인원 초과 추가금
-  const balance = base - eb - pd - rd - revC - gsd - deposit + travel + sur;
+  const tkt = (r.type!=='lead') ? ticketFeeOf(r) : 0;   // 식권 제작 서비스
+  const balance = base - eb - pd - rd - revC - gsd - deposit + travel + sur + tkt;
   const revD = Number(r.reviewDiscountDay)||0;
   const finalSettlement = balance - revD;
-  return {base, eb, pd, rd, revC, gsd, sur, deposit, travel, balance, revD, finalSettlement};
+  return {base, eb, pd, rd, revC, gsd, sur, tkt, deposit, travel, balance, revD, finalSettlement};
 }
 
 function recordStage(r){
@@ -3493,15 +3517,16 @@ function renderSettlement(){
       </div>
       <div class="lb-count">
         <div class="n">${fmtMoney(fin.finalSettlement)}</div>
-        <div class="l">잔금${(fin.revC+fin.revD)? ' − 후기할인 '+fmtMoney(fin.revC+fin.revD).replace('원',''):''}${fin.sur? ' · 초과 +'+fmtMoney(fin.sur).replace('원',''):''}${fin.gsd? ' · 규모할인 −'+fmtMoney(fin.gsd).replace('원',''):''}</div>
+        <div class="l">잔금${(fin.revC+fin.revD)? ' − 후기할인 '+fmtMoney(fin.revC+fin.revD).replace('원',''):''}${fin.sur? ' · 초과 +'+fmtMoney(fin.sur).replace('원',''):''}${fin.tkt? ' · 식권 +'+fmtMoney(fin.tkt).replace('원',''):''}${fin.gsd? ' · 규모할인 −'+fmtMoney(fin.gsd).replace('원',''):''}</div>
       </div>
       <button class="map-btn" data-map-id="${r.id}" style="margin-left:14px;">📍 길찾기</button>
+      <button class="btn btn-sm ${fin.tkt?'tk-has':''}" data-settle-doc="${r.id}" data-settle-focus="ticket" style="margin-left:8px;" title="식권 제작 서비스 비용 추가">🎟️ 식권${fin.tkt? ' '+fmtMoney(fin.tkt):' 추가'}</button>
       <button class="btn btn-sm" data-settle-doc="${r.id}" style="margin-left:8px;">📄 정산서</button>
       <button class="btn btn-primary btn-sm" data-id="${r.id}" style="margin-left:8px;">정산 완료 처리</button>
     </div>`;
   }).join('');
   attachMapButtons(el);
-  el.querySelectorAll('button[data-settle-doc]').forEach(b=> b.addEventListener('click', (e)=>{ e.stopPropagation(); openSettleDoc(b.dataset.settleDoc); }));
+  el.querySelectorAll('button[data-settle-doc]').forEach(b=> b.addEventListener('click', (e)=>{ e.stopPropagation(); openSettleDoc(b.dataset.settleDoc, b.dataset.settleFocus); }));
   el.querySelectorAll('button[data-id]').forEach(b=> b.addEventListener('click', async (e)=>{
     e.stopPropagation();
     const rec = RECORDS.find(r=>r.id===b.dataset.id);
@@ -3519,7 +3544,7 @@ function renderReferralLegacy(){
   const groups = {};
   contracts.forEach(r=>{
     if(r.partnerCode && r.partnerCode.trim()){
-      const code = r.partnerCode.trim();
+      const code = canonCode(r.partnerCode);
       (groups[code] = groups[code] || []).push(r);
     }
   });
@@ -4623,8 +4648,16 @@ document.getElementById('saveBtn').addEventListener('click', async ()=>{
   }
   if(editingId){
     const idx = RECORDS.findIndex(r=>r.id===editingId);
-    RECORDS[idx] = Object.assign({}, RECORDS[idx], values, {type});
+    const before = RECORDS[idx], oldKey = recordKey(before), oldCode = String(before.contractCode||'').trim();
+    const nc = String(values.contractCode||'').trim();
+    if(type==='contract' && nc && nc!==oldCode && RECORDS.some(r=> r!==before && r.type==='contract' && String(r.contractCode||'').trim()===nc)){ showToast(`${nc} 는 이미 다른 계약의 코드예요`); return; }
+    RECORDS[idx] = Object.assign({}, before, values, {type});
     markDirty(RECORDS[idx]);
+    if(type==='contract' && recordKey(RECORDS[idx])!==oldKey){
+      const cr = applyCodeChange(RECORDS[idx], oldKey, oldCode);
+      if(oldCode && nc && oldCode!==nc) showToast(`짝꿍코드 변경 · 이 코드로 계약한 ${cr.referred}건도 새 코드(${nc})로 연결했어요`);
+      savePartnerDb(true);
+    }
   } else {
     const rec = blankRecord(type);
     Object.assign(rec, values, {type});
@@ -5270,7 +5303,9 @@ function buildCustomerView(records, db, code, todayStr, withFile){
 
   // 짝꿍코드: 내 코드로 계약한 분들 (본식 종료 건만 확정 · 내 예식 전 확정분은 잔금 할인, 이후는 페이백)
   var myCode = String(r.contractCode||'').trim();
-  var referred = myCode ? all.filter(function(x){ return x!==r && !x.cancelled && String(x.partnerCode||'').trim()===myCode; }) : [];
+  // 짝꿍코드를 바꾼 경우: 예전 코드로 적힌 계약도 새 코드로 연결 (settings.codeAlias = {예전코드: 새코드})
+  var codeAl = (s && s.codeAlias) || {}, canon = function(c){ c = String(c||'').trim(); var g = 0; while(c && codeAl[c] && codeAl[c]!==c && g++<10) c = String(codeAl[c]).trim(); return c; };
+  var referred = myCode ? all.filter(function(x){ return x!==r && !x.cancelled && canon(x.partnerCode)===myCode; }) : [];
   referred.sort(function(a,b){ return String(a.weddingDate||'').localeCompare(String(b.weddingDate||'')); });
   var refRows = referred.map(function(x){
     var done = !!(x.weddingDate && today && x.weddingDate < today);
@@ -5299,7 +5334,9 @@ function buildCustomerView(records, db, code, todayStr, withFile){
   var base = n(r.baseAmount), eb = r.earlyBird!=='O' ? 0 : String(r.contractDate||'') >= '2026-09-01' ? (String(r.productType||'').trim()==='양측' ? 50000 : 30000) : (n(r.earlyBirdDiscount)||20000);
   var pd = (r.partnerCode && String(r.partnerCode).trim() && String(r.partnerCode).trim()!=='-') ? n(r.partnerDiscount) : 0;
   var rd = discountCnt * UNIT, revC = n(r.reviewDiscountContract), deposit = n(r.deposit), travel = n(r.travelFee);
-  var balance = base - eb - pd - rd - revC - gsd - deposit + travel + sur;
+  var TKP = {c200:19900, c500:39900, b20:2000, b50:4000, b100:7000}, tko = settle.ticket || {}, tkt = 0;   // 식권 제작 서비스 (커스텀 200·500장 · 기본 20·50·100장)
+  Object.keys(TKP).forEach(function(k){ tkt += Math.max(0, Math.floor(n(tko[k]))) * TKP[k]; });
+  var balance = base - eb - pd - rd - revC - gsd - deposit + travel + sur + tkt;
   var revD = n(r.reviewDiscountDay);
 
   return {
@@ -5311,7 +5348,7 @@ function buildCustomerView(records, db, code, todayStr, withFile){
     wedding: {date: r.weddingDate||'', time: r.weddingTime||'', venue: r.venueName||'', hall: r.hallName||'', region: r.region||'',
       product: r.productType||'', groomGuests: n(r.groomGuests), brideGuests: n(r.brideGuests), settingsSubmitted: !!r.settingsSubmitted},
     contract: {date: r.contractDate||'', code: myCode, hasFile: !!String(client.contractUrl||'').trim(),
-      amounts: {base: base, earlyBird: eb, partnerDiscount: pd, referralDiscount: rd, reviewContract: revC, guestScaleDiscount: gsd, surcharge: sur, deposit: deposit, travel: travel, balance: balance, reviewDay: revD, final: balance - revD},
+      amounts: {base: base, earlyBird: eb, partnerDiscount: pd, referralDiscount: rd, reviewContract: revC, guestScaleDiscount: gsd, surcharge: sur, deposit: deposit, travel: travel, ticket: tkt, balance: balance, reviewDay: revD, final: balance - revD},
       settled: !!r.settlementDone},
     live: (function(){
       var base = String(s.giftBaseUrl || 'https://momentworks.github.io/arrange/').trim();
@@ -9932,6 +9969,8 @@ function addRowToIndex_(idx, ctx, r) {
 function findRowFast_(idx, rec) {
   var code = rec.contractCode ? String(rec.contractCode).trim() : '';
   if (code && idx.code[code]) return idx.code[code][0];
+  var prev = rec._prevCode ? String(rec._prevCode).trim() : '';   // 관리자가 계약코드(짝꿍코드)를 바꾼 경우: 예전 코드의 행을 찾아 수정
+  if (prev && prev !== code && idx.code[prev]) return idx.code[prev][0];
   if (rec.clientName && rec.weddingDate) {
     var list = idx.nd[String(rec.clientName).trim() + '|' + String(rec.weddingDate).trim()];
     if (list) return list[0];
@@ -11724,12 +11763,66 @@ document.addEventListener('click', async ev=>{
    - 시트 '짝꿍코드추천페이백' 칸 = 이미 지급한 금액 (지급할 금액은 앱이 자동 계산)
 ========================================================= */
 const REFERRAL_UNIT = 10000;
+/* ---------- 짝꿍코드(계약코드) 변경: 예전 코드로 연결된 모든 것을 새 코드로 ----------
+   · 이 코드로 계약한 분들(짝꿍코드 칸) → 새 코드로 바꿔 저장 (추천 할인 · 페이백 · 고객페이지 추천 현황 모두 새 코드 기준)
+   · 계약 기준으로 저장된 정산 · 페이백 지급 · 고객페이지 · 배정 기록(C:예전코드) → C:새코드 로 옮김
+   · settings.codeAlias[예전] = 새 코드 → 최초 계약서 · 나중에 들어오는 계약에 예전 코드가 적혀 있어도 새 코드로 계산 */
+function codeAliases(){ const st = pSet(); return (st && st.codeAlias) || {}; }
+function canonCode(c){ c = String(c||'').trim(); const al = codeAliases(); let g = 0; while(c && al[c] && al[c]!==c && g++<10) c = String(al[c]).trim(); return c; }
+function applyCodeChange(rec, oldKey, oldCode){
+  const newCode = String(rec.contractCode||'').trim(), newKey = recordKey(rec), out = {referred:0, moved:0};
+  oldCode = String(oldCode||'').trim();
+  const db = ensurePdb(); db.referralPay = db.referralPay || {}; db.settings = db.settings || {};
+  if(oldCode && newCode && oldCode!==newCode){
+    const al = db.settings.codeAlias = Object.assign({}, db.settings.codeAlias||{});
+    delete al[newCode];                                                   // 예전 코드로 되돌린 경우
+    Object.keys(al).forEach(k=>{ if(String(al[k]).trim()===oldCode) al[k] = newCode; });
+    al[oldCode] = newCode; pDirty.settings = true;
+    RECORDS.forEach(r=>{
+      if(r===rec || r.type!=='contract') return;
+      if(String(r.partnerCode||'').trim()===oldCode || (r.partnerCode && canonCode(r.partnerCode)===newCode && String(r.partnerCode).trim()!==newCode)){
+        r.partnerCode = newCode; markDirty(r); out.referred++;
+      }
+    });
+    rec._prevCode = oldCode;   // 서버: 구글시트에서 예전 코드의 행을 찾아 수정 (새 행을 만들지 않음)
+  }
+  if(oldKey && newKey && oldKey!==newKey){
+    const rp = db.referralPay;
+    Object.keys(rp).forEach(k=>{
+      const i = k.indexOf(':'); if(i<0) return;
+      if(k.slice(i+1)===oldKey){ const nk = k.slice(0,i+1)+newKey; rp[nk] = Object.assign({}, rp[k], rp[nk]||{}); delete rp[k]; pDirty.referral.add(k); pDirty.referral.add(nk); out.moved++; }
+    });
+    Object.keys(rp).forEach(k=>{ const v = rp[k]; if(v && typeof v==='object' && v.key===oldKey){ v.key = newKey; pDirty.referral.add(k); out.moved++; } });
+    Object.keys(db.assignments||{}).forEach(id=>{ const a = db.assignments[id]; if(a && a.key===oldKey){ a.key = newKey; pDirty.assignments.add(id); } });
+  }
+  return out;
+}
+/* 불러온 계약 중 예전 짝꿍코드가 적힌 계약 → 새 코드로 맞춤 (최초 계약서 · 시트에 예전 코드가 남아 있어도) */
+function normalizePartnerCodes(){
+  if(!Object.keys(codeAliases()).length) return false;
+  let ch = false;
+  RECORDS.forEach(r=>{ if(r.type!=='contract' || !r.partnerCode) return; const c = canonCode(r.partnerCode); if(c && c!==String(r.partnerCode).trim()){ r.partnerCode = c; markDirty(r); ch = true; } });
+  return ch;
+}
+async function changeContractCode(rec, newCode){
+  newCode = String(newCode||'').trim().toUpperCase().replace(/\s+/g,'');
+  const oldCode = String(rec.contractCode||'').trim();
+  if(!newCode || newCode===oldCode) return false;
+  if(!/^[A-Z0-9가-힣_-]{3,30}$/.test(newCode)){ showToast('짝꿍코드는 영문 · 숫자 3~30자로 넣어주세요'); return false; }
+  if(RECORDS.some(r=> r!==rec && r.type==='contract' && String(r.contractCode||'').trim()===newCode)){ showToast(`${newCode} 는 이미 다른 계약의 코드예요`); return false; }
+  const oldKey = recordKey(rec);
+  rec.contractCode = newCode; markDirty(rec);
+  const res = applyCodeChange(rec, oldKey, oldCode);
+  renderAll(); await persist(); await savePartnerDb(true);
+  showToast(`짝꿍코드를 ${newCode} 로 바꿨어요${res.referred? ` · 이 코드로 계약한 ${res.referred}건도 새 코드로 연결`:''} · 할인 · 페이백 · 고객페이지 모두 반영`);
+  return true;
+}
 
 function referralInfo(code){
   code = String(code||'').trim();
   if(!code) return {code:'', owner:null, referred:[], done:[], discount:[], payback:[], ownerDone:false};
   const owner = RECORDS.find(r=> r.type==='contract' && !r.cancelled && String(r.contractCode||'').trim()===code) || null;
-  const referred = RECORDS.filter(r=> r.type==='contract' && !r.cancelled && r!==owner && r.partnerCode && String(r.partnerCode).trim()===code);
+  const referred = RECORDS.filter(r=> r.type==='contract' && !r.cancelled && r!==owner && r.partnerCode && canonCode(r.partnerCode)===code);
   const done = referred.filter(r=>{ const dd = ddayInfo(r.weddingDate); return dd && dd.diff<0; });
   const ownerDate = owner && owner.weddingDate ? owner.weddingDate : '';
   const discount = ownerDate ? done.filter(r=> r.weddingDate < ownerDate) : done;
@@ -11800,7 +11893,7 @@ function migratePaybackColumn(){
 }
 async function runReferralSync(){
   const r = migratePaybackColumn();
-  const d = syncDerivedFields();
+  const d = syncDerivedFields() | normalizePartnerCodes();
   if(r.pdbChanged) await savePartnerDb(true);
   if(r.recChanged || d) await persist();
   return r;
@@ -11916,7 +12009,7 @@ function renderPaybackAlerts(){
 function renderReferral(){
   const contracts = activeContracts();
   const groups = {};
-  contracts.forEach(r=>{ if(r.partnerCode && r.partnerCode.trim()){ const c=r.partnerCode.trim(); (groups[c]=groups[c]||[]).push(r); } });
+  contracts.forEach(r=>{ if(r.partnerCode && r.partnerCode.trim()){ const c=canonCode(r.partnerCode); (groups[c]=groups[c]||[]).push(r); } });
   const entries = Object.entries(groups).filter(([code])=> contracts.some(r=>r.contractCode===code))
     .sort((a,b)=> b[1].length - a[1].length);
   const el = document.getElementById('referralList');
@@ -12228,6 +12321,7 @@ function settleGet(rec){
   });
   out.note = fb.note || '';
   out.issuedAt = fb.issuedAt || '';
+  out.ticket = Object.assign({}, fb.ticket || {});
   return out;
 }
 /* 하객 기준인원 · 초과 인원 · 추가금 계산 */
@@ -12288,6 +12382,7 @@ function settleDocHTML(rec, ov){
     <table class="sd-lines">
       ${line('기준금액', f.base, {always:true})}
       ${line('출장비', f.travel, {plus:true})}
+      ${ticketLines(rec).map(it=> line(`식권 제작 · ${it.name} ${it.qty}장`, it.amt, {plus:true, cls:'add tk', sub: `${it.n}세트 × ${fmtMoney(it.price)}`})).join('')}
       ${line('하객 기준인원 초과 추가금', g.surcharge, {plus:true, cls:'add', sub: g.over ? `초과 ${g.over}명 · ${guestUnitText(pol)}${g.manual?' (조정 금액)':''}` : (g.manual?'조정 금액':'')})}
       ${line('얼리버드 할인', f.eb, {minus:true})}
       ${line('짝꿍코드 할인', f.pd, {minus:true})}
@@ -12317,6 +12412,15 @@ function settleFormHTML(rec){
     <label>하객 초과 추가금<input type="number" min="0" step="1000" id="sdSurcharge" value="${st.guestSurcharge===null?'':st.guestSurcharge}" placeholder="비워두면 자동 ${fmtMoney(g.auto)}"></label>
     <label>하객규모할인 금액<input type="number" min="0" step="1000" id="sdGsd" value="${st.guestScaleDiscount===null?'':st.guestScaleDiscount}" placeholder="0"></label>
     <label class="sd-check"><input type="checkbox" id="sdGsRemoved" ${st.guestScaleRemoved?'checked':''}> 하객규모할인 제외 (정산 시 할인 삭제)</label>
+    <div class="sd-tk" id="sdTicket">
+      <div class="sd-tk-h"><b>🎟️ 식권 제작 서비스</b><span id="sdTkSum">${fmtMoney(ticketFeeOf(rec))}</span></div>
+      ${(()=>{ const cd = ((ensurePdb().referralPay||{})['card:'+rec.id]||{}).rows||[], gv = k=> (cd.find(x=> x.key===k)||{}).value||''; const a = gv('ticket_order_apply'), q = gv('ticket_order_qty'), d = gv('ticket_design_pref');
+        return (a||q||d) ? `<div class="sd-tk-req">설정서 신청 내용: ${[a, q && ('수량 '+q+(/매|장/.test(q)?'':'매')), d].filter(Boolean).map(esc).join(' · ')}</div>` : ''; })()}
+      ${['custom','basic'].map(gk=>{ const its = TICKET_ITEMS.filter(it=> it.g===gk), h = its[0];
+        return `<div class="sd-tk-g"><div class="sd-tk-gt">${h.icon} ${h.name}<small>${gk==='custom'?'원하시는 디자인으로 제작':'모먼트웍스 기본 식권 디자인'}</small></div>
+          ${its.map(it=>`<label class="sd-tk-row"><span>${it.qty}장 <em>${fmtMoney(it.price)}</em></span><span class="sd-tk-step"><button type="button" data-tkstep="-1" data-k="${it.k}">−</button><input type="number" min="0" step="1" data-tk="${it.k}" value="${Number(st.ticket[it.k])||''}" placeholder="0"><button type="button" data-tkstep="1" data-k="${it.k}">+</button></span></label>`).join('')}</div>`; }).join('')}
+      <div class="sd-hint">세트 수를 넣으면 잔금 · 정산서 · 고객페이지 정산에 함께 반영돼요 (예: 커스텀 500장 1세트 = 39,900원)</div>
+    </div>
     <label>비고 (정산서에 표시)<textarea id="sdNote" rows="3" placeholder="예: 실제 하객 520명으로 초과 추가금 부과">${esc(st.note)}</textarea></label>
     <div class="sd-actions">
       <button class="btn btn-primary" id="sdSave">저장</button>
@@ -12332,7 +12436,7 @@ function settleFormHTML(rec){
     </details>
   </div>`;
 }
-function openSettleDoc(id){
+function openSettleDoc(id, focus){
   const rec = RECORDS.find(r=> r.id===id); if(!rec) return;
   SETTLE_ID = id;
   const ov = document.getElementById('settleOverlay');
@@ -12341,16 +12445,21 @@ function openSettleDoc(id){
   document.getElementById('settleFormWrap').innerHTML = settleFormHTML(rec);
   ov.classList.add('active');
   const val = id=>{ const v = document.getElementById(id).value; return v==='' ? null : Number(v); };
+  const tkVal = ()=>{ const o = {}; document.querySelectorAll('#sdTicket [data-tk]').forEach(i=>{ const n = Math.max(0, Math.floor(Number(i.value)||0)); if(n) o[i.dataset.tk] = n; }); return o; };
   const preview = ()=>{ // 저장 전 미리보기 (저장하지 않음)
     const fields = {actualGuests:val('sdActual'), guestSurcharge:val('sdSurcharge'), guestScaleDiscount:val('sdGsd'), guestScaleRemoved:document.getElementById('sdGsRemoved').checked};
-    const tmp = Object.assign({}, rec, fields);
+    const tmp = Object.assign({}, rec, fields, {__ticket: tkVal()});
+    document.getElementById('sdTkSum').textContent = fmtMoney(ticketFeeOf(tmp));
     document.getElementById('settleDocWrap').innerHTML = settleDocHTML(tmp, {note: document.getElementById('sdNote').value});
     document.getElementById('sdAuto').textContent = fmtMoney(guestCalc(tmp).auto);
   };
   ['sdActual','sdSurcharge','sdGsd','sdGsRemoved','sdNote'].forEach(x=> document.getElementById(x).addEventListener('input', preview));
+  document.querySelectorAll('#sdTicket [data-tk]').forEach(i=> i.addEventListener('input', preview));
+  document.querySelectorAll('#sdTicket [data-tkstep]').forEach(b=> b.addEventListener('click', ()=>{ const i = document.querySelector(`#sdTicket [data-tk="${b.dataset.k}"]`); i.value = Math.max(0, (Number(i.value)||0) + Number(b.dataset.tkstep)) || ''; preview(); }));
+  if(focus==='ticket'){ const t = document.getElementById('sdTicket'); if(t){ t.classList.add('focus'); setTimeout(()=>{ try{ t.scrollIntoView({block:'center', behavior:'smooth'}); }catch(_){} }, 60); } }
   document.getElementById('sdGsRemoved').addEventListener('change', preview);
   document.getElementById('sdSave').addEventListener('click', async ()=>{
-    await settleSave(rec, {actualGuests:val('sdActual'), guestSurcharge:val('sdSurcharge'), guestScaleDiscount:val('sdGsd'), guestScaleRemoved:document.getElementById('sdGsRemoved').checked, note:document.getElementById('sdNote').value});
+    await settleSave(rec, {actualGuests:val('sdActual'), guestSurcharge:val('sdSurcharge'), guestScaleDiscount:val('sdGsd'), guestScaleRemoved:document.getElementById('sdGsRemoved').checked, note:document.getElementById('sdNote').value, ticket: tkVal()});
     showToast(`${rec.clientName}님 정산서를 저장했어요`); openSettleDoc(id);
   });
   document.getElementById('sdPrint').addEventListener('click', ()=>{
@@ -12543,6 +12652,7 @@ const CustomerPortal = (function(){
       <div class="cp-money">
         ${row('기준 금액', a.base)}
         ${row('출장비', a.travel, '', '+ ')}
+        ${row('식권 제작 서비스', a.ticket, '', '+ ')}
         ${row('하객 기준인원 초과 추가금', a.surcharge, '', '+ ')}
         ${row('얼리버드 할인', a.earlyBird, 'minus', '− ')}
         ${row('짝꿍코드 할인', a.partnerDiscount, 'minus', '− ')}
@@ -13034,7 +13144,7 @@ function renderClientBox(rec, boxEl){
   } else {
     const off = c.active===false;
     box.innerHTML = `<div class="cp-admin-h"><b>💍 고객 전용 페이지</b>${off? '<span class="badge badge-cancelled">사용 중지</span>' : '<span class="badge badge-done">사용 중</span>'}<div class="cp-savebar" data-cpsavebar><span class="cp-save-st" data-cpst>변경사항 없음</span><button type="button" class="btn btn-sm btn-ghost" data-cpsave="revert" disabled>되돌리기</button><button type="button" class="btn btn-sm btn-primary" data-cpsave="save" disabled>💾 저장</button></div></div>
-      ${rec.contractCode? `<div class="cp-admin-code"><span>계약코드(짝꿍코드)</span><b>${esc(rec.contractCode)}</b><button type="button" class="btn btn-sm" data-cpa="copycontract" title="계약코드(짝꿍코드) 복사">📋 복사</button></div>`:''}
+      ${rec.contractCode? `<div class="cp-admin-code"><span>계약코드(짝꿍코드)</span><b>${esc(rec.contractCode)}</b><button type="button" class="btn btn-sm" data-cpa="copycontract" title="계약코드(짝꿍코드) 복사">📋 복사</button><button type="button" class="btn btn-sm" data-cpa="editcontract" title="짝꿍코드 변경 · 이 코드로 계약한 분들 · 할인 · 페이백 모두 새 코드로">✏️ 변경</button></div>`:''}
       <div class="cp-admin-code"><span>접속코드</span><b>${esc(c.code)}</b><button type="button" class="btn btn-sm" data-cpa="copycode" title="접속코드 복사">📋 복사</button>
         <button type="button" class="btn btn-sm btn-kakao" data-cpa="invite">${KK_ICON}안내문 공유</button>
         <button type="button" class="btn btn-sm" data-cpa="preview">고객 화면 미리보기</button></div>
@@ -13065,6 +13175,11 @@ function renderClientBox(rec, boxEl){
     if(a==='filecheck'){ checkContractFile(cur.code, b); return; }
     if(a==='copycode'){ copyText(cur.code, `접속코드 ${cur.code} 를 복사했어요`); return; }
     if(a==='copycontract'){ copyText(rec.contractCode, `계약코드(짝꿍코드) ${rec.contractCode} 를 복사했어요`); return; }
+    if(a==='editcontract'){
+      const n = (typeof window.prompt==='function') ? prompt(`새 짝꿍코드를 넣어주세요 (지금: ${rec.contractCode})\n\n바꾸면 이 코드로 계약한 분들의 짝꿍코드 · 추천 할인 · 페이백 · 고객페이지 추천 현황이 모두 새 코드로 바뀌어요.`, rec.contractCode) : null;
+      if(n!==null && await changeContractCode(rec, n)){ renderClientBox(rec, box); custTabRefresh(); }
+      return;
+    }
     if(a==='regen'){ if(!confirm('코드를 새로 만들까요? 기존 코드로는 더 이상 접속할 수 없어요.')) return; await saveClient(rec, {code: genClientCode()}, '새 코드를 발급했어요'); renderClientBox(rec, box); custTabRefresh(); return; }
     if(a==='toggle'){ await saveClient(rec, {active: cur.active===false}, cur.active===false? '고객 페이지를 다시 열었어요' : '고객 페이지 접속을 중지했어요'); renderClientBox(rec, box); custTabRefresh(); return; }
   }));
