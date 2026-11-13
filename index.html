@@ -3459,6 +3459,7 @@ function renderList(){
       if(!rec) return;
       rec.settingsSubmitted = !rec.settingsSubmitted;
       markDirty(rec);
+      if(!rec.settingsSubmitted) clearSfDone(rec.id);   // 직접 '미제출'로 바꾸면 고객페이지 제출 완료 안내도 내림
       await persist();
       renderAll();
     });
@@ -4654,6 +4655,7 @@ document.getElementById('saveBtn').addEventListener('click', async ()=>{
     if(type==='contract' && nc && nc!==oldCode && RECORDS.some(r=> r!==before && r.type==='contract' && String(r.contractCode||'').trim()===nc)){ showToast(`${nc} 는 이미 다른 계약의 코드예요`); return; }
     RECORDS[idx] = Object.assign({}, before, values, {type});
     markDirty(RECORDS[idx]);
+    if(type==='contract' && before.settingsSubmitted && !RECORDS[idx].settingsSubmitted) clearSfDone(RECORDS[idx].id);
     if(type==='contract' && recordKey(RECORDS[idx])!==oldKey){
       const cr = applyCodeChange(RECORDS[idx], oldKey, oldCode);
       if(oldCode && nc && oldCode!==nc) showToast(`짝꿍코드 변경 · 이 코드로 계약한 ${cr.referred}건도 새 코드(${nc})로 연결했어요`);
@@ -4888,7 +4890,7 @@ function buildPartnerView(records, db, code, todayStr){
       clientName: settings.showClientName ? (r.clientName||'') : mask(r.clientName),
       clientPhone: (db.settings && db.settings.showClientPhone===true) ? (r.phone||'') : '',
       groomGuests: Number(r.groomGuests)||0, brideGuests: Number(r.brideGuests)||0,
-      settingsSubmitted: !!r.settingsSubmitted,
+      settingsSubmitted: !!r.settingsSubmitted || !!((db.referralPay||{})['sfdone:'+r.id]),
       roles: mine.map(function(s){ return s.role||''; }),
       pay: pay,
       payDetail: payDetail,
@@ -5266,6 +5268,7 @@ function applySettingsGuide(records, db, payload, trusted){
       if(touched){ var c2 = {}; Object.keys(cl).forEach(function(q){ c2[q] = cl[q]; }); c2.sides = sides; c2.updatedAt = new Date().toISOString(); db.referralPay[ck] = c2; }
     }
   }
+  if(trusted!=='admin'){ var sfPrev = db.referralPay['sfdone:'+hit.id] || {}; db.referralPay['sfdone:'+hit.id] = {at: new Date().toISOString(), first: sfPrev.first || sfPrev.at || new Date().toISOString(), source: trusted==='pdf' ? 'pdf' : 'form'}; }   // 고객이 설정서를 제출함 → 고객페이지 · 파트너 화면 '제출 완료'
   return {ok:true, db:db, recordId: hit.id, contractCode: hit.contractCode||'', items: Object.keys(g.items).length};
 }
 
@@ -5347,7 +5350,7 @@ function buildCustomerView(records, db, code, todayStr, withFile){
     client: {name: (function(){ var gd = rp['guide:'+recordId] || {}; var nn = (side && side.name) || (sideKey==='groom' ? gd.groomName : sideKey==='bride' ? gd.brideName : '') || r.clientName || '';
       return String(nn).replace(/\s+(신랑|신부)(측)?\s*(님)?\s*$/, '').replace(/\s*님$/, '').trim() || String(r.clientName||''); })(), contractName: r.clientName||'', code: myCode, side: sideKey, sideLabel: ''},
     wedding: {date: r.weddingDate||'', time: r.weddingTime||'', venue: r.venueName||'', hall: r.hallName||'', region: r.region||'',
-      product: r.productType||'', groomGuests: n(r.groomGuests), brideGuests: n(r.brideGuests), settingsSubmitted: !!r.settingsSubmitted},
+      product: r.productType||'', groomGuests: n(r.groomGuests), brideGuests: n(r.brideGuests), settingsSubmitted: !!r.settingsSubmitted || !!rp['sfdone:'+recordId], settingsSubmittedAt: (rp['sfdone:'+recordId]||{}).at || ''},
     contract: {date: r.contractDate||'', code: myCode, hasFile: !!String(client.contractUrl||'').trim(),
       amounts: {base: base, earlyBird: eb, partnerDiscount: pd, referralDiscount: rd, reviewContract: revC, guestScaleDiscount: gsd, surcharge: sur, deposit: deposit, travel: travel, ticket: tkt, balance: balance, reviewDay: revD, final: balance - revD},
       settled: !!r.settlementDone},
@@ -9864,6 +9867,7 @@ function doPost(e) {
       if (!gr.ok) { addFail_(); return json_(gr); }
       try { mmSideSweep_(gr.db, contractRecordsCached_(), gr.recordId); } catch (e5) { Logger.log('마이모먼트 문자 안내 목록 오류: ' + e5); }   // 설정서 제출 즉시 상대방 문자 안내 대기 목록에 올림
       writeRaw_(PARTNER_SHEET, JSON.stringify(gr.db));
+      try { markSettingsSubmitted_(gr.recordId); } catch (e7) { Logger.log('설정서 제출여부 시트 기록 오류: ' + e7); }
       return json_({ ok: true, contractCode: gr.contractCode, items: gr.items });
     }
 
@@ -11311,6 +11315,17 @@ function dayOwner_(db, code) {
   return (db.members || []).filter(function (m) { return m && m.active !== false && norm(m.code) === t && (m.kind === 'owner' || m.title === '대표'); })[0] || null;
 }
 /* 대표가 파트너스오피스에서 바꾼 배정 → 계약관리 시트의 파트너1~4 · 파트너1~4인건비 칸도 같게 (통합관리 시트 매칭이 되돌리지 않도록) */
+/* 고객이 운영설정서를 제출하면 계약 시트 '설정서 제출여부' 칸 = O (행을 못 찾으면 새 행을 만들지 않음) */
+function markSettingsSubmitted_(rid) {
+  var rec = (contractRecordsCached_() || []).filter(function (r) { return r && r.id === rid; })[0];
+  if (!rec || rec.settingsSubmitted) return;
+  var ctx = getSourceContext_();
+  if (!ctx || !(ctx.IDX.settingsSubmitted >= 0)) return;
+  var upd = { type: 'contract', id: rec.id, contractCode: rec.contractCode, clientName: rec.clientName, weddingDate: rec.weddingDate, settingsSubmitted: true };
+  if (findRowFast_(buildRowIndex_(ctx), upd) === -1) return;
+  writeContractsBatch_(ctx, [upd]);
+  removeRecordsCache_();
+}
 function syncSheetPartners_(rid, db) {
   var rec = (contractRecordsCached_() || []).filter(function (r) { return r && r.id === rid; })[0];
   var a = (db.assignments || {})[rid];
@@ -11892,9 +11907,17 @@ function migratePaybackColumn(){
   });
   return {recChanged: rec, pdbChanged: pdb};
 }
+/* 고객이 운영설정서를 제출한 계약(서버 기록 sfdone:<계약id>) → '설정서 제출여부' 제출완료로 (시트에도 저장) */
+function markSfSubmitted(id){ const r = RECORDS.find(x=> x.id===id); if(r && r.type==='contract' && !r.settingsSubmitted){ r.settingsSubmitted = true; markDirty(r); setTimeout(()=>{ try{ persist(); }catch(_){} }, 0); return true; } return false; }
+function clearSfDone(id){ const rp = ensurePdb().referralPay || {}; if(rp['sfdone:'+id]){ delete rp['sfdone:'+id]; pDirty.referral.add('sfdone:'+id); savePartnerDb(true); } }
+function syncSettingsSubmitted(){
+  const rp = (ensurePdb().referralPay)||{}; let ch = false;
+  RECORDS.forEach(r=>{ if(r.type==='contract' && !r.cancelled && !r.settingsSubmitted && rp['sfdone:'+r.id]){ r.settingsSubmitted = true; markDirty(r); ch = true; } });
+  return ch;
+}
 async function runReferralSync(){
   const r = migratePaybackColumn();
-  const d = syncDerivedFields() | normalizePartnerCodes();
+  const d = syncDerivedFields() | normalizePartnerCodes() | syncSettingsSubmitted();
   if(r.pdbChanged) await savePartnerDb(true);
   if(r.recChanged || d) await persist();
   return r;
@@ -12624,11 +12647,22 @@ const CustomerPortal = (function(){
     const list = remindDates();
     return `<section class="cp-card" id="cp-alarm"><h2>🔔 축의대 운영서 제출기한 알림</h2>
       <p class="cp-desc">휴대폰 캘린더에 추가하면 예식 10일 전 · 5일 전에 알림을 받으실 수 있어요.</p>
-      ${!view.wedding.date ? '<div class="cp-empty">예식 일정이 정해지면 알림을 추가할 수 있어요</div>'
+      ${view.wedding.settingsSubmitted ? `<div class="cp-empty" style="color:#2F7D57;font-weight:700;">✅ 운영 설정서 제출을 완료하셨어요${sfWhen()? ` (${sfWhen()})`:''} · 제출기한 알림은 더 필요하지 않아요</div>`
+        : !view.wedding.date ? '<div class="cp-empty">예식 일정이 정해지면 알림을 추가할 수 있어요</div>'
         : !list.length ? '<div class="cp-empty">제출 알림 기간(예식 10일 전 · 5일 전)이 지났어요</div>'
         : `<button class="cp-btn wide" data-cp="ics">📅 휴대폰 캘린더에 추가</button>
       <div class="cp-row2" style="margin-top:8px;font-size:12.5px;">${list.map(r=>`<a class="cp-btn ghost" style="font-size:13px;padding:11px 8px;white-space:nowrap;" href="${e(googleCalUrl(r))}" target="_blank" rel="noopener">Google 캘린더 · ${r.n}일 전</a>`).join('')}</div>
       <p class="cp-note">${list.map(r=>`${r.n}일 전 ${fdate(r.date)} 오전 10시`).join(' · ')}</p>`}
+    </section>`;
+  }
+  function sfWhen(){ const a = view.wedding.settingsSubmittedAt; if(!a) return ''; const d = new Date(a); return isNaN(d) ? '' : `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+  function sfDoneHTML(){ // 축의대 운영 설정서를 제출하면 자동으로 보이는 안내 (예식 전까지)
+    const w = view.wedding, n = dday(w.date);
+    if(!w.settingsSubmitted || (n!==null && n<0)) return '';
+    return `<section class="cp-card cp-sfdone" id="cp-sfdone" style="border:1.5px solid #9CCBAE;background:linear-gradient(135deg,#F1FAF4,#FFFFFF);">
+      <h2 style="color:#2F7D57;">✅ 축의대 운영 설정서 제출 완료</h2>
+      <p class="cp-desc" style="margin:0;">${e(view.client.name)}님, 축의대 운영 설정서가 정상적으로 제출되었어요${sfWhen()? ` <b>(${sfWhen()})</b>`:''}.<br>모먼트웍스가 내용을 확인해 예식 당일 축의대 운영과 예식 안내문에 그대로 반영해 드릴게요.</p>
+      <p class="cp-note" style="margin-top:8px;">수정하실 내용이 있으면 카카오톡 채널로 편하게 알려주세요 😊</p>
     </section>`;
   }
   function weddingHTML(){
@@ -12640,7 +12674,7 @@ const CustomerPortal = (function(){
         ${w.region? `<div><dt>지역</dt><dd>${e(w.region)}</dd></div>`:''}
         <div><dt>이용 상품</dt><dd>축의대 ${e(w.product)||'-'}</dd></div>
         <div><dt>예상 하객</dt><dd>${view.client.side==='groom' ? `<b>신랑측 ${w.groomGuests}명</b> · 신부측 ${w.brideGuests}명` : view.client.side==='bride' ? `신랑측 ${w.groomGuests}명 · <b>신부측 ${w.brideGuests}명</b>` : `신랑측 ${w.groomGuests}명 · 신부측 ${w.brideGuests}명`}</dd></div>
-        <div><dt>운영 설정서</dt><dd>${w.settingsSubmitted? '<b class="ok">제출 완료 ✓</b>' : '<b class="wait">제출 전</b>'}</dd></div>
+        <div><dt>운영 설정서</dt><dd>${w.settingsSubmitted? `<b class="ok">제출 완료 ✓</b>${sfWhen()? ` <small style="color:#8A8079;font-weight:500;">${sfWhen()} 제출</small>`:''}` : '<b class="wait">제출 전</b>'}</dd></div>
       </dl>
       ${!w.settingsSubmitted && i.settingsFormUrl ? `<a class="cp-btn primary wide" href="${e(i.settingsFormUrl)}" target="_blank" rel="noopener">📝 축의대 운영 설정서 작성하기</a>`:''}
     </section>`;
@@ -12907,6 +12941,7 @@ const CustomerPortal = (function(){
         ${greetHTML()}
         ${heroHTML()}
         ${contractDocHTML()}
+        ${sfDoneHTML()}
         ${noticeHTML()}
         ${weddingHTML()}
         ${contractHTML()}
@@ -13936,7 +13971,7 @@ async function importSettingsPdf(file, recordId, opt){
   if(!rec){ const m = matchContractFor(date, names); if(!m.ok) return Object.assign({ok:false, error: m.error, candIds: (m.cands||[]).map(r=>r.id)}, info); rec = m.rec; }
   const r = applySettingsGuide(RECORDS, ensurePdb(), Object.assign({}, payload, {recordId: rec.id}), 'pdf');
   if(!r.ok) return Object.assign({ok:false, error: r.error}, info);
-  pDirty.referral.add('guide:'+r.recordId); pDirty.referral.add('card:'+r.recordId); pDirty.referral.add('client:'+r.recordId); if(!(opt && opt.noSave)) await savePartnerDb();
+  pDirty.referral.add('guide:'+r.recordId); pDirty.referral.add('card:'+r.recordId); pDirty.referral.add('client:'+r.recordId); pDirty.referral.add('sfdone:'+r.recordId); markSfSubmitted(r.recordId); if(!(opt && opt.noSave)) await savePartnerDb();
   return Object.assign({ok:true, recordId: r.recordId, items: r.items}, info);
 }
 function guideProgHTML(){
@@ -14552,7 +14587,7 @@ document.addEventListener('click', async (ev)=>{
     if(!x || !x.payload || !sel || !sel.value){ showToast('적용할 계약을 선택해주세요'); return; }
     const r = applySettingsGuide(RECORDS, ensurePdb(), Object.assign({}, x.payload, {recordId: sel.value}), 'pdf');
     if(!r.ok){ alert(r.error); return; }
-    pDirty.referral.add('guide:'+r.recordId); pDirty.referral.add('card:'+r.recordId); pDirty.referral.add('client:'+r.recordId); GUIDE_IMPORT[i] = Object.assign({}, x, {ok:true, recordId:r.recordId, items:r.items});
+    pDirty.referral.add('guide:'+r.recordId); pDirty.referral.add('card:'+r.recordId); pDirty.referral.add('client:'+r.recordId); pDirty.referral.add('sfdone:'+r.recordId); markSfSubmitted(r.recordId); GUIDE_IMPORT[i] = Object.assign({}, x, {ok:true, recordId:r.recordId, items:r.items});
     renderCustomerTab(); showToast('예식 안내문을 적용했어요'); await savePartnerDb(); return;
   }
   if(a==='copySnippet'){ copyText(settingsGuideSnippet(), '연동 코드를 복사했어요 · 운영설정서 Apps Script에 붙여넣어 주세요'); return; }
