@@ -9753,6 +9753,13 @@ function doGet(e) {
       if (!cs.ok && /접속코드/.test(cs.error || '')) addFail_();
       return json_(cs);
     }
+    if (p.action === 'arrangeSetup') { // 축의대 내역정리 시트: 입력자 코드 → 그 예식의 축의대 설정서(운영 확인사항)
+      if (tooManyFails_()) return json_({ ok: false, error: '시도가 너무 많아요. 10분 뒤 다시 시도해주세요' });
+      var asr = arrangeSetup_(contractRecordsCached_(), readJson_(PARTNER_SHEET, {}), p.code);
+      if (!asr.ok && asr.bad) addFail_();
+      delete asr.bad;
+      return json_(asr);
+    }
     if (p.action === 'dayReport') { // 예식 당일 단계별 안내 문구 (대표 계정 · 관리자)
       if (tooManyFails_()) return json_({ ok: false, error: '시도가 너무 많아요. 10분 뒤 다시 시도해주세요' });
       var ddb = readJson_(PARTNER_SHEET, {});
@@ -11108,6 +11115,34 @@ function dayTpl_(db, k) { var v = (db.settings || {})['dayTpl_' + k]; return (v 
 function dayFill_(tpl, m) { return String(tpl || '').replace(/\{([^{}\s]{1,10})\}/g, function (all, k) { return (m[k] === undefined || m[k] === null) ? all : String(m[k]); }); }
 function dayWon_(n) { return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 /* 축의대 내역정리 집계 (입력자 코드 기준) → {total, guests, useAdult, remainAdult, useChild, remainChild} */
+/* 축의대 내역정리 시트(arrange)의 「축의대 운영 확인사항」: 입력자 코드로 예식을 찾아 통합관리의 축의대 설정서 값을 원래 항목 키로 돌려줌
+   · 개인 연락처 · 계약자 성함 · 동의 항목은 보내지 않음 · 설정서 없이 하객 안내사항만 직접 입력한 경우 그 값으로 채움 */
+function arrangeSetup_(recs, db, code) {
+  code = String(code || '').trim().toLowerCase();
+  if (!code || code.length < 4) return { ok: false, error: '입력자 코드가 필요해요' };
+  var rp = (db && db.referralPay) || {}, rid = '', side = '';
+  Object.keys(rp).some(function (k) {
+    if (k.indexOf('arrange:') !== 0 || !rp[k]) return false;
+    return ['groom', 'bride'].some(function (sk) { if (String(rp[k][sk] || '').trim().toLowerCase() === code) { rid = k.slice(8); side = sk; return true; } return false; });
+  });
+  if (!rid) return { ok: false, bad: true, error: '통합관리에 등록된 입력자 코드가 아니에요' };
+  var r = (recs || []).filter(function (x) { return x && x.id === rid; })[0];
+  if (!r || r.cancelled) return { ok: false, error: '계약을 찾지 못했어요' };
+  var card = rp['card:' + rid] || {}, g = rp['guide:' + rid] || {}, raw = {};
+  var SKIP = { groom_phone: 1, bride_phone: 1, contractor_name: 1, final_agree: 1, contractor_phone: 1, contact_phone: 1, client_phone: 1, phone: 1 };
+  (card.rows || []).forEach(function (row) {
+    if (!row || !row.key || SKIP[row.key]) return;
+    var v = String(row.value == null ? '' : row.value);
+    raw[row.key] = /^vip_/i.test(row.key) ? v.split('\n') : v;
+  });
+  var it = g.items || {}, put = function (k, v) { if (v && !raw[k]) raw[k] = String(v); };
+  if (it.parking) { var pk = String(it.parking); var m1 = /주차 등록:\s*(.*)/.exec(pk), m2 = /무료 주차:\s*(.*)/.exec(pk); put('info_parking_way', m1 ? m1[1] : (m2 ? '' : pk)); put('info_parking_time', m2 ? m2[1] : ''); }
+  put('info_atm', it.atm); put('info_hall', it.banquet); put('info_bride_room', it.bridalRoom); put('info_meal_time', it.mealTime); put('info_child_ticket', it.childTicket);
+  put('groom_name', g.groomName); put('bride_name', g.brideName);
+  if (!Object.keys(raw).length) return { ok: true, empty: true, side: side };
+  return { ok: true, side: side, product: r.productType || '', date: r.weddingDate || '', time: r.weddingTime || '', venue: r.venueName || '', hall: r.hallName || '',
+    raw: raw, at: card.updatedAt || g.submittedAt || g.updatedAt || '' };
+}
 function arrangeStats_(editorCode) {
   var ev = (sbReq_('get', 'events?select=*&editor_code=eq.' + encodeURIComponent(editorCode)) || [])[0];
   if (!ev) throw new Error('수파베이스에 ' + editorCode + ' 코드가 없어요');
