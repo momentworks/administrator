@@ -2189,6 +2189,7 @@ tr.mw-new-row>td:first-child{box-shadow:inset 4px 0 0 #E0A526;}
 .sd-form label.sd-tk-row{display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:8px;margin:3px 0;font-size:12.5px}.sd-tk-row em{font-style:normal;color:var(--slate);margin-left:6px}
 .sd-tk-step{display:inline-flex;align-items:center;gap:4px}.sd-tk-step button{width:26px;height:26px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:14px;line-height:1}.sd-form .sd-tk-step input{width:54px;text-align:center;margin:0;padding:4px}
 .btn.tk-has{border-color:var(--gold,#C9A961);color:#8A6A1F;font-weight:700}
+.cp-fs-note.in{margin:0;}.cp-fs-note.in.sm{margin:2px 0 6px;font-size:11.5px;}.cp-fs-sub{display:inline-block;font-size:11.5px;font-weight:700;color:#9A6B4F;background:#FBF4EC;border:1px solid #E3C9B4;border-radius:999px;padding:2px 10px;}
 </style>
 </head>
 <body>
@@ -13355,62 +13356,70 @@ function guideAdminHTML(rec){
 const CARD_CLOSED = new Set(), GUIDE_CLOSED = new Set(); // 사용자가 직접 접어 둔 영역 (펼치면 둘 다 함께 열려요)
 /* 운영설정서 양식(첨부 index.html)과 같은 메뉴 · 항목 · 선택지 — 항목 이름은 설정서가 보내는 원본 키 그대로예요 */
 const O_CAMERA = ['신랑 측만 1대 제공','신부 측만 1대 제공','양측 1대씩 제공','제공하지 않음'];
-const FORM_SECS = [
+const FORM_SECS = [   // 2026-11 새 운영설정서(첨부 index.html)와 같은 순서 · 항목 이름 · 선택지 · 안내 문구
   ['01','예식 기본정보',null,[
-    {k:'groom_name',l:'신랑 성함'},{k:'bride_name',l:'신부 성함'},{k:'groom_phone',l:'신랑 연락처',ph:'010-0000-0000'},{k:'bride_phone',l:'신부 연락처',ph:'010-0000-0000'},
+    {k:'groom_name',l:'신랑 성함',ph:'신랑 성함'},{k:'bride_name',l:'신부 성함',ph:'신부 성함'},{k:'groom_phone',l:'신랑 연락처',ph:'010-0000-0000'},{k:'bride_phone',l:'신부 연락처',ph:'010-0000-0000'},
     {k:'contract_package',l:'계약 패키지',o:['한측','양측','통합']},
     {k:'contract_half_side',l:'한측 계약 - 계약 측',o:[['신랑','신랑측'],['신부','신부측']]},
+    {note:'📌 계약하지 않은 측의 입력 항목은 자동으로 비활성화됩니다.'},
     {k:'wedding_date',l:'예식일',ph:'2026-10-24'},{k:'wedding_time',l:'예식 시작시간',ph:'17:00'},{k:'venue_region',l:'지역',ph:'예: 서울 영등포구'},{k:'venue_name',l:'예식장명',ph:'예: 더컨벤션 영등포'},
     {k:'hall_name',l:'홀 이름',ph:'예: 그랜드볼룸 2층'},{k:'groom_guest_count',l:'신랑측 예상 하객 수',ph:'예: 150명'},{k:'bride_guest_count',l:'신부측 예상 하객 수',ph:'예: 150명'}]],
   ['02','양가 정보',null,[
     {g:'신랑측',f:[{k:'groom_side_name',l:'혼주 성함',ph:'아버님 / 어머님 성함'}]},{g:'신부측',f:[{k:'bride_side_name',l:'혼주 성함',ph:'아버님 / 어머님 성함'}]}]],
-  ['03','관계 설정','📌 가족분들께서 축의대에 대한 사실을 알고 계시나요?',[
-    {k:'agency_awareness',l:'축의업체 인지사항',o:['네, 축의대 업체임을 알고 계십니다.','아니요, 모르십니다.']},
-    {k:'relation_type',l:'관계 설정 (하객이 물어보면 응대하는 관계)',o:['축의대 업체','친구','회사 동료','학교 선후배','사회적 지인','기타']},
-    {k:'relation_type_etc',l:'관계 설정 (기타)',ph:'기타 내용을 입력해주세요'}]],
+  ['03','관계 설정',null,[
+    {k:'agency_awareness',l:'축의업체 인지사항',n:'📌 가족분들께서 축의대에 대한 사실을 알고 계시나요?',o:['네, 축의대 업체임을 알고 계십니다.','아니요, 모르십니다.']},
+    {note:'📌 아래 관계설정은 방문하신 하객 분들께서 물어보시면 응대드리는 관계설정사항입니다. 부모님 혹은 가족 분들께서 저희에 대한 사실을 모르신다면 예식 전 한 번 더 카카오톡으로 알람부탁드립니다. 감사합니다.'},
+    {k:'relation_type',l:'관계 설정',o:['축의대 업체','친구','회사 동료','학교 선후배','사회적 지인','기타']},
+    {k:'relation_type_etc',l:'관계 설정(기타)',ph:'기타 내용을 입력해주세요'}]],
   ['04','축의금 정리방식',null,[
     {k:'money_op',l:'운영 방식',o:['수령즉시 봉투봉인','금액 확인·기록 후 봉투 봉인','금액 확인·기록 후 지폐 권종별 정리']},
     {k:'transfer_yn',l:'현장 계좌이체를 받을 예정이신가요?',o:['예','아니오']},
     {k:'groom_account',l:'신랑 계좌 (해당 시)',ph:'은행명 / 계좌번호 / 예금주'},{k:'bride_account',l:'신부 계좌 (해당 시)',ph:'은행명 / 계좌번호 / 예금주'},
     {k:'refund_way',l:'축의금 반환 요청 시 대응 방법',o:['반환 불가 안내(예식 종료 후 신랑 또는 신부님께 직접 연락드리도록 안내)','성함 및 연락처 메모 후 반환','사유 확인 후 반환(성함 및 사유 메모)','기타']},
-    {k:'refund_way_etc',l:'축의금 반환 대응 (기타)',ph:'기타 내용을 입력해주세요'}]],
-  ['05','식권 운영 및 제작 서비스','📌 웨딩홀 정책상 식권에 도장 또는 싸인을 처리해야하는 경우에는 도장 또는 싸인이 처리된 식권으로 전달 부탁드립니다.(도장을 찍으실 경우에는 식권 추가시 도장이 필요하므로 예식 당일 도장도 함께 전달 부탁드립니다.)',[
+    {k:'refund_way_etc',l:'축의금 반환 대응(기타)',ph:'기타 내용을 입력해주세요'}]],
+  ['05','식권 운영 및 제작 서비스',null,[
+    {sub:'식권 준비 · 제작 서비스'},
     {k:'ticket_prepared',l:'식권 준비 여부',o:['준비 완료했어요.','아직 준비하지 않았어요.','준비 예정이며, 제작 서비스를 알아보고 싶어요.']},
     {k:'ticket_order_apply',l:'식권 제작 서비스를 신청하시겠습니까?',o:['네, 제작을 신청할게요.','가격과 디자인을 먼저 확인하고 싶어요.','아니요, 직접 준비할게요.']},
     {k:'ticket_order_qty',l:'필요한 식권 수량',ph:'매'},{k:'ticket_design_pref',l:'원하는 디자인 또는 요청사항 (선택)',o:['프리미엄 기본 디자인','맞춤 디자인 상담']},
+    {sub:'식권 운영'},
+    {note:'📌 웨딩홀 정책상 식권에 도장 또는 싸인을 처리해야하는 경우에는 도장 또는 싸인이 처리된 식권으로 전달 부탁드립니다.(도장을 찍으실 경우에는 식권 추가시 도장이 필요하므로 예식 당일 도장도 함께 전달 부탁드립니다.)'},
     {k:'ticket_adult_groom',l:'배정 식권수량 (신랑측 대인)',ph:'매'},{k:'ticket_child_groom',l:'배정 식권수량 (신랑측 소인)',ph:'매'},
     {k:'ticket_adult_bride',l:'배정 식권수량 (신부측 대인)',ph:'매'},{k:'ticket_child_bride',l:'배정 식권수량 (신부측 소인)',ph:'매'},
     {g:'본식 당일 식권 전달해주시는 분',f:[{k:'ticket_deliverer_relation',l:'관계',ph:'관계 (예: 신랑 친구)'},{k:'ticket_deliverer_name',l:'성함',ph:'성함'},{k:'ticket_deliverer_phone',l:'연락처',ph:'010-0000-0000'}]},
-    {k:'transfer_check_way',l:'축의금 계좌이체 하객 응대 방법',o:['모바일 청첩장 확인','이체 내역 확인']},
     {k:'mobile_invitation_url',l:'모바일 청첩장 주소',ph:'예: https://www.mcard.co.kr/...'},
     {k:'ticket_cross_use',l:'식권 소진 시, 신랑측(또는 신부측) 식권 교차 사용 가능 여부',o:['가능','불가능']},
     {k:'ticket_out_way',l:'식권 소진 시 대응 방법',o:['웨딩홀에 추가 식권을 요청','자체 식권을 사용']},
     {k:'ticket_out_place',l:'식권 소진 시 추가 수령 장소',ph:'예: 예약실'},{k:'child_ticket_age',l:'소인 식권의 나이 기준',ph:'예: 초등학생 이하'},
     {k:'child_to_adult_ticket',l:'소인 식권 소진 시, 대인 식권 사용 가능 여부',o:['가능','불가능']},
-    {k:'ticket_reissue_way',l:'식권 추가 지급 요청 시 대응 방법 (분실 또는 인원 추가)',o:['축의금 내역 확인 후 지급(성함, 연락처 기재)','축의금 내역만 확인 후 지급(성함,연락처 기재 X)','지급 안 함','기타']},
     {k:'ticket_paid_way',l:'계좌이체 및 직접 축의금 전달하신 경우 식권지급 방법',o:['별도 확인없이 지급','모바일 청첩장 확인 후 지급','계좌이체 내역 확인 후 지급','연락처(신랑/신부 또는 혼주)보유 여부 확인 후 지급','기타']},
-    {k:'ticket_paid_way_etc',l:'식권지급 방법 (기타)',ph:'기타 내용을 입력해주세요'}]],
+    {k:'ticket_paid_way_etc',l:'계좌이체·직접 전달 식권지급 방법(기타)',ph:'기타 내용을 입력해주세요'}]],
   ['06','답례품',null,[
     {k:'gift_yn',l:'답례품 제공 여부',o:['있음','없음']},{k:'gift_type',l:'종류 (해당 시)',ph:'예: 와인 / 와플세트'},{k:'gift_place',l:'수령 장소',ph:'예: 축의대 옆 데스크'},
-    {k:'gift_target',l:'수령 대상',ph:'예: 식사 안 하시는 하객'},{k:'gift_criteria',l:'수령 기준',ph:'예: 봉투 1개당 1개'},{k:'gift_script',l:'안내 멘트',ta:1,ph:'하객 안내 시 전달할 멘트'}]],
+    {k:'gift_target',l:'수령 대상',ph:'예: 식사 안 하시는 하객'},{k:'gift_criteria',l:'수령 기준',ph:'예: 봉투 1개당 1개'},{k:'gift_script',l:'안내 멘트',ta:1,ph:'하객 안내 시 전달할 멘트를 적어주세요.'}]],
   ['07','하객 안내사항','📌 작성해주시는 하객 안내사항은 예식 안내문 제작에 활용될 예정입니다.',[
     {k:'info_parking_way',l:'주차 등록',ph:'예: 1층 데스크에서 셀프 등록'},{k:'info_parking_time',l:'무료 주차',ph:'예: 2시간 무료'},{k:'info_atm',l:'ATM 위치',ph:'예: 1층 로비 오른쪽'},
-    {k:'info_hall',l:'연회장 위치',ph:'예: 지하 1층'},{k:'info_bride_room',l:'신부대기실',ph:'예: 홀 맞은편'},{k:'info_meal_time',l:'식사 가능시간',ph:'예: 예식 30분 전부터'},{k:'info_child_ticket',l:'소인 식권',ph:"식권 운영의 '소인 식권의 나이 기준'과 같아요"}]],
-  ['08','VIP 명단','📌 축의대에서 예식당일 별도 확인 절차 없이 식권을 배부 해 드릴 분들의 명단을 모두 작성해 주세요.(예: 가족, 친인척, 지인, 사전 계좌이체로 축의를 해주신 분들의 명단 등)',[
-    {k:'vip_yn',l:'VIP 명단 작성 여부',o:['있음','없음']},{vip:1}]],
+    {k:'info_hall',l:'연회장 위치',ph:'예: 지하 1층'},{k:'info_bride_room',l:'신부대기실',ph:'예: 홀 맞은편'},{k:'info_meal_time',l:'식사 가능시간',ph:'예: 예식 30분 전부터'},{k:'info_child_ticket',l:'소인 식권',ph:"식권 운영의 '소인 식권의 나이 기준' 입력 시 자동 반영"}]],
+  ['08','VIP 명단',null,[
+    {k:'vip_yn',l:'VIP 명단 작성 여부',o:['있음','없음']},
+    {note:'📌 축의대에서 예식당일 별도 확인 절차 없이 식권을 배부 해 드릴 분들의 명단을 모두 작성해 주세요.(예: 가족, 친인척, 지인, 사전 계좌이체로 축의를 해주신 분들의 명단 등)'},
+    {vip:1}]],
   ['09','축의금 인계','📌 예식 당일 신랑님, 신부님의 경우 바쁜 일정으로 직접 축의금을 수령하시기 어려우실 수 있습니다. 이 점 참고하시어 대신 인수해 주실 분으로 작성 부탁드립니다. : )',[
     {g:'인계 받으실 분 (신랑측)',f:[{k:'handover_relation_groom',l:'관계',ph:'관계 (예: 신랑 아버님)'},{k:'handover_name_groom',l:'성함',ph:'성함'},{k:'handover_phone_groom',l:'연락처',ph:'010-0000-0000'}]},
     {g:'인계 받으실 분 (신부측)',f:[{k:'handover_relation_bride',l:'관계',ph:'관계 (예: 신부 어머님)'},{k:'handover_name_bride',l:'성함',ph:'성함'},{k:'handover_phone_bride',l:'연락처',ph:'010-0000-0000'}]}]],
   ['10','당일 일정',null,[{k:'sch_mw_arrive',l:'신랑, 신부님 웨딩홀 도착 예상 시간',ph:'예: 13:30'}]],
   ['11','긴급상황 대응',null,[
-    {g:'비상연락망 · 1순위',f:[{k:'emg_1_relation',l:'관계',ph:'관계 (예: 신랑 형님)'},{k:'emg_1_name',l:'성함',ph:'성함'},{k:'emg_1_phone',l:'연락처',ph:'010-0000-0000'}]},
-    {g:'비상연락망 · 2순위',f:[{k:'emg_2_relation',l:'관계',ph:'관계 (예: 신부 언니)'},{k:'emg_2_name',l:'성함',ph:'성함'},{k:'emg_2_phone',l:'연락처',ph:'010-0000-0000'}]}]],
-  ['12','사진 및 영상촬영','📌 실시간 유튜브 영상은 한측 계약 시 1대, 양측 계약 시 2대(신랑측 1대, 신부측 1대)로 촬영합니다. 웨딩홀 통신 상황상 인터넷이 원활하지 않은 경우에는 녹화로 대체됩니다. 녹화본은 당일 자정까지 유튜브에 업로드 후 마이모먼트를 통해 확인하실 수 있습니다. 추가로 촬영을 원하시는 경우에는 예식 당일에 추가 카메라를 준비해 주시면 동영상 촬영이 가능합니다.',[
+    {sub:'비상연락망'},
+    {g:'1순위',f:[{k:'emg_1_relation',l:'관계',ph:'관계 (예: 신랑 형님)'},{k:'emg_1_name',l:'성함',ph:'성함'},{k:'emg_1_phone',l:'연락처',ph:'010-0000-0000'}]},
+    {g:'2순위',f:[{k:'emg_2_relation',l:'관계',ph:'관계 (예: 신부 언니)'},{k:'emg_2_name',l:'성함',ph:'성함'},{k:'emg_2_phone',l:'연락처',ph:'010-0000-0000'}]}]],
+  ['12','사진 및 영상촬영','📌 실시간 유튜브 영상은 한측 계약 시 1대, 양측 계약 시 2대(신랑측 1대, 신부측 1대)로 촬영합니다. 웨딩홀 통신 상황상 인터넷이 원활하지 않은 경우에는 녹화로 대체됩니다. 녹화본은 당일 자정까지 유튜브에 업로드 후 마이모먼트를 통해 확인하실 수 있습니다.',[
     {k:'photo_consent',l:'서비스 전 과정 촬영 동의',o:['동의','비동의']}]],
-  ['13','예식 안내문 이미지 제작 여부 (양측 모두 무료)','📌 한측 계약시에도 원하시는 경우, 양측 모두 제작해 드립니다.',[
-    {k:'guide_doc',l:'예식 안내문 제작 여부',o:['계약 측만 제작','양측 모두 제작','제작하지 않음']}]],
+  ['13','예식 안내문 이미지 제작 여부 (양측 모두 무료)',null,[
+    {k:'guide_doc',l:'예식 안내문 제작 여부',o:['계약 측만 제작','양측 모두 제작','제작하지 않음']},
+    {note:'📌 한측 계약시에도 원하시는 경우, 양측 모두 제작해 드립니다.'}]],
   ['14','동의 및 확인',null,[{k:'contractor_name',l:'계약자 성함',ph:'계약자 성함 입력'}]]
 ];
+const FORM_LABEL = {"groom_name": "신랑 성함", "bride_name": "신부 성함", "groom_phone": "신랑 연락처", "bride_phone": "신부 연락처", "contract_package": "계약 패키지", "contract_half_side": "한측 계약 - 계약 측", "wedding_date": "예식일", "wedding_time": "예식 시작시간", "venue_name": "예식장명", "venue_region": "지역", "hall_name": "홀 이름", "groom_guest_count": "신랑측 예상 하객 수", "bride_guest_count": "신부측 예상 하객 수", "groom_side_name": "[신랑측] 혼주 성함", "bride_side_name": "[신부측] 혼주 성함", "relation_type": "관계 설정", "relation_type_etc": "관계 설정(기타)", "agency_awareness": "축의업체 인지사항", "money_op": "축의금 정리 방식", "transfer_yn": "계좌이체 받을 예정", "groom_account": "신랑 계좌", "bride_account": "신부 계좌", "refund_way": "축의금 반환 요청 시 대응 방법", "refund_way_etc": "축의금 반환 대응(기타)", "ticket_adult_groom": "배정 식권수량(신랑측 대인)", "ticket_child_groom": "배정 식권수량(신랑측 소인)", "ticket_adult_bride": "배정 식권수량(신부측 대인)", "ticket_child_bride": "배정 식권수량(신부측 소인)", "ticket_prepared": "식권 준비 여부", "ticket_order_apply": "식권 제작 서비스 신청 여부", "ticket_order_qty": "제작 필요 식권 수량", "ticket_design_pref": "식권 원하는 디자인 또는 요청사항(선택)", "mobile_invitation_url": "모바일 청첩장 주소", "ticket_cross_use": "식권 교차 사용 가능 여부", "ticket_deliverer_relation": "본식 당일 식권 전달자 - 관계", "ticket_deliverer_name": "본식 당일 식권 전달자 - 성함", "ticket_deliverer_phone": "본식 당일 식권 전달자 - 연락처", "ticket_out_way": "식권 소진 시 대응 방법", "ticket_out_place": "식권 소진 시 추가 수령 장소", "child_ticket_age": "소인 식권의 나이 기준", "child_to_adult_ticket": "소인 식권 소진 시 대인 식권 사용 가능 여부", "ticket_paid_way": "계좌이체 및 직접 축의금 전달하신 경우 식권지급 방법", "ticket_paid_way_etc": "계좌이체·직접 전달 식권지급 방법(기타)", "vip_yn": "VIP 명단 작성 여부", "gift_yn": "답례품 제공 여부", "gift_type": "답례품 종류", "gift_place": "답례품 수령 장소", "gift_target": "답례품 수령 대상", "gift_criteria": "답례품 수령 기준", "gift_script": "답례품 안내 멘트", "info_parking_way": "주차 등록 방법", "info_parking_time": "무료 주차 시간", "info_atm": "ATM 위치", "info_hall": "연회장 위치", "info_bride_room": "신부대기실 위치", "info_meal_time": "식사 가능 시간", "info_child_ticket": "소인 식권", "handover_relation_groom": "인계 받으실 분(신랑측) - 관계", "handover_name_groom": "인계 받으실 분(신랑측) - 성함", "handover_phone_groom": "인계 받으실 분(신랑측) - 연락처", "handover_relation_bride": "인계 받으실 분(신부측) - 관계", "handover_name_bride": "인계 받으실 분(신부측) - 성함", "handover_phone_bride": "인계 받으실 분(신부측) - 연락처", "sch_mw_arrive": "신랑,신부님 웨딩홀 도착 예상 시간", "emg_1_relation": "비상연락 1순위 - 관계", "emg_1_name": "비상연락 1순위 - 성함", "emg_1_phone": "비상연락 1순위 - 연락처", "emg_2_relation": "비상연락 2순위 - 관계", "emg_2_name": "비상연락 2순위 - 성함", "emg_2_phone": "비상연락 2순위 - 연락처", "photo_consent": "서비스 전 과정 촬영 동의", "guide_doc": "예식 안내문 제작 여부", "contractor_name": "계약자 성함"};   // 설정서 label() 그대로 (저장되는 항목 이름표)
 const FORM_VIP = ['vip_name','vip_relation','vip_contact','vip_memo'];
 const FORM_KEYS = (()=>{ const o = []; FORM_SECS.forEach(s=> s[3].forEach(f=>{ if(f.k) o.push(f.k); if(f.f) f.f.forEach(x=> o.push(x.k)); if(f.vip) FORM_VIP.forEach(k=> o.push(k)); })); return o; })();
 const FORM_ALIAS = {agency_awareness:['family_aware','family_awareness','aware_family','family_notice','family_know','vendor_aware','aware_yn','family_aware_yn','축의업체 인지사항','축의업체 인지사항(가족 인지 여부)','가족 인지 여부'],
@@ -13441,10 +13450,10 @@ function cardAdminHTML(rec){
   const dkey = k=> keyOf[k] || k;
   const input = (f)=>{ const v = get(f.k);
     if(f.o){ const opts = f.o.map(x=> Array.isArray(x)? x : [x, x]); if(v && !opts.some(x=> x[0]===v)) opts.push([v, v]);
-      return `<div class="cp-chips"><input hidden data-cpc="${esc(dkey(f.k))}" data-lab="${esc(f.l)}" value="${esc(v)}">${opts.map(([ov, ol])=>`<button type="button" class="cp-chip ${ov===v?'on':''}" data-cpchip="${esc(ov)}">${esc(ol)}</button>`).join('')}</div>`; }
+      return `<div class="cp-chips"><input hidden data-cpc="${esc(dkey(f.k))}" data-lab="${esc(FORM_LABEL[f.k]||f.l)}" value="${esc(v)}">${opts.map(([ov, ol])=>`<button type="button" class="cp-chip ${ov===v?'on':''}" data-cpchip="${esc(ov)}">${esc(ol)}</button>`).join('')}</div>`; }
     const multi = f.ta || v.length>60 || v.indexOf('\n')>=0;
-    return multi ? `<textarea data-cpc="${esc(dkey(f.k))}" data-lab="${esc(f.l)}" rows="${Math.min(5, Math.max(2, v.split('\n').length))}" placeholder="${esc(f.ph||'')}">${esc(v)}</textarea>`
-      : `<input data-cpc="${esc(dkey(f.k))}" data-lab="${esc(f.l)}" value="${esc(v)}" placeholder="${esc(f.ph||'')}">`; };
+    return multi ? `<textarea data-cpc="${esc(dkey(f.k))}" data-lab="${esc(FORM_LABEL[f.k]||f.l)}" rows="${Math.min(5, Math.max(2, v.split('\n').length))}" placeholder="${esc(f.ph||'')}">${esc(v)}</textarea>`
+      : `<input data-cpc="${esc(dkey(f.k))}" data-lab="${esc(FORM_LABEL[f.k]||f.l)}" value="${esc(v)}" placeholder="${esc(f.ph||'')}">`; };
   const vipHTML = ()=>{
     const col = k=>{ const v = get(k); return v ? v.split('\n') : []; };
     const cols = FORM_VIP.map(col), n = Math.max(3, ...cols.map(x=> x.length));
@@ -13455,9 +13464,11 @@ function cardAdminHTML(rec){
   };
   const secHTML = ([num, title, note, items])=> `<div class="cp-fs"><div class="cp-fs-h"><em>${num}</em><b>${esc(title)}</b></div>${note? `<div class="cp-fs-note">${esc(note)}</div>`:''}
     <div class="cp-fs-body">${items.map(f=>{
+      if(f.note) return `<div class="cp-ff wide cp-fs-note in">${esc(f.note)}</div>`;
+      if(f.sub) return `<div class="cp-ff wide"><span class="cp-fs-sub">${esc(f.sub)}</span></div>`;
       if(f.vip) return `<div class="cp-ff wide">${vipHTML()}</div>`;
       if(f.g) return `<div class="cp-ff ${f.f.length>1?'wide':''}"><div class="cp-fl">${esc(f.g)}</div><div class="cp-fgrp">${f.f.map(x=> input(x)).join('')}</div></div>`;
-      return `<div class="cp-ff ${f.o||f.ta?'wide':''}"><div class="cp-fl">${esc(f.l)}</div>${input(f)}</div>`;
+      return `<div class="cp-ff ${f.o||f.ta?'wide':''}"><div class="cp-fl">${esc(f.l)}</div>${f.n? `<div class="cp-fs-note in sm">${esc(f.n)}</div>`:''}${input(f)}</div>`;
     }).join('')}</div></div>`;
   const extra = rows.filter(r=> !hit.has(r));
   const filled = rows.length, when = c.updatedAt ? new Date(c.updatedAt) : null;
