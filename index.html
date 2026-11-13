@@ -2190,6 +2190,16 @@ tr.mw-new-row>td:first-child{box-shadow:inset 4px 0 0 #E0A526;}
 .sd-tk-step{display:inline-flex;align-items:center;gap:4px}.sd-tk-step button{width:26px;height:26px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:14px;line-height:1}.sd-form .sd-tk-step input{width:54px;text-align:center;margin:0;padding:4px}
 .btn.tk-has{border-color:var(--gold,#C9A961);color:#8A6A1F;font-weight:700}
 .cp-fs-note.in{margin:0;}.cp-fs-note.in.sm{margin:2px 0 6px;font-size:11.5px;}.cp-fs-sub{display:inline-block;font-size:11.5px;font-weight:700;color:#9A6B4F;background:#FBF4EC;border:1px solid #E3C9B4;border-radius:999px;padding:2px 10px;}
+.dy-steps.fold{display:flex;flex-direction:column;gap:6px}
+.dy-fold{padding:0}.dy-fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:10px 12px;flex-wrap:wrap}.dy-fold>summary::-webkit-details-marker{display:none}
+.dy-fold>summary:hover{background:#FBF7F2;border-radius:10px}.dy-fold[open]>summary{border-bottom:1px solid #F0E8E0;border-radius:10px 10px 0 0}
+.dy-fold>:not(summary){margin-left:12px;margin-right:12px}.dy-fold>textarea{width:calc(100% - 24px)!important}.dy-gh .hint{margin-left:6px;font-weight:500}.dy-fold>.dy-acts{margin-bottom:12px}.dy-fold[open]{box-shadow:0 2px 10px rgba(80,50,30,.08);border-color:#E3D3C2}
+.dy-no{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:12px;background:#F4ECE3;color:#7A4E2D;font-weight:800;font-size:12px;padding:0 6px}.dy-step.sent .dy-no{background:#DFF1E6;color:#2F7D57}
+.dy-to{font-size:11.5px;color:var(--slate,#6b6b6b)}.dy-todo{font-size:11px;color:#9A5B13;background:#FFF4DE;border-radius:999px;padding:2px 8px}
+.dy-chev{margin-left:auto;width:8px;height:8px;border-right:2px solid #A08C7A;border-bottom:2px solid #A08C7A;transform:rotate(45deg);transition:transform .15s}.dy-fold[open] .dy-chev{transform:rotate(-135deg)}
+.dy-fold.flash{animation:dyflash 1.2s}@keyframes dyflash{0%{box-shadow:0 0 0 3px rgba(201,169,97,.6)}100%{box-shadow:0 0 0 0 rgba(201,169,97,0)}}
+.dy-jump{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 4px;padding:8px 10px;background:#FBF8F4;border-radius:10px}.dy-jl{font-size:11.5px;font-weight:800;color:#7A4E2D;margin-right:4px}.dy-jg{font-size:11px;color:var(--slate,#6b6b6b);margin-left:6px}
+.dy-jc{border:1px solid #E5DBD2;background:#fff;border-radius:999px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer;color:#4E4038}.dy-jc.sent{color:#2F7D57;border-color:#CFE5D8;background:#F4FBF6}.dy-jc.on{border-color:#C9A961;box-shadow:0 0 0 2px rgba(201,169,97,.25);font-weight:700}.dy-jc.fold{margin-left:auto;color:var(--slate,#6b6b6b)}
 </style>
 </head>
 <body>
@@ -14195,7 +14205,7 @@ document.addEventListener('click', async (ev)=>{
 ========================================================= */
 const DAY_STEPS = [["morning", "1", "오전 인사", ""], ["photos", "2", "현금 · 화환 사진", "사진을 함께 보내는 단계예요"], ["result", "3", "축의대 운영 결과보고", ""], ["handover", "4", "인계 완료 보고", ""], ["settle", "5", "정산 안내", ""]];
 const DAY_TPL_DEFAULT = {"result_denom": ["금일 축의대 운영 결과를 보고드립니다. 😊", "", "[축의대 운영 결과{측}]", "· 접수금액: {접수금액}원", "· 접수하객: {접수하객}명", "· (대인)식권사용/잔량: {대인사용}장/{대인잔량}장", "· (소인)식권사용/잔량: {소인사용}장/{소인잔량}장", "", "[권종별 집계 현황]", "· 5만원권: {오만원권}장", "· 1만원권: {만원권}장"].join('\n'), "morning": "안녕하세요. 😊\n드디어 두 분의 예식 날이 다가왔습니다. 결혼을 진심으로 축하드립니다.🎉\n\n예식 70분 전에 도착 후 식권을 전달받고 축의 접수대를 오픈할 예정입니다.\n실시간 라이브 영상과 실시간 축의 현황은 <마이모먼트>에서 확인하실 수 있습니다.\n\n📌 마이모먼트\n{주소}", "photos": "현재 접수된 축의금과 화환 사진 공유드립니다. 😊", "result": "금일 축의대 운영 결과를 보고드립니다. 😊\n\n[축의대 운영 결과{측}]\n· 접수금액: {접수금액}원\n· 접수하객: {접수하객}명\n· (대인)식권사용/잔량: {대인사용}장/{대인잔량}장\n· (소인)식권사용/잔량: {소인사용}장/{소인잔량}장\n\n* PDF 파일 및 엑셀 파일은 마이모먼트에서도 다운로드 가능합니다.\n✅ 다운로드 경로: 마이모먼트 > 💌 실시간 축의 현황 > 📱 여기서 바로보기 > 하단의 🔑 실시간 축의현황 확인코드 복사 & 붙여넣기 > 접속하기 > 오른쪽 하단 PDF로 저장 또는 엑셀로 저장\n\n✅ PDF로 저장하실 때에는 인쇄옵션(설정)에서 '배경그래픽 포함'을 꼭 선택 부탁드립니다.", "handover": "축의금은 사전에 지정해주신 인수자분({인수자})께 전달드렸습니다.\n분홍색 봉투에 챙겨드린 휴족시간이 피로회복에 조금이나마 도움되면 좋겠습니다. 😊\n\n오늘 정말 고생많으셨습니다.\n다시 한번 두분의 결혼을 진심으로 축하드립니다.🎉", "settle": "💌 모먼트웍스 잔금 정산 안내\n\n모먼트웍스 축의대 대행 잔금 정산을 안내드립니다.💛\n\n정산내역서를 확인하신 후,\n내일까지 잔금 정산을 부탁드립니다.\n\n✔️ 잔금: {잔금}원\n✔️ 입금 계좌\n- 카카오뱅크 3333-37-9293260\n- 예금주: 김현관(모먼트웍스)\n✔️ 현금영수증(계약금+잔금)은 계약자분의 핸드폰번호로 발행됩니다. 다른 분 번호로 발행을 원하신다면 핸드폰번호를 말씀 부탁드립니다.\n✔️ 축의내역 중 성함/금액 등 수정이 필요하신 사항은 언제든지 편하게 말씀해주시면 수정본 송부드리겠습니다."};
-const DAY_ST = {filter:'all', q:'', open:null, data:{}, err:{}, loading:{}, edit:{}, den:{}};
+const DAY_ST = {filter:'all', q:'', open:null, data:{}, err:{}, loading:{}, edit:{}, den:{}, stepOpen:{}};   // stepOpen: 펼친 안내 항목 (계약id:항목)
 function denCheck(st, v){   // 권종별 검산: 5만원권 × 장수 + 1만원권 × 장수 = 내역정리 총액
   const a = String(v && v.a!=null ? v.a : '').replace(/[^0-9]/g,''), b = String(v && v.b!=null ? v.b : '').replace(/[^0-9]/g,'');
   const total = st.denom ? st.denom.total : null, sum = (Number(a)||0)*50000 + (Number(b)||0)*10000;
@@ -14389,8 +14399,9 @@ function dayPanelHTML(){
     else if(d){
       const people = d.people || [];
       body = `<div class="dy-people">${people.map(p=> `<span class="${p.phone?'':'none'}">${esc(p.label)} ${p.phone? esc(p.phone.replace(/(\d{3})(\d{3,4})(\d{4})/,'$1-$2-$3')) : '· 연락처 없음'}</span>`).join('')}<button class="btn btn-sm btn-ghost" data-dy="reload" data-id="${r.id}">↻ 최신 집계로 새로고침</button></div>
-        ${(()=>{ const stepA = st=>{ const s = sent[st.key], txt = dayTextA(r.id, st.key);
-          return `<div class="dy-step ${s?'sent':''}"><div class="dy-sh"><b>${esc(st.no)}) ${esc(st.label)}</b>${s? `<span class="dy-ok">✓ ${new Date(s.at).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})} ${s.how==='sms'?'문자':s.how==='copy'?'복사':'카톡'}</span>`:''}</div>
+        ${(()=>{ const toLab = st=>{ const ps = people.filter(p=> !st.to || st.to.indexOf(p.side)>=0).map(p=> p.side==='groom'?'신랑':'신부'); return ps.length ? [...new Set(ps)].join(' · ') : '카카오톡'; };
+          const stepA = st=>{ const s = sent[st.key], txt = dayTextA(r.id, st.key), sk = r.id+':'+st.key;
+          return `<details class="dy-step dy-fold ${s?'sent':''}" data-dystep="${sk}" ${DAY_ST.stepOpen[sk]?'open':''}><summary class="dy-sh"><span class="dy-no">${esc(st.no)}</span><b>${esc(st.label)}</b><span class="dy-to">→ ${esc(toLab(st))}</span>${s? `<span class="dy-ok">✓ ${new Date(s.at).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})} ${s.how==='sms'?'문자':s.how==='copy'?'복사':'카톡'}</span>`:'<span class="dy-todo">보내기 전</span>'}<span class="dy-chev" aria-hidden="true"></span></summary>
             ${st.warn? `<div class="dy-warn">⚠️ ${esc(st.warn)}</div>`:''}${st.hint? `<div class="dy-hint">${esc(st.hint)} · 사진은 카카오톡 · 문자에서 직접 첨부해주세요</div>`:''}
             ${st.denom? (()=>{ const kk = r.id+':'+st.key, c = denCheck(st, DAY_ST.den[kk]); return `<div class="dy-den"><b>💴 권종별 집계</b> <span class="hint">설정서: 금액 확인·기록 후 지폐 권종별 정리 · 장수를 넣고 총액과 검산이 맞아야 보낼 수 있어요</span>
               <div class="dy-den-in"><label>5만원권 <input inputmode="numeric" data-dyden="${kk}" data-f="a" value="${esc(c.a)}" placeholder="0"> 장</label><label>1만원권 <input inputmode="numeric" data-dyden="${kk}" data-f="b" value="${esc(c.b)}" placeholder="0"> 장</label></div>
@@ -14398,10 +14409,13 @@ function dayPanelHTML(){
             <textarea data-dyt="${r.id}:${st.key}" rows="${Math.min(12, Math.max(2, txt.split('\n').length))}">${esc(txt)}</textarea>
             <div class="dy-acts ${st.denom && !denCheck(st, DAY_ST.den[r.id+':'+st.key]).ok ? 'locked':''}" data-dyacts="${r.id}:${st.key}"><button class="btn btn-sm btn-kakao" data-dy="kakao" data-id="${r.id}" data-k="${st.key}">${KK_ICON}카카오톡 공유</button>
               ${people.map((p,i)=> (!st.to || st.to.indexOf(p.side)>=0) ? `<button class="btn btn-sm" data-dy="sms" data-id="${r.id}" data-k="${st.key}" data-i="${i}">📱 ${p.side==='groom'?'신랑':'신부'}에게 문자</button>` : '').join('')}
-              <button class="btn btn-sm btn-ghost" data-dy="copy" data-id="${r.id}" data-k="${st.key}">복사</button></div></div>`; };
+              <button class="btn btn-sm btn-ghost" data-dy="copy" data-id="${r.id}" data-k="${st.key}">복사</button></div></details>`; };
           const pre = (d.steps||[]).filter(x=> x.group==='pre'), dayS = (d.steps||[]).filter(x=> x.group!=='pre'), pn = pre.filter(x=> sent[x.key]).length;
-          return (pre.length? `<details class="dy-pre" ${r.weddingDate>todayStr()?'open':''}><summary>📨 사전 안내 <span class="hint">마이모먼트 · 설정서 요청 · 상대방${pn? ' · ✓ '+pn:''}</span></summary><div class="dy-steps">${pre.map(stepA).join('')}</div></details>`:'')
-            + `<div class="dy-gh">🎊 예식 당일 안내</div><div class="dy-steps">${dayS.map(stepA).join('')}</div>`; })()}`;
+          const all = pre.concat(dayS), anyOpen = all.some(x=> DAY_ST.stepOpen[r.id+':'+x.key]);
+          const chip = st=> `<button class="dy-jc ${sent[st.key]?'sent':''} ${DAY_ST.stepOpen[r.id+':'+st.key]?'on':''}" data-dy="jump" data-id="${r.id}" data-k="${st.key}" title="${esc(st.label)} 펼치기">${sent[st.key]?'✓ ':''}${esc(st.no)} ${esc(st.label)}</button>`;
+          return `<div class="dy-jump"><span class="dy-jl">항목 바로 열기</span>${pre.length? `<span class="dy-jg">📨 사전</span>${pre.map(chip).join('')}`:''}<span class="dy-jg">🎊 당일</span>${dayS.map(chip).join('')}${anyOpen? `<button class="dy-jc fold" data-dy="foldAll" data-id="${r.id}">모두 접기</button>`:''}</div>`
+            + (pre.length? `<div class="dy-gh">📨 사전 안내 <span class="hint">마이모먼트 · 설정서 요청 · 상대방 · ${pn}/${pre.length} 보냄</span></div><div class="dy-steps fold">${pre.map(stepA).join('')}</div>`:'')
+            + `<div class="dy-gh">🎊 예식 당일 안내 <span class="hint">${dayS.filter(x=> sent[x.key]).length}/${dayS.length} 보냄 · 항목을 누르면 펼쳐져요</span></div><div class="dy-steps fold">${dayS.map(stepA).join('')}</div>`; })()}`;
     }
     return `<div class="dy-card open">${head}<div class="dy-body">${body}</div></div>`;
   };
@@ -14455,6 +14469,10 @@ document.addEventListener('click', async (ev)=>{
   if(a==='filter'){ DAY_ST.filter = el.dataset.v; DAY_ST.open = null; dayRerender(); return; }
   if(a==='open'){ DAY_ST.open = DAY_ST.open===rid ? null : rid; dayRerender(); if(DAY_ST.open){ dayLoadA(rid); setTimeout(()=>{ const li = document.getElementById('dy-'+rid); if(li && li.getBoundingClientRect().top < 60) li.scrollIntoView({block:'start', behavior:'smooth'}); }, 30); } return; }
   if(a==='reload'){ dayLoadA(rid, true); return; }
+  if(a==='jump'){ const sk = rid+':'+key, was = !!DAY_ST.stepOpen[sk]; DAY_ST.stepOpen[sk] = !was; dayRerender();
+    if(!was) setTimeout(()=>{ const d = document.querySelector(`#dayTabRoot [data-dystep="${CSS.escape(sk)}"]`); if(d){ d.scrollIntoView({block:'center', behavior:'smooth'}); d.classList.add('flash'); setTimeout(()=> d.classList.remove('flash'), 1200); } }, 30);
+    return; }
+  if(a==='foldAll'){ Object.keys(DAY_ST.stepOpen).forEach(k=>{ if(k.indexOf(rid+':')===0) delete DAY_ST.stepOpen[k]; }); dayRerender(); return; }
   const text = dayTextA(rid, key);
   const dst = ((DAY_ST.data[rid]||{}).steps||[]).find(x=> x.key===key);
   if(dst && dst.denom && /^(copy|kakao|sms)$/.test(a) && !denCheck(dst, DAY_ST.den[rid+':'+key]).ok){ showToast('권종별 장수를 입력하고 총액과 검산이 맞아야 보낼 수 있어요'); return; }
@@ -14465,6 +14483,10 @@ document.addEventListener('click', async (ev)=>{
     if(mmIsPhone()) location.href = mmSmsHref(p.phone, text);
     dayMarkA(rid, key, 'sms'); dayRerender(); return; }
 });
+document.addEventListener('toggle', ev=>{ const d = ev.target; if(!d || !d.dataset || !d.dataset.dystep) return;
+  if(d.open) DAY_ST.stepOpen[d.dataset.dystep] = true; else delete DAY_ST.stepOpen[d.dataset.dystep];
+  const c = document.querySelector(`#dayTabRoot .dy-jc[data-id="${CSS.escape(d.dataset.dystep.split(':')[0])}"][data-k="${CSS.escape(d.dataset.dystep.split(':').slice(1).join(':'))}"]`); if(c) c.classList.toggle('on', d.open);
+  if(d.open){ const ta = d.querySelector('textarea'); if(ta){ ta.style.height = 'auto'; } } }, true);
 document.addEventListener('input', ev=>{ const t = ev.target; if(t && t.dataset && t.dataset.dyt) DAY_ST.edit[t.dataset.dyt] = t.value;
   if(t && t.dataset && t.dataset.dyden){
     const k = t.dataset.dyden, rid = k.slice(0, k.indexOf(':')), key = k.slice(k.indexOf(':')+1);
