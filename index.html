@@ -5381,7 +5381,7 @@ function buildCustomerView(records, db, code, todayStr, withFile){
     })(),
     referral: {code: myCode, unit: UNIT, rows: refRows, total: refRows.length, discountCount: discountCnt, paybackCount: paybackCnt,
       discountAmount: discountCnt*UNIT, paybackAmount: paybackCnt*UNIT, paybackPaid: Math.min(paybackPaid, paybackCnt*UNIT)},
-    info: {home: s.customerHomeUrl || 'https://momentworks.github.io/momentworks.kr/', notice: s.customerNotice || '', settingsFormUrl: s.settingsFormUrl || '', kakao: s.customerKakaoUrl || 'https://pf.kakao.com/_FbIfX/chat', phone: s.reportPhone || '010-5730-0614', memo: [client.memo||'', (side && side.memo)||''].filter(function(x){ return x; }).join('\n')},
+    info: {home: s.customerHomeUrl || 'https://momentworks.github.io/momentworks.kr/', notice: s.customerNotice || '', settingsFormUrl: s.settingsFormUrl || 'https://momentworks.github.io/document/', kakao: s.customerKakaoUrl || 'https://pf.kakao.com/_FbIfX/chat', phone: s.reportPhone || '010-5730-0614', memo: [client.memo||'', (side && side.memo)||''].filter(function(x){ return x; }).join('\n')},
     guide: (function(){
       var gd = rp['guide:'+r.id] || null;
       if(!gd || !gd.items) return null;
@@ -12601,7 +12601,7 @@ const CustomerPortal = (function(){
       .filter(r=> !today || r.date >= today);
   }
   function remindText(n){
-    const w = view.wedding, f = view.info && view.info.settingsFormUrl;
+    const w = view.wedding, f = sfUrl();
     return {title: `📝 축의대 운영서 제출 (예식 ${n}일 전)`,
       body: `${view.client.name}님 예식(${fdate(w.date, true)} ${w.time||''})까지 ${n}일 남았어요.\n축의대 운영서를 아직 제출하지 않으셨다면 오늘 작성해주세요.`
         + (f ? `\n작성하기: ${f}` : '') + `\n고객 전용 페이지: ${location.href.split('#')[0]}`};
@@ -12690,8 +12690,7 @@ const CustomerPortal = (function(){
     return `<section class="cp-card cp-sfdone" id="cp-sfdone" style="border:1.5px solid #9CCBAE;background:linear-gradient(135deg,#F1FAF4,#FFFFFF);">
       <h2 style="color:#2F7D57;">✅ 축의대 운영 설정서 제출 완료</h2>
       <p class="cp-desc" style="margin:0;">${e(view.client.name)}님, 축의대 운영 설정서가 정상적으로 제출되었어요${sfWhen()? ` <b>(${sfWhen()})</b>`:''}.<br>모먼트웍스가 내용을 확인해 예식 당일 축의대 운영과 예식 안내문에 그대로 반영해 드릴게요.</p>
-      <p class="cp-note" style="margin-top:8px;">수정하실 내용이 있으면 아래 버튼으로 다시 제출하시거나 카카오톡 채널로 편하게 알려주세요 😊</p>
-      ${sfBtnHTML(true)}
+      <p class="cp-note" style="margin-top:8px;">수정하실 내용이 있으면 💍 예식 정보의 「수정 · 다시 제출」 버튼으로 다시 제출하시거나 카카오톡 채널로 편하게 알려주세요 😊</p>
     </section>`;
   }
   function weddingHTML(){
@@ -12703,19 +12702,20 @@ const CustomerPortal = (function(){
         ${w.region? `<div><dt>지역</dt><dd>${e(w.region)}</dd></div>`:''}
         <div><dt>이용 상품</dt><dd>축의대 ${e(w.product)||'-'}</dd></div>
         <div><dt>예상 하객</dt><dd>${view.client.side==='groom' ? `<b>신랑측 ${w.groomGuests}명</b> · 신부측 ${w.brideGuests}명` : view.client.side==='bride' ? `신랑측 ${w.groomGuests}명 · <b>신부측 ${w.brideGuests}명</b>` : `신랑측 ${w.groomGuests}명 · 신부측 ${w.brideGuests}명`}</dd></div>
-        <div><dt>운영 설정서</dt><dd>${w.settingsSubmitted? `<b class="ok">제출 완료 ✓</b>${sfWhen()? ` <small style="color:#8A8079;font-weight:500;">${sfWhen()} 제출</small>`:''}` : '<b class="wait">제출 전</b>'}</dd></div>
+        <div><dt>운영 설정서</dt><dd style="display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px 8px;"><span>${w.settingsSubmitted? `<b class="ok">제출 완료 ✓</b>${sfWhen()? ` <small style="color:#8A8079;font-weight:500;">${sfWhen()} 제출</small>`:''}` : '<b class="wait">제출 전</b>'}</span><a href="${e(sfUrl())}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:800;text-decoration:none;white-space:nowrap;${w.settingsSubmitted? 'background:#fff;color:#7A2E3A;border:1px solid #D9C3C6;' : 'background:#7A2E3A;color:#fff;border:1px solid #7A2E3A;'}">${w.settingsSubmitted? '✏️ 수정 · 다시 제출' : '📝 작성하기'}</a></dd></div>
       </dl>
-      ${view.wedding.settingsSubmitted ? '' : sfBtnHTML()}
+      <a class="cp-btn ${w.settingsSubmitted?'':'primary'} wide" href="${e(sfUrl())}" target="_blank" rel="noopener">${w.settingsSubmitted? '✏️ 축의대 운영 설정서 수정해서 다시 제출하기' : '📝 축의대 운영 설정서 작성하기'}</a>
     </section>`;
   }
   // 운영 설정서 버튼: 제출 전 → 작성하기 · 제출 후 → 수정해서 다시 제출하기 (예식일까지 언제나 보임)
+  const SF_URL_DEFAULT = 'https://momentworks.github.io/document/';   // 운영 설정서 (document) (통합관리 설정에 주소가 없을 때)
+  function sfUrl(){ return String((view.info && view.info.settingsFormUrl) || '').trim() || SF_URL_DEFAULT; }
   function sfBtnHTML(sub){
-    const w = view.wedding, i = view.info || {}, n = dday(w.date);
+    const w = view.wedding, i = view.info || {}, n = dday(w.date), url = sfUrl();
     if(n!==null && n<0) return '';
-    if(!i.settingsFormUrl) return w.settingsSubmitted ? '' : `<a class="cp-btn wide" href="${e(i.kakao||'#')}" target="_blank" rel="noopener">💬 운영 설정서 작성 링크는 카카오톡으로 안내드려요</a>`;
     return w.settingsSubmitted
-      ? `<a class="cp-btn wide" href="${e(i.settingsFormUrl)}" target="_blank" rel="noopener" style="${sub?'margin-top:10px;':''}">✏️ 운영 설정서 수정해서 다시 제출하기</a><p class="cp-note" style="margin-top:6px;">다시 제출하시면 가장 최근에 제출하신 내용으로 바뀌어요.</p>`
-      : `<a class="cp-btn primary wide" href="${e(i.settingsFormUrl)}" target="_blank" rel="noopener">📝 축의대 운영 설정서 작성하기</a>`;
+      ? `<a class="cp-btn wide" href="${e(url)}" target="_blank" rel="noopener" style="${sub?'margin-top:10px;':''}">✏️ 운영 설정서 수정해서 다시 제출하기</a><p class="cp-note" style="margin-top:6px;">다시 제출하시면 가장 최근에 제출하신 내용으로 바뀌어요.</p>`
+      : `<a class="cp-btn primary wide" href="${e(url)}" target="_blank" rel="noopener">📝 축의대 운영 설정서 작성하기</a>`;
   }
   function contractHTML(){
     const c = view.contract, a = c.amounts;
@@ -14542,7 +14542,7 @@ function customerSettingsHTML(){
       <div class="form-field"><label class="cu-check"><input type="checkbox" data-act="autoCode" ${s.autoClientCode===false?'':'checked'}> 신규 계약이 등록되면 고객 접속코드 자동 발급 <span class="hint">예식 예정 · 일정 미정 계약만</span></label></div>
       <div class="form-field"><label>고객 페이지 주소</label><input data-act="setText" data-key="customerUrl" value="${esc(s.customerUrl||'')}" placeholder="https://아이디.github.io/customer/"></div>
       <div class="form-field"><label>실시간 축의 현황 기본 주소 <span class="hint">고객별 현황판 코드가 이 주소 뒤에 붙어 자동 로그인돼요</span></label><input data-act="setText" data-key="giftBaseUrl" value="${esc(s.giftBaseUrl||'')}" placeholder="https://momentworks.github.io/arrange/"></div>
-      <div class="form-field"><label>축의대 운영 설정서 작성 링크 <span class="hint">고객페이지 「설정서 작성하기 · 다시 제출하기」 버튼 주소</span>${(s.settingsFormUrl||'').trim()? '' : ' <b style="color:#B71C1C;font-size:12px;">⚠ 비어 있어서 고객페이지에 작성 버튼이 안 보여요</b>'}</label><input data-act="setText" data-key="settingsFormUrl" value="${esc(s.settingsFormUrl||'')}" placeholder="운영 설정서 페이지 주소"></div>
+      <div class="form-field"><label>축의대 운영 설정서 작성 링크 <span class="hint">고객페이지 「설정서 작성하기 · 다시 제출하기」 버튼 주소</span>${(s.settingsFormUrl||'').trim()? '' : ' <span class="hint">· 비우면 기본 운영 설정서(https://momentworks.github.io/document/)로 연결</span>'}</label><input data-act="setText" data-key="settingsFormUrl" value="${esc(s.settingsFormUrl||'')}" placeholder="https://momentworks.github.io/document/"></div>
       <div class="form-field"><label>모먼트웍스 홈페이지 <span class="hint">고객 페이지 메뉴 · 추천 글에 들어가요</span></label><input data-act="setText" data-key="customerHomeUrl" value="${esc(s.customerHomeUrl||'')}" placeholder="https://momentworks.github.io/momentworks.kr/"></div>
       <div class="form-field"><label>고객 문의 카카오톡 <span class="hint">비우면 모먼트웍스 공식 채널</span></label><input data-act="setText" data-key="customerKakaoUrl" value="${esc(s.customerKakaoUrl||'')}" placeholder="https://pf.kakao.com/_FbIfX/chat"></div>
       <div class="form-field"><label>모든 고객에게 보이는 안내문</label><textarea data-act="setText" data-key="customerNotice" rows="3" placeholder="예: 예식 1주일 전까지 운영 설정서를 제출해주세요.">${esc(s.customerNotice||'')}</textarea></div>
